@@ -1,0 +1,135 @@
+{
+  "entities": {
+    "Product": {
+      "title": "Product",
+      "description": "Fine wine bottle in the catalog",
+      "type": "object",
+      "properties": {
+        "product_id": { "type": "string" },
+        "name": { "type": "string" },
+        "winery": { "type": "string" },
+        "country": { "type": "string" },
+        "region": { "type": "string" },
+        "vintage": { "type": "number" },
+        "wine_type": { "type": "string" },
+        "grape_variety": { "type": "string" },
+        "alcohol_percentage": { "type": "number" },
+        "sweetness": { "type": "string" },
+        "body": { "type": "string" },
+        "price": { "type": "number" },
+        "stock": { "type": "number" },
+        "image": { "type": "string" },
+        "bottle_color": { "type": "string" },
+        "accent_color": { "type": "string" },
+        "description": { "type": "string" },
+        "rating": { "type": "number" },
+        "reviews_count": { "type": "number" },
+        "featured": { "type": "boolean" },
+        "category_id": { "type": "string" },
+        "food_pairings": { "type": "array" },
+        "serving_temp": { "type": "string" },
+        "decanting": { "type": "string" }
+      },
+      "required": ["product_id", "name", "winery", "price", "stock", "wine_type"]
+    },
+    "Category": {
+      "title": "Category",
+      "description": "Wine category collection",
+      "type": "object",
+      "properties": {
+        "category_id": { "type": "string" },
+        "name": { "type": "string" },
+        "slug": { "type": "string" },
+        "description": { "type": "string" },
+        "wine_type": { "type": "string" },
+        "image": { "type": "string" },
+        "featured": { "type": "boolean" }
+      },
+      "required": ["category_id", "name", "slug"]
+    },
+    "Order": {
+      "title": "Order",
+      "description": "Customer wine order and cold-chain consignment",
+      "type": "object",
+      "properties": {
+        "order_id": { "type": "string" },
+        "user_id": { "type": "string" },
+        "customer_name": { "type": "string" },
+        "email": { "type": "string" },
+        "phone": { "type": "string" },
+        "order_date": { "type": "string" },
+        "subtotal": { "type": "number" },
+        "shipping": { "type": "number" },
+        "discount": { "type": "number" },
+        "discount_code": { "type": "string" },
+        "total_amount": { "type": "number" },
+        "payment_method": { "type": "string" },
+        "delivery_address": { "type": "object" },
+        "status": { "type": "string" },
+        "estimated_delivery": { "type": "string" },
+        "tracking_number": { "type": "string" },
+        "items": { "type": "array" }
+      },
+      "required": ["order_id", "user_id", "total_amount", "status", "items"]
+    },
+    "User": {
+      "title": "User",
+      "description": "VÍNEA customer or sommelier admin profile",
+      "type": "object",
+      "properties": {
+        "user_id": { "type": "string" },
+        "name": { "type": "string" },
+        "email": { "type": "string" },
+        "phone": { "type": "string" },
+        "role": { "type": "string" },
+        "member_since": { "type": "string" },
+        "avatar": { "type": "string" },
+        "date_of_birth": { "type": "string" },
+        "preferred_wine_types": { "type": "array" },
+        "flavor_preference": { "type": "string" },
+        "favorite_davao_branch": { "type": "string" },
+        "delivery_instructions": { "type": "string" },
+        "membership_tier": { "type": "string" },
+        "bio": { "type": "string" },
+        "saved_addresses": { "type": "array" }
+      },
+      "required": ["user_id", "email", "name"]
+    },
+    "Review": {
+      "title": "Review",
+      "description": "Sommelier tasting review or customer rating",
+      "type": "object",
+      "properties": {
+        "review_id": { "type": "string" },
+        "product_id": { "type": "string" },
+        "user_name": { "type": "string" },
+        "rating": { "type": "number" },
+        "comment": { "type": "string" },
+        "date": { "type": "string" }
+      },
+      "required": ["review_id", "product_id", "rating", "comment"]
+    }
+  },
+  "firestore": {
+    "/products/{productId}": {
+      "schema": "Product",
+      "description": "Fine wine bottle catalog"
+    },
+    "/categories/{categoryId}": {
+      "schema": "Category",
+      "description": "Wine category collections"
+    },
+    "/orders/{orderId}": {
+      "schema": "Order",
+      "description": "Wine allocations and shipments"
+    },
+    "/users/{userId}": {
+      "schema": "User",
+      "description": "Customer and sommelier profiles"
+    },
+    "/reviews/{reviewId}": {
+      "schema": "Review",
+      "description": "Tasting notes and ratings"
+    }
+  }
+}

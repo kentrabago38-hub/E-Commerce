@@ -1,0 +1,6 @@
+{
+  "name": "VÍNEA — Premium Wine Marketplace",
+  "description": "Discover exceptional wines from renowned global terroirs. Discover. Taste. Remember.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

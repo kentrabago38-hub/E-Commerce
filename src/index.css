@@ -1,0 +1,88 @@
+@import "tailwindcss";
+
+@theme {
+  --color-midnight-bordeaux: #210D12;
+  --color-deep-merlot: #48151F;
+  --color-wine-red: #861F32;
+  --color-champagne-gold: #C6A15B;
+  --color-warm-ivory: #F5EFE7;
+  --color-soft-taupe: #B7AAA1;
+  --color-cellar-black: #130B0D;
+
+  /* Legacy tokens mapped to refined palette for backward compatibility */
+  --color-obsidian: #130B0D;
+  --color-black-cherry: #210D12;
+  --color-oxblood: #48151F;
+  --color-burgundy: #861F32;
+  --color-champagne: #C6A15B;
+  --color-antique-brass: #B38E46;
+  --color-warm-ivory: #F5EFE7;
+  --color-muted-taupe: #B7AAA1;
+  --color-subdued-stone: #9C8E8B;
+  --color-dark-wine: #381820;
+
+  --font-serif: 'Cormorant Garamond', Georgia, serif;
+  --font-sans: 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+@layer base {
+  :root {
+    --color-bg-primary: #210D12;
+    --color-bg-secondary: #130B0D;
+    --color-surface-merlot: #48151F;
+    --color-wine-red: #861F32;
+    --color-champagne-gold: #C6A15B;
+    --color-text-ivory: #F5EFE7;
+    --color-text-taupe: #B7AAA1;
+    --color-border-subtle: #48151F;
+  }
+
+  body {
+    font-family: var(--font-sans);
+    background-color: #210D12;
+    color: #F5EFE7;
+    overflow-x: hidden;
+  }
+
+  h1, h2, h3, h4, .font-serif, .font-display {
+    font-family: var(--font-serif);
+    letter-spacing: -0.01em;
+  }
+}
+
+/* Custom scrollbars for wine cellar feel */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #130B0D;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #48151F;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #861F32;
+}
+
+/* Subtle gold shimmer for editorial accent words */
+.gold-shimmer {
+  background: linear-gradient(135deg, #C6A15B 0%, #F5EFE7 50%, #C6A15B 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.luxury-glow {
+  box-shadow: 0 10px 30px -10px rgba(134, 31, 50, 0.4);
+}
+
+.gold-glow {
+  box-shadow: 0 4px 20px -2px rgba(198, 161, 91, 0.2);
+}
+
+
+
