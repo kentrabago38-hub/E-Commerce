@@ -34,7 +34,17 @@ export const Navbar: React.FC = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [megaMenuOpen, setMegaMenuOpen] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
   const megaMenuTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 40);
+    };
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    handleScroll();
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   const handleNavClick = (tab: NavTab) => {
     setSelectedProduct(null);
@@ -88,7 +98,13 @@ export const Navbar: React.FC = () => {
   };
 
   return (
-    <header className="sticky top-0 z-40 w-full bg-[#210D12]/95 backdrop-blur-md border-b border-[#351116] transition-colors">
+    <header
+      className={`sticky top-0 z-40 w-full transition-all duration-300 border-b ${
+        isScrolled
+          ? 'bg-[#18090C]/98 backdrop-blur-xl border-[#48151F] shadow-2xl'
+          : 'bg-[#210D12]/80 backdrop-blur-md border-[#351116]/40 shadow-sm'
+      }`}
+    >
       {/* Top micro announcement bar (Prompt 2.A) */}
       <div className="bg-[#130B0D] py-2 px-4 text-center border-b border-[#351116]/60 text-[11px] font-medium tracking-wider text-[#C6A15B] flex items-center justify-between">
         <div className="hidden sm:block text-[#B7AAA1] font-light">

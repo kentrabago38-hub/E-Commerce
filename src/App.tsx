@@ -16,6 +16,10 @@ import { FoodPairingSection } from './components/FoodPairingSection';
 import { UserDashboard } from './components/UserDashboard';
 import { AdminPortal } from './components/AdminPortal';
 import { Footer } from './components/Footer';
+import { TheArtOfWineSection } from './components/TheArtOfWineSection';
+import { CollectorsRoomSection } from './components/CollectorsRoomSection';
+import { MomentWorthRememberingSection } from './components/MomentWorthRememberingSection';
+import { FadeInUp } from './components/FadeInUp';
 import { AgeVerificationModal } from './components/AgeVerificationModal';
 import { ProductQuickViewModal } from './components/ProductQuickViewModal';
 import { CartDrawer } from './components/CartDrawer';
@@ -135,90 +139,123 @@ const MainStoreContent: React.FC = () => {
 
   return (
     <main>
-      {/* 1. Cinematic Hero Section with Brand Trust Indicators */}
+      {/* 1. Cinematic Asymmetrical Hero Campaign with Brand Trust Indicators */}
       <HeroSection />
 
-      {/* 2. Featured Wine Collections Showcase (Warm Ivory Editorial Background) */}
-      <CategoryShowcase />
+      {/* 2. The Art of Wine Editorial Feature (Crystal Glass Pour & Heritage) */}
+      <FadeInUp>
+        <TheArtOfWineSection />
+      </FadeInUp>
 
-      {/* 3. Sommelier's Selection (Magazine-Style Editorial Feature) */}
-      <SommeliersSelectionSection />
+      {/* 3. Featured Wine Collections Showcase (Warm Ivory Editorial Background) */}
+      <FadeInUp>
+        <CategoryShowcase />
+      </FadeInUp>
 
-      {/* 4. Featured Cellar Allocations & Bestselling Wines (Deep Burgundy) */}
-      <section className="py-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
-        <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 border-b border-[#48151F] pb-8">
-          <div>
-            <div className="inline-flex items-center gap-2 text-xs uppercase tracking-[0.25em] text-[#C6A15B] font-semibold mb-2">
-              <Award className="w-3.5 h-3.5" />
-              <span>Cellar Spotlight</span>
+      {/* 4. The Collector's Room (Exclusive Vault Allocations & Style C Cards) */}
+      <FadeInUp>
+        <CollectorsRoomSection />
+      </FadeInUp>
+
+      {/* 5. Featured Cellar Allocations & Bestselling Wines (Boutique Style Grid) */}
+      <FadeInUp>
+        <section className="py-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+          <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 border-b border-[#48151F] pb-8">
+            <div>
+              <div className="inline-flex items-center gap-2 text-xs uppercase tracking-[0.25em] text-[#C6A15B] font-semibold mb-2">
+                <Award className="w-3.5 h-3.5" />
+                <span>Cellar Spotlight</span>
+              </div>
+              <h2 className="font-serif text-3xl sm:text-4xl lg:text-5xl text-[#F5EFE7] font-normal tracking-tight">
+                Featured Vintages & Bestsellers
+              </h2>
             </div>
-            <h2 className="font-serif text-3xl sm:text-4xl lg:text-5xl text-[#F5EFE7] font-normal tracking-tight">
-              Featured Vintages & Bestsellers
-            </h2>
-          </div>
-          <button
-            onClick={() => {
-              setSelectedProduct(null);
-              setActiveTab('shop');
-              window.scrollTo({ top: 380, behavior: 'smooth' });
-            }}
-            className="text-xs uppercase tracking-wider text-[#C6A15B] hover:text-[#F5EFE7] font-semibold flex items-center gap-1.5 transition-colors cursor-pointer mt-4 md:mt-0"
-          >
-            <span>View All Wines</span>
-            <ArrowRight className="w-3.5 h-3.5" />
-          </button>
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {featuredWines.map((wine) => (
-            <ProductCard key={wine.product_id} product={wine} />
-          ))}
-        </div>
-      </section>
-
-      {/* 5. Discover by Region (Interactive Terroir Exploration) */}
-      <WineRegionsSection />
-
-      {/* 6. Food & Wine Pairing Showcase (Gastronomy Focus) */}
-      <FoodPairingSection />
-
-      {/* 7. Interactive Personalized Discovery ("Find Your Wine" Sommelier Quiz Banner) */}
-      <section className="py-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
-        <div className="relative rounded-2xl overflow-hidden bg-gradient-to-r from-[#210D12] via-[#48151F]/40 to-[#130B0D] border border-[#48151F] p-8 sm:p-12 lg:p-16 flex flex-col md:flex-row items-center justify-between gap-8 shadow-2xl">
-          <div className="max-w-xl">
-            <div className="flex items-center gap-2 text-[#C6A15B] text-xs uppercase tracking-[0.2em] font-semibold mb-3">
-              <Sparkles className="w-3.5 h-3.5" />
-              <span>Sommelier Recommendation Engine</span>
-            </div>
-            <h3 className="font-serif text-3xl sm:text-4xl text-[#F5EFE7] font-normal mb-3">
-              Unsure Which Vintage to Select?
-            </h3>
-            <p className="text-sm text-[#B7AAA1] font-light leading-relaxed mb-6">
-              Take our 60-second interactive questionnaire to discover bottles matched precisely to your flavor preferences, occasion, and gastronomy.
-            </p>
             <button
-              onClick={() => setIsQuizOpen(true)}
-              className="py-3.5 px-6 rounded-lg bg-[#861F32] hover:bg-[#a1253c] text-[#F5EFE7] text-xs uppercase tracking-wider font-semibold border border-[#C6A15B]/40 transition-all cursor-pointer shadow-lg flex items-center gap-2"
+              onClick={() => {
+                setSelectedProduct(null);
+                setActiveTab('shop');
+                window.scrollTo({ top: 380, behavior: 'smooth' });
+              }}
+              className="text-xs uppercase tracking-wider text-[#C6A15B] hover:text-[#F5EFE7] font-semibold flex items-center gap-1.5 transition-colors cursor-pointer mt-4 md:mt-0"
             >
-              <span>Take The Sommelier Quiz</span>
-              <ArrowRight className="w-4 h-4 text-[#C6A15B]" />
+              <span>View All Wines</span>
+              <ArrowRight className="w-3.5 h-3.5" />
             </button>
           </div>
 
-          <div className="w-32 h-32 rounded-xl bg-[#130B0D] border border-[#48151F] flex items-center justify-center text-[#C6A15B] shrink-0 shadow-inner">
-            <Wine className="w-14 h-14" />
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {featuredWines.map((wine) => (
+              <ProductCard key={wine.product_id} product={wine} styleVariant="boutique" />
+            ))}
           </div>
-        </div>
-      </section>
+        </section>
+      </FadeInUp>
 
-      {/* 8. Editorial Brand Story & Terroir Manifesto */}
-      <EditorialStorySection />
+      {/* 6. Sommelier's Reserve Selection (Magazine-Style Editorial Feature) */}
+      <FadeInUp>
+        <SommeliersSelectionSection />
+      </FadeInUp>
 
-      {/* 9. 5 Davao Physical Boutique Branches */}
-      <DavaoBranchesSection />
+      {/* 7. Explore the World of Wine / Terroir Discovery */}
+      <FadeInUp>
+        <WineRegionsSection />
+      </FadeInUp>
 
-      {/* 10. Sommelier Wine Guide Articles */}
-      <WineGuideSection />
+      {/* 8. Perfect Pairings (Gastronomy & Food Matching) */}
+      <FadeInUp>
+        <FoodPairingSection />
+      </FadeInUp>
+
+      {/* 9. A Moment Worth Remembering (Atmospheric Lifestyle & Celebrations) */}
+      <FadeInUp>
+        <MomentWorthRememberingSection />
+      </FadeInUp>
+
+      {/* 10. Interactive Sommelier Quiz Banner */}
+      <FadeInUp>
+        <section className="py-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+          <div className="relative rounded-2xl overflow-hidden bg-gradient-to-r from-[#210D12] via-[#48151F]/40 to-[#130B0D] border border-[#48151F] p-8 sm:p-12 lg:p-16 flex flex-col md:flex-row items-center justify-between gap-8 shadow-2xl">
+            <div className="max-w-xl">
+              <div className="flex items-center gap-2 text-[#C6A15B] text-xs uppercase tracking-[0.2em] font-semibold mb-3">
+                <Sparkles className="w-3.5 h-3.5" />
+                <span>Sommelier Recommendation Engine</span>
+              </div>
+              <h3 className="font-serif text-3xl sm:text-4xl text-[#F5EFE7] font-normal mb-3">
+                Unsure Which Vintage to Select?
+              </h3>
+              <p className="text-sm text-[#B7AAA1] font-light leading-relaxed mb-6">
+                Take our 60-second interactive questionnaire to discover bottles matched precisely to your flavor preferences, occasion, and gastronomy.
+              </p>
+              <button
+                onClick={() => setIsQuizOpen(true)}
+                className="py-3.5 px-6 rounded-lg bg-[#861F32] hover:bg-[#a1253c] text-[#F5EFE7] text-xs uppercase tracking-wider font-semibold border border-[#C6A15B]/40 transition-all cursor-pointer shadow-lg flex items-center gap-2"
+              >
+                <span>Take The Sommelier Quiz</span>
+                <ArrowRight className="w-4 h-4 text-[#C6A15B]" />
+              </button>
+            </div>
+
+            <div className="w-32 h-32 rounded-xl bg-[#130B0D] border border-[#48151F] flex items-center justify-center text-[#C6A15B] shrink-0 shadow-inner">
+              <Wine className="w-14 h-14" />
+            </div>
+          </div>
+        </section>
+      </FadeInUp>
+
+      {/* 11. Editorial Brand Story & Terroir Manifesto */}
+      <FadeInUp>
+        <EditorialStorySection />
+      </FadeInUp>
+
+      {/* 12. 5 Davao Physical Boutique Branches */}
+      <FadeInUp>
+        <DavaoBranchesSection />
+      </FadeInUp>
+
+      {/* 13. Sommelier Wine Guide Articles */}
+      <FadeInUp>
+        <WineGuideSection />
+      </FadeInUp>
     </main>
   );
 };

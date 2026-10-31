@@ -16,8 +16,12 @@ import {
   Share2,
   ZoomIn,
   MessageSquarePlus,
-  Wine
+  Wine,
+  TrendingUp
 } from 'lucide-react';
+import { VintageComparisonTab } from './VintageComparisonTab';
+
+type DetailTab = 'vintage' | 'tasting' | 'reviews';
 
 interface ProductDetailPageProps {
   product: Product;
@@ -38,6 +42,7 @@ export const ProductDetailPage: React.FC<ProductDetailPageProps> = ({ product, o
   } = useWineStore();
 
   const [quantity, setQuantity] = useState(1);
+  const [activeDetailTab, setActiveDetailTab] = useState<DetailTab>('vintage');
   const [isZoomed, setIsZoomed] = useState(false);
   const [zoomCoords, setZoomCoords] = useState({ x: 50, y: 50 });
 
@@ -321,180 +326,233 @@ export const ProductDetailPage: React.FC<ProductDetailPageProps> = ({ product, o
         </div>
       </div>
 
-      {/* Tasting Notes & Food Pairings Section */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-20 p-8 rounded-2xl bg-[#140b0f] border border-[#2b151f]">
-        {/* Sommelier Tasting Notes */}
-        <div>
-          <div className="flex items-center gap-2 text-xs uppercase tracking-widest text-[#dfbe76] font-semibold mb-3">
-            <Sparkles className="w-4 h-4" />
-            <span>Master Sommelier Tasting Notes</span>
-          </div>
-          <h3 className="font-serif text-2xl text-white font-normal mb-4">
-            Sensory Architecture
-          </h3>
+      {/* Editorial Product Detail Tabs Navigation */}
+      <div className="flex items-center gap-4 sm:gap-8 border-b border-[#351116] mb-12 overflow-x-auto">
+        <button
+          onClick={() => setActiveDetailTab('vintage')}
+          className={`pb-4 px-1 text-xs sm:text-sm font-semibold uppercase tracking-wider transition-all flex items-center gap-2 cursor-pointer border-b-2 whitespace-nowrap ${
+            activeDetailTab === 'vintage'
+              ? 'border-[#C6A15B] text-[#C6A15B]'
+              : 'border-transparent text-[#B7AAA1] hover:text-[#F5EFE7]'
+          }`}
+        >
+          <TrendingUp className="w-4 h-4" />
+          <span>Vintage Comparison</span>
+          <span className="text-[10px] px-2 py-0.5 rounded-full bg-[#861F32] text-white font-sans font-bold">
+            Analytics
+          </span>
+        </button>
 
-          <div className="space-y-4 text-sm">
-            <div>
-              <span className="text-xs text-neutral-400 font-semibold uppercase tracking-wider block mb-1">
-                Aromas & Bouquet
-              </span>
-              <div className="flex flex-wrap gap-2">
-                {product.tasting_notes.aroma.map((note, idx) => (
-                  <span
-                    key={idx}
-                    className="px-2.5 py-1 rounded bg-[#251119] border border-[#3b1a26] text-xs text-neutral-200"
-                  >
-                    {note}
-                  </span>
-                ))}
-              </div>
-            </div>
+        <button
+          onClick={() => setActiveDetailTab('tasting')}
+          className={`pb-4 px-1 text-xs sm:text-sm font-semibold uppercase tracking-wider transition-all flex items-center gap-2 cursor-pointer border-b-2 whitespace-nowrap ${
+            activeDetailTab === 'tasting'
+              ? 'border-[#C6A15B] text-[#C6A15B]'
+              : 'border-transparent text-[#B7AAA1] hover:text-[#F5EFE7]'
+          }`}
+        >
+          <Sparkles className="w-4 h-4" />
+          <span>Sensory & Gastronomy</span>
+        </button>
 
-            <div>
-              <span className="text-xs text-neutral-400 font-semibold uppercase tracking-wider block mb-1">
-                Palate & Texture
-              </span>
-              <p className="text-neutral-300 leading-relaxed font-light">
-                {product.tasting_notes.palate}
-              </p>
-            </div>
-
-            <div>
-              <span className="text-xs text-neutral-400 font-semibold uppercase tracking-wider block mb-1">
-                Finish & Longevity
-              </span>
-              <p className="text-neutral-300 leading-relaxed font-light">
-                {product.tasting_notes.finish}
-              </p>
-            </div>
-          </div>
-        </div>
-
-        {/* Food Pairings */}
-        <div>
-          <div className="flex items-center gap-2 text-xs uppercase tracking-widest text-[#dfbe76] font-semibold mb-3">
-            <Utensils className="w-4 h-4" />
-            <span>Culinary Harmonization</span>
-          </div>
-          <h3 className="font-serif text-2xl text-white font-normal mb-4">
-            Food Pairing Suggestions
-          </h3>
-          <p className="text-xs text-neutral-400 mb-4 font-light">
-            Crafted to complement rich dining experiences by cleansing the palate and accentuating savoriness.
-          </p>
-          <div className="grid grid-cols-2 gap-3">
-            {product.food_pairings.map((pairing, idx) => (
-              <div
-                key={idx}
-                className="p-3.5 rounded-xl bg-[#1b0d13] border border-[#2e1520] flex items-center gap-2.5 text-xs font-medium text-neutral-200"
-              >
-                <div className="w-2 h-2 rounded-full bg-[#dfbe76] shrink-0" />
-                <span>{pairing}</span>
-              </div>
-            ))}
-          </div>
-        </div>
+        <button
+          onClick={() => setActiveDetailTab('reviews')}
+          className={`pb-4 px-1 text-xs sm:text-sm font-semibold uppercase tracking-wider transition-all flex items-center gap-2 cursor-pointer border-b-2 whitespace-nowrap ${
+            activeDetailTab === 'reviews'
+              ? 'border-[#C6A15B] text-[#C6A15B]'
+              : 'border-transparent text-[#B7AAA1] hover:text-[#F5EFE7]'
+          }`}
+        >
+          <Star className="w-4 h-4" />
+          <span>Collector Reviews ({productReviews.length})</span>
+        </button>
       </div>
 
-      {/* Reviews & Community Feedback */}
-      <div className="mb-20">
-        <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-8 border-b border-[#2b161f] pb-6">
-          <div>
-            <p className="text-xs uppercase tracking-widest text-[#dfbe76] font-semibold mb-1">
-              Collector Verdicts
-            </p>
-            <h3 className="font-serif text-3xl text-white font-normal">
-              Customer Reviews ({productReviews.length})
-            </h3>
-          </div>
-          <div className="flex items-center gap-2 text-sm text-[#dfbe76] mt-3 sm:mt-0">
-            <Star className="w-4 h-4 fill-current" />
-            <span className="font-bold text-white">{product.rating.toFixed(1)}</span>
-            <span className="text-neutral-400">Average across {product.reviews_count} collectors</span>
-          </div>
+      {/* Tab 1: Vintage Comparison (Recharts Visualizations) */}
+      {activeDetailTab === 'vintage' && (
+        <div className="mb-20">
+          <VintageComparisonTab product={product} />
         </div>
+      )}
 
-        {/* Existing reviews */}
-        <div className="space-y-4 mb-10">
-          {productReviews.length === 0 ? (
-            <p className="text-sm text-neutral-400 py-6 text-center italic">
-              No reviews written yet. Be the first to add your tasting notes for this vintage.
-            </p>
-          ) : (
-            productReviews.map((rev) => (
-              <div
-                key={rev.review_id}
-                className="p-5 rounded-xl bg-[#150c10] border border-[#27131d]"
-              >
-                <div className="flex items-center justify-between mb-2">
-                  <div className="flex items-center gap-2">
-                    <span className="font-medium text-white text-sm">{rev.user_name}</span>
-                    <span className="text-xs text-neutral-500">· {rev.review_date}</span>
-                  </div>
-                  <div className="flex items-center text-[#dfbe76]">
-                    {[...Array(rev.rating)].map((_, i) => (
-                      <Star key={i} className="w-3.5 h-3.5 fill-current" />
-                    ))}
-                  </div>
+      {/* Tab 2: Sensory Architecture & Gastronomy */}
+      {activeDetailTab === 'tasting' && (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-20 p-8 rounded-2xl bg-[#140b0f] border border-[#2b151f]">
+          {/* Sommelier Tasting Notes */}
+          <div>
+            <div className="flex items-center gap-2 text-xs uppercase tracking-widest text-[#dfbe76] font-semibold mb-3">
+              <Sparkles className="w-4 h-4" />
+              <span>Master Sommelier Tasting Notes</span>
+            </div>
+            <h3 className="font-serif text-2xl text-white font-normal mb-4">
+              Sensory Architecture
+            </h3>
+
+            <div className="space-y-4 text-sm">
+              <div>
+                <span className="text-xs text-neutral-400 font-semibold uppercase tracking-wider block mb-1">
+                  Aromas & Bouquet
+                </span>
+                <div className="flex flex-wrap gap-2">
+                  {product.tasting_notes.aroma.map((note, idx) => (
+                    <span
+                      key={idx}
+                      className="px-2.5 py-1 rounded bg-[#251119] border border-[#3b1a26] text-xs text-neutral-200"
+                    >
+                      {note}
+                    </span>
+                  ))}
                 </div>
-                <p className="text-xs sm:text-sm text-neutral-300 leading-relaxed font-light">
-                  {rev.comment}
+              </div>
+
+              <div>
+                <span className="text-xs text-neutral-400 font-semibold uppercase tracking-wider block mb-1">
+                  Palate & Texture
+                </span>
+                <p className="text-neutral-300 leading-relaxed font-light">
+                  {product.tasting_notes.palate}
                 </p>
               </div>
-            ))
-          )}
-        </div>
 
-        {/* Add Review Form */}
-        <form
-          onSubmit={handleSubmitReview}
-          className="p-6 rounded-2xl bg-[#170c11] border border-[#341824] max-w-2xl"
-        >
-          <div className="flex items-center gap-2 text-xs uppercase tracking-wider text-[#dfbe76] font-semibold mb-3">
-            <MessageSquarePlus className="w-4 h-4" />
-            <span>Leave a Tasting Review</span>
-          </div>
-
-          <div className="mb-4">
-            <label className="block text-xs text-neutral-400 mb-1.5">Rating (1 to 5 Stars)</label>
-            <div className="flex items-center gap-2">
-              {[1, 2, 3, 4, 5].map((star) => (
-                <button
-                  type="button"
-                  key={star}
-                  onClick={() => setNewRating(star)}
-                  className="p-1 text-[#dfbe76] hover:scale-110 transition-transform cursor-pointer"
-                >
-                  <Star
-                    className={`w-5 h-5 ${star <= newRating ? 'fill-current' : 'text-neutral-700'}`}
-                  />
-                </button>
-              ))}
-              <span className="text-xs text-neutral-400 ml-2 font-medium">{newRating} Stars</span>
+              <div>
+                <span className="text-xs text-neutral-400 font-semibold uppercase tracking-wider block mb-1">
+                  Finish & Longevity
+                </span>
+                <p className="text-neutral-300 leading-relaxed font-light">
+                  {product.tasting_notes.finish}
+                </p>
+              </div>
             </div>
           </div>
 
-          <div className="mb-4">
-            <label className="block text-xs text-neutral-400 mb-1.5">Your Tasting Impression</label>
-            <textarea
-              value={newComment}
-              onChange={(e) => setNewComment(e.target.value)}
-              placeholder="Describe aromas, palate texture, aging notes, or food pairings..."
-              rows={3}
-              required
-              className="w-full p-3 rounded-lg bg-black/40 border border-neutral-700 text-sm text-[#f3efe6] placeholder-neutral-500 focus:outline-none focus:border-[#d4af37]"
-            />
+          {/* Food Pairings */}
+          <div>
+            <div className="flex items-center gap-2 text-xs uppercase tracking-widest text-[#dfbe76] font-semibold mb-3">
+              <Utensils className="w-4 h-4" />
+              <span>Culinary Harmonization</span>
+            </div>
+            <h3 className="font-serif text-2xl text-white font-normal mb-4">
+              Food Pairing Suggestions
+            </h3>
+            <p className="text-xs text-neutral-400 mb-4 font-light">
+              Crafted to complement rich dining experiences by cleansing the palate and accentuating savoriness.
+            </p>
+            <div className="grid grid-cols-2 gap-3">
+              {product.food_pairings.map((pairing, idx) => (
+                <div
+                  key={idx}
+                  className="p-3.5 rounded-xl bg-[#1b0d13] border border-[#2e1520] flex items-center gap-2.5 text-xs font-medium text-neutral-200"
+                >
+                  <div className="w-2 h-2 rounded-full bg-[#dfbe76] shrink-0" />
+                  <span>{pairing}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Tab 3: Reviews & Community Feedback */}
+      {activeDetailTab === 'reviews' && (
+        <div className="mb-20">
+          <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-8 border-b border-[#2b161f] pb-6">
+            <div>
+              <p className="text-xs uppercase tracking-widest text-[#dfbe76] font-semibold mb-1">
+                Collector Verdicts
+              </p>
+              <h3 className="font-serif text-3xl text-white font-normal">
+                Customer Reviews ({productReviews.length})
+              </h3>
+            </div>
+            <div className="flex items-center gap-2 text-sm text-[#dfbe76] mt-3 sm:mt-0">
+              <Star className="w-4 h-4 fill-current" />
+              <span className="font-bold text-white">{product.rating.toFixed(1)}</span>
+              <span className="text-neutral-400">Average across {product.reviews_count} collectors</span>
+            </div>
           </div>
 
-          <button
-            type="submit"
-            disabled={reviewSubmitting || !newComment.trim()}
-            className="py-2.5 px-5 rounded-lg bg-[#29121a] hover:bg-[#801729] text-[#dfbe76] hover:text-white border border-[#d4af37]/40 text-xs uppercase tracking-wider font-semibold transition-all cursor-pointer disabled:opacity-50"
+          {/* Existing reviews */}
+          <div className="space-y-4 mb-10">
+            {productReviews.length === 0 ? (
+              <p className="text-sm text-neutral-400 py-6 text-center italic">
+                No reviews written yet. Be the first to add your tasting notes for this vintage.
+              </p>
+            ) : (
+              productReviews.map((rev) => (
+                <div
+                  key={rev.review_id}
+                  className="p-5 rounded-xl bg-[#150c10] border border-[#27131d]"
+                >
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center gap-2">
+                      <span className="font-medium text-white text-sm">{rev.user_name}</span>
+                      <span className="text-xs text-neutral-500">· {rev.review_date}</span>
+                    </div>
+                    <div className="flex items-center text-[#dfbe76]">
+                      {[...Array(rev.rating)].map((_, i) => (
+                        <Star key={i} className="w-3.5 h-3.5 fill-current" />
+                      ))}
+                    </div>
+                  </div>
+                  <p className="text-xs sm:text-sm text-neutral-300 leading-relaxed font-light">
+                    {rev.comment}
+                  </p>
+                </div>
+              ))
+            )}
+          </div>
+
+          {/* Add Review Form */}
+          <form
+            onSubmit={handleSubmitReview}
+            className="p-6 rounded-2xl bg-[#170c11] border border-[#341824] max-w-2xl"
           >
-            Submit Review
-          </button>
-        </form>
-      </div>
+            <div className="flex items-center gap-2 text-xs uppercase tracking-wider text-[#dfbe76] font-semibold mb-3">
+              <MessageSquarePlus className="w-4 h-4" />
+              <span>Leave a Tasting Review</span>
+            </div>
+
+            <div className="mb-4">
+              <label className="block text-xs text-neutral-400 mb-1.5">Rating (1 to 5 Stars)</label>
+              <div className="flex items-center gap-2">
+                {[1, 2, 3, 4, 5].map((star) => (
+                  <button
+                    type="button"
+                    key={star}
+                    onClick={() => setNewRating(star)}
+                    className="p-1 text-[#dfbe76] hover:scale-110 transition-transform cursor-pointer"
+                  >
+                    <Star
+                      className={`w-5 h-5 ${star <= newRating ? 'fill-current' : 'text-neutral-700'}`}
+                    />
+                  </button>
+                ))}
+                <span className="text-xs text-neutral-400 ml-2 font-medium">{newRating} Stars</span>
+              </div>
+            </div>
+
+            <div className="mb-4">
+              <label className="block text-xs text-neutral-400 mb-1.5">Your Tasting Impression</label>
+              <textarea
+                value={newComment}
+                onChange={(e) => setNewComment(e.target.value)}
+                placeholder="Describe aromas, palate texture, aging notes, or food pairings..."
+                rows={3}
+                required
+                className="w-full p-3 rounded-lg bg-black/40 border border-neutral-700 text-sm text-[#f3efe6] placeholder-neutral-500 focus:outline-none focus:border-[#d4af37]"
+              />
+            </div>
+
+            <button
+              type="submit"
+              disabled={reviewSubmitting || !newComment.trim()}
+              className="py-2.5 px-5 rounded-lg bg-[#29121a] hover:bg-[#801729] text-[#dfbe76] hover:text-white border border-[#d4af37]/40 text-xs uppercase tracking-wider font-semibold transition-all cursor-pointer disabled:opacity-50"
+            >
+              Submit Review
+            </button>
+          </form>
+        </div>
+      )}
 
       {/* “You May Also Like” Section */}
       <div className="border-t border-[#2b161f] pt-16">
