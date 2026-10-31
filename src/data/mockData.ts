@@ -444,7 +444,7 @@ export const DAVAO_BRANCHES: DavaoBranch[] = [
       'Temperature-Controlled Bottle Storage Lockers',
       'Curated Corporate & VIP Gift Concierge'
     ],
-    image: '/src/assets/images/hero_wine_cellar_1791213186963.jpg',
+    image: '/src/assets/images/davao_wine_cellar_1793457420629.jpg',
     isFlagship: true,
     mapCoordinates: '7.1032, 125.6421'
   },

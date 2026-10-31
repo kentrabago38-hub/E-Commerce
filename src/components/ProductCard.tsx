@@ -2,7 +2,7 @@ import React from 'react';
 import { Product } from '../types/wine';
 import { useWineStore } from '../context/WineStoreContext';
 import { formatPeso } from '../utils/formatCurrency';
-import { Heart, Eye, ShoppingBag, Star, Wine } from 'lucide-react';
+import { Heart, Eye, ShoppingBag, Star } from 'lucide-react';
 
 interface ProductCardProps {
   product: Product;
@@ -32,9 +32,12 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, onSelect }) =
   };
 
   return (
-    <div className="group relative rounded-xl bg-[#130B0D] border border-[#48151F] hover:border-[#C6A15B]/60 transition-all duration-300 flex flex-col justify-between overflow-hidden shadow-md hover:shadow-2xl">
+    <div className="group relative rounded-xl bg-[#130B0D] border border-[#351116] hover:border-[#C6A15B]/70 transition-all duration-300 flex flex-col justify-between overflow-hidden shadow-md hover:shadow-2xl">
       {/* Top Media Area */}
-      <div className="relative aspect-4/3 overflow-hidden bg-gradient-to-b from-[#48151F]/40 to-[#130B0D] cursor-pointer" onClick={handleCardClick}>
+      <div
+        className="relative aspect-4/3 overflow-hidden bg-gradient-to-b from-[#2A0E13] to-[#130B0D] cursor-pointer"
+        onClick={handleCardClick}
+      >
         <img
           src={product.image}
           alt={product.name}
@@ -46,7 +49,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, onSelect }) =
         {/* Vintage & Wine Type Metadata (Zero-Pill Discipline) */}
         <div className="absolute top-3 left-3 flex items-center gap-1.5 drop-shadow-md">
           <span className="text-[11px] font-semibold tracking-[0.2em] text-[#C6A15B] uppercase">
-            {product.vintage} · {product.wine_type}
+            {product.vintage} · {product.wine_type} · 750ml
           </span>
           {isOutOfStock ? (
             <span className="text-[10px] uppercase font-bold tracking-wider text-rose-400">
@@ -82,7 +85,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, onSelect }) =
               e.stopPropagation();
               setQuickViewProduct(product);
             }}
-            className="w-full py-2 px-3 rounded-lg bg-[#210D12]/90 hover:bg-[#48151F] text-[#C6A15B] text-xs font-medium tracking-wider uppercase border border-[#C6A15B]/40 backdrop-blur-md flex items-center justify-center gap-1.5 transition-all shadow-lg cursor-pointer"
+            className="w-full py-2 px-3 rounded-lg bg-[#210D12]/95 hover:bg-[#351116] text-[#C6A15B] text-xs font-semibold tracking-wider uppercase border border-[#C6A15B]/40 backdrop-blur-md flex items-center justify-center gap-1.5 transition-all shadow-lg cursor-pointer"
           >
             <Eye className="w-3.5 h-3.5" />
             <span>Quick View</span>
@@ -95,7 +98,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, onSelect }) =
         <div>
           {/* Origin & Winery metadata */}
           <div className="flex items-center justify-between text-xs text-[#B7AAA1] mb-1.5">
-            <span className="truncate">{product.winery}</span>
+            <span className="truncate font-serif italic">{product.winery}</span>
             <span className="shrink-0 text-[#B7AAA1]/80">
               {product.country} · {product.region}
             </span>
@@ -112,9 +115,9 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, onSelect }) =
           {/* Grape & Body characteristics */}
           <div className="flex items-center gap-2 text-xs text-[#B7AAA1] mb-3">
             <span>{product.grape_variety}</span>
-            <span aria-hidden="true" className="text-[#48151F]">·</span>
+            <span aria-hidden="true" className="text-[#351116]">·</span>
             <span>{product.body} Body</span>
-            <span aria-hidden="true" className="text-[#48151F]">·</span>
+            <span aria-hidden="true" className="text-[#351116]">·</span>
             <span>{product.sweetness}</span>
           </div>
 
@@ -129,35 +132,31 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, onSelect }) =
         </div>
 
         {/* Price & Action row */}
-        <div className="pt-3 border-t border-[#48151F] flex items-center justify-between gap-3">
+        <div className="pt-3 border-t border-[#351116] flex items-center justify-between gap-3">
           <div>
-            <div className="flex items-baseline gap-2">
-              <span className="font-serif text-2xl font-normal text-[#C6A15B] tabular-nums">
-                {formatPeso(product.price)}
-              </span>
-              {product.original_price && (
-                <span className="text-xs text-[#B7AAA1]/60 line-through tabular-nums">
-                  {formatPeso(product.original_price)}
-                </span>
-              )}
-            </div>
-            <span className="text-[10px] text-[#B7AAA1]/70 uppercase tracking-wider block">
-              750ml Bottle
+            <span className="font-serif text-xl sm:text-2xl font-normal text-[#C6A15B] tabular-nums block">
+              {formatPeso(product.price)}
+            </span>
+            <span className="text-[10px] text-[#B7AAA1] uppercase tracking-wider block">
+              Davao Climate Cellar
             </span>
           </div>
 
           {/* Add to Cart button */}
           <button
-            onClick={() => addToCart(product, 1)}
+            onClick={(e) => {
+              e.stopPropagation();
+              addToCart(product, 1);
+            }}
             disabled={isOutOfStock}
-            className={`py-2 px-3.5 rounded-lg text-xs font-semibold tracking-wider uppercase flex items-center gap-1.5 transition-all cursor-pointer ${
+            className={`px-3.5 py-2.5 rounded-lg text-xs font-semibold tracking-wider uppercase transition-all flex items-center gap-1.5 shadow-sm cursor-pointer ${
               isOutOfStock
-                ? 'bg-neutral-800 text-neutral-500 cursor-not-allowed border border-neutral-700'
-                : 'bg-[#861F32] hover:bg-[#a1253c] text-[#F5EFE7] border border-[#C6A15B]/35 hover:border-[#C6A15B] shadow-sm'
+                ? 'bg-[#1e1114] text-neutral-500 border border-neutral-700/40 cursor-not-allowed'
+                : 'bg-[#861F32] hover:bg-[#a1253c] text-white border border-[#C6A15B]/40 hover:border-[#C6A15B]'
             }`}
-            aria-label={`Add ${product.name} to cart`}
+            title={isOutOfStock ? 'Sold out' : 'Add to cart'}
           >
-            <ShoppingBag className="w-3.5 h-3.5" />
+            <ShoppingBag className="w-3.5 h-3.5 text-[#C6A15B]" />
             <span className="hidden sm:inline">Add</span>
           </button>
         </div>

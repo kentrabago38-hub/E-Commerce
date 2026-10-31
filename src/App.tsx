@@ -10,6 +10,9 @@ import { WineGuideSection } from './components/WineGuideSection';
 import { DavaoBranchesSection } from './components/DavaoBranchesSection';
 import { AboutSection } from './components/AboutSection';
 import { EditorialStorySection } from './components/EditorialStorySection';
+import { WineRegionsSection } from './components/WineRegionsSection';
+import { SommeliersSelectionSection } from './components/SommeliersSelectionSection';
+import { FoodPairingSection } from './components/FoodPairingSection';
 import { UserDashboard } from './components/UserDashboard';
 import { AdminPortal } from './components/AdminPortal';
 import { Footer } from './components/Footer';
@@ -132,13 +135,16 @@ const MainStoreContent: React.FC = () => {
 
   return (
     <main>
-      {/* 1. Cinematic Hero Section */}
+      {/* 1. Cinematic Hero Section with Brand Trust Indicators */}
       <HeroSection />
 
-      {/* 2. Featured Collections Showcase (Asymmetrical Editorial Grid) */}
+      {/* 2. Featured Wine Collections Showcase (Warm Ivory Editorial Background) */}
       <CategoryShowcase />
 
-      {/* 3. Featured Cellar Allocations / Best Sellers */}
+      {/* 3. Sommelier's Selection (Magazine-Style Editorial Feature) */}
+      <SommeliersSelectionSection />
+
+      {/* 4. Featured Cellar Allocations & Bestselling Wines (Deep Burgundy) */}
       <section className="py-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
         <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 border-b border-[#48151F] pb-8">
           <div>
@@ -147,14 +153,14 @@ const MainStoreContent: React.FC = () => {
               <span>Cellar Spotlight</span>
             </div>
             <h2 className="font-serif text-3xl sm:text-4xl lg:text-5xl text-[#F5EFE7] font-normal tracking-tight">
-              Featured Vintages
+              Featured Vintages & Bestsellers
             </h2>
           </div>
           <button
             onClick={() => {
               setSelectedProduct(null);
               setActiveTab('shop');
-              window.scrollTo({ top: 0, behavior: 'smooth' });
+              window.scrollTo({ top: 380, behavior: 'smooth' });
             }}
             className="text-xs uppercase tracking-wider text-[#C6A15B] hover:text-[#F5EFE7] font-semibold flex items-center gap-1.5 transition-colors cursor-pointer mt-4 md:mt-0"
           >
@@ -170,7 +176,13 @@ const MainStoreContent: React.FC = () => {
         </div>
       </section>
 
-      {/* 4. Interactive Personalized Discovery ("Find Your Wine" Sommelier Quiz Banner) */}
+      {/* 5. Discover by Region (Interactive Terroir Exploration) */}
+      <WineRegionsSection />
+
+      {/* 6. Food & Wine Pairing Showcase (Gastronomy Focus) */}
+      <FoodPairingSection />
+
+      {/* 7. Interactive Personalized Discovery ("Find Your Wine" Sommelier Quiz Banner) */}
       <section className="py-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
         <div className="relative rounded-2xl overflow-hidden bg-gradient-to-r from-[#210D12] via-[#48151F]/40 to-[#130B0D] border border-[#48151F] p-8 sm:p-12 lg:p-16 flex flex-col md:flex-row items-center justify-between gap-8 shadow-2xl">
           <div className="max-w-xl">
@@ -199,13 +211,13 @@ const MainStoreContent: React.FC = () => {
         </div>
       </section>
 
-      {/* 5. Editorial Brand Story */}
+      {/* 8. Editorial Brand Story & Terroir Manifesto */}
       <EditorialStorySection />
 
-      {/* 6. 5 Davao Branches Showcase */}
+      {/* 9. 5 Davao Physical Boutique Branches */}
       <DavaoBranchesSection />
 
-      {/* 7. Sommelier Wine Guide */}
+      {/* 10. Sommelier Wine Guide Articles */}
       <WineGuideSection />
     </main>
   );

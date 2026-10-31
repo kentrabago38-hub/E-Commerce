@@ -1,8 +1,6 @@
 import React from 'react';
 import { useWineStore } from '../context/WineStoreContext';
 import { Wine, ArrowRight, ShieldCheck, Compass } from 'lucide-react';
-import cellarPhoto from '../assets/images/hero_wine_cellar_1791213186963.jpg';
-
 export const EditorialStorySection: React.FC = () => {
   const { setActiveTab } = useWineStore();
 
@@ -18,9 +16,10 @@ export const EditorialStorySection: React.FC = () => {
           <div className="lg:col-span-5 relative">
             <div className="relative rounded-2xl overflow-hidden border border-[#48151F] aspect-4/5 shadow-2xl">
               <img
-                src={cellarPhoto}
+                src="/src/assets/images/hero_wine_cellar_1791213186963.jpg"
                 alt="Subterranean vintage wine cellar"
                 className="w-full h-full object-cover object-center scale-105 hover:scale-110 transition-transform duration-1000 ease-out"
+                referrerPolicy="no-referrer"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-[#130B0D] via-transparent to-black/20" />
 
