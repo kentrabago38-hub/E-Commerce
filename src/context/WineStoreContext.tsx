@@ -10,19 +10,23 @@ import {
   GUIDE_ARTICLES
 } from '../data/mockData';
 import {
-  seedInitialDataIfEmpty,
-  subscribeToProducts,
-  subscribeToCategories,
-  subscribeToOrders,
-  saveOrderToFirestore,
-  updateOrderStatusInFirestore,
-  saveProductToFirestore,
-  updateProductStockInFirestore,
-  deleteProductFromFirestore,
-  saveUserToFirestore,
-  saveReviewToFirestore
-} from '../services/dbService';
-import { testFirestoreConnection } from '../lib/firebase';
+  checkPostgresHealth,
+  fetchProductsApi,
+  createProductApi,
+  updateProductApi,
+  updateProductStockApi,
+  deleteProductApi,
+  fetchCategoriesApi,
+  createCategoryApi,
+  deleteCategoryApi,
+  fetchOrdersApi,
+  createOrderApi,
+  updateOrderStatusApi,
+  fetchUsersApi,
+  saveUserApi,
+  fetchReviewsApi,
+  createReviewApi
+} from '../services/apiClient';
 
 export type NavTab = 'home' | 'shop' | 'red' | 'white' | 'rose' | 'sparkling' | 'collections' | 'branches' | 'about' | 'guide' | 'account' | 'admin';
 
@@ -140,6 +144,7 @@ interface WineStoreContextType {
   cartSubtotal: number;
   cartCount: number;
   isCloudConnected: boolean;
+  isPostgresConnected: boolean;
 }
 
 const WineStoreContext = createContext<WineStoreContextType | undefined>(undefined);
@@ -324,51 +329,58 @@ export const WineStoreProvider: React.FC<{ children: ReactNode }> = ({ children 
   const [isQuizOpen, setIsQuizOpen] = useState<boolean>(false);
   const [activeOrderConfirmation, setActiveOrderConfirmation] = useState<Order | null>(null);
   const [toasts, setToasts] = useState<ToastMessage[]>([]);
-  const [isCloudConnected, setIsCloudConnected] = useState<boolean>(false);
+  const [isCloudConnected, setIsCloudConnected] = useState<boolean>(true);
+  const [isPostgresConnected, setIsPostgresConnected] = useState<boolean>(true);
 
-  // Firestore real-time synchronization & initial boot
+  // PostgreSQL real-time synchronization & initial boot
   useEffect(() => {
-    let unsubscribeProducts: (() => void) | undefined;
-    let unsubscribeCategories: (() => void) | undefined;
-    let unsubscribeOrders: (() => void) | undefined;
+    let isMounted = true;
 
     const initDb = async () => {
       try {
-        const connected = await testFirestoreConnection();
-        setIsCloudConnected(connected);
-
-        // Seed initial wine collections to Cloud Firestore if database is clean
-        await seedInitialDataIfEmpty();
-
-        // Subscribe to live cloud updates for products, categories, and orders
-        unsubscribeProducts = subscribeToProducts((cloudProducts) => {
-          if (cloudProducts && cloudProducts.length > 0) {
-            setProducts(cloudProducts);
+        const isHealthy = await checkPostgresHealth();
+        if (isHealthy) {
+          if (isMounted) {
+            setIsPostgresConnected(true);
+            setIsCloudConnected(true);
           }
-        });
+        }
 
-        unsubscribeCategories = subscribeToCategories((cloudCats) => {
-          if (cloudCats && cloudCats.length > 0) {
-            setCategories(cloudCats);
-          }
-        });
+        // Fetch persisted data from PostgreSQL database
+        const [pgProducts, pgCategories, pgOrders, pgUsers, pgReviews] = await Promise.all([
+          fetchProductsApi(),
+          fetchCategoriesApi(),
+          fetchOrdersApi(),
+          fetchUsersApi(),
+          fetchReviewsApi()
+        ]);
 
-        unsubscribeOrders = subscribeToOrders((cloudOrders) => {
-          if (cloudOrders && cloudOrders.length > 0) {
-            setOrders(cloudOrders);
+        if (isMounted) {
+          if (pgProducts && pgProducts.length > 0) {
+            setProducts(pgProducts);
           }
-        });
+          if (pgCategories && pgCategories.length > 0) {
+            setCategories(pgCategories);
+          }
+          if (pgOrders && pgOrders.length > 0) {
+            setOrders(pgOrders);
+          }
+          if (pgUsers && pgUsers.length > 0) {
+            setRegisteredUsers(pgUsers);
+          }
+          if (pgReviews && pgReviews.length > 0) {
+            setReviews(pgReviews);
+          }
+        }
       } catch (err) {
-        console.warn('Database initialization note:', err);
+        console.warn('PostgreSQL database initialization note:', err);
       }
     };
 
     initDb();
 
     return () => {
-      if (unsubscribeProducts) unsubscribeProducts();
-      if (unsubscribeCategories) unsubscribeCategories();
-      if (unsubscribeOrders) unsubscribeOrders();
+      isMounted = false;
     };
   }, []);
 
@@ -583,13 +595,13 @@ export const WineStoreProvider: React.FC<{ children: ReactNode }> = ({ children 
     setActiveOrderConfirmation(newOrder);
     showToast(`Order #${newOrderId} placed successfully!`, 'success');
 
-    // Persist Order and updated stock to Cloud Database
-    saveOrderToFirestore(newOrder).catch((e) => console.warn('Order sync note:', e));
+    // Persist Order and updated stock to PostgreSQL database
+    createOrderApi(newOrder).catch((e: unknown) => console.warn('Order sync note:', e));
     orderData.items.forEach((item) => {
       const currentProd = products.find((p) => p.product_id === item.product_id);
       if (currentProd) {
         const nextStock = Math.max(0, currentProd.stock - item.quantity);
-        updateProductStockInFirestore(item.product_id, nextStock).catch(() => {});
+        updateProductStockApi(item.product_id, nextStock).catch(() => {});
       }
     });
 
@@ -600,7 +612,7 @@ export const WineStoreProvider: React.FC<{ children: ReactNode }> = ({ children 
     setOrders(prev =>
       prev.map(o => (o.order_id === orderId ? { ...o, status } : o))
     );
-    updateOrderStatusInFirestore(orderId, status).catch((e) => console.warn('Status sync note:', e));
+    updateOrderStatusApi(orderId, status).catch((e: unknown) => console.warn('Status sync note:', e));
     showToast(`Order #${orderId} status changed to ${status}`, 'info');
   };
 
@@ -614,20 +626,20 @@ export const WineStoreProvider: React.FC<{ children: ReactNode }> = ({ children 
       reviews_count: 1
     };
     setProducts(prev => [newProduct, ...prev]);
-    saveProductToFirestore(newProduct).catch((e) => console.warn('Product add note:', e));
+    createProductApi(newProduct).catch((e: unknown) => console.warn('Product add note:', e));
     showToast(`Product "${newProduct.name}" added to catalog.`, 'success');
   };
 
   const updateProduct = (updated: Product) => {
     setProducts(prev => prev.map(p => (p.product_id === updated.product_id ? updated : p)));
-    saveProductToFirestore(updated).catch((e) => console.warn('Product update note:', e));
+    updateProductApi(updated).catch((e: unknown) => console.warn('Product update note:', e));
     showToast(`Updated "${updated.name}".`, 'success');
   };
 
   const deleteProduct = (productId: string) => {
     const prod = products.find(p => p.product_id === productId);
     setProducts(prev => prev.filter(p => p.product_id !== productId));
-    deleteProductFromFirestore(productId).catch((e) => console.warn('Product delete note:', e));
+    deleteProductApi(productId).catch((e: unknown) => console.warn('Product delete note:', e));
     showToast(`Deleted "${prod?.name || 'Wine'}" from catalog.`, 'info');
   };
 
@@ -635,7 +647,7 @@ export const WineStoreProvider: React.FC<{ children: ReactNode }> = ({ children 
     setProducts(prev =>
       prev.map(p => (p.product_id === productId ? { ...p, stock: Math.max(0, stock) } : p))
     );
-    updateProductStockInFirestore(productId, stock).catch((e) => console.warn('Stock update note:', e));
+    updateProductStockApi(productId, stock).catch((e: unknown) => console.warn('Stock update note:', e));
     showToast(`Stock updated to ${stock}.`, 'info');
   };
 
@@ -644,6 +656,7 @@ export const WineStoreProvider: React.FC<{ children: ReactNode }> = ({ children 
     const newId = `cat-${cat.slug || Date.now()}`;
     const newCat: Category = { ...cat, category_id: newId, item_count: 0 };
     setCategories(prev => [...prev, newCat]);
+    createCategoryApi(newCat).catch((e: unknown) => console.warn('Category add note:', e));
     showToast(`Category "${cat.category_name}" created.`, 'success');
   };
 
@@ -654,6 +667,7 @@ export const WineStoreProvider: React.FC<{ children: ReactNode }> = ({ children 
 
   const deleteCategory = (catId: string) => {
     setCategories(prev => prev.filter(c => c.category_id !== catId));
+    deleteCategoryApi(catId).catch((e: unknown) => console.warn('Category delete note:', e));
     showToast(`Category removed.`, 'info');
   };
 
@@ -670,7 +684,7 @@ export const WineStoreProvider: React.FC<{ children: ReactNode }> = ({ children 
     };
 
     setReviews(prev => [newReview, ...prev]);
-    saveReviewToFirestore(newReview).catch((e) => console.warn('Review sync note:', e));
+    createReviewApi(newReview).catch((e: unknown) => console.warn('Review sync note:', e));
 
     // Recalculate average rating
     setProducts(prev =>
@@ -814,6 +828,7 @@ export const WineStoreProvider: React.FC<{ children: ReactNode }> = ({ children 
 
     setRegisteredUsers(prev => [newUser, ...prev]);
     setUser(newUser);
+    saveUserApi(newUser).catch((e: unknown) => console.warn('User register sync note:', e));
     setIsAuthModalOpen(false);
     setAuthRedirectReason(null);
     showToast(`Account created! Welcome to VÍNEA Cellars, ${newUser.name}.`, 'success');
@@ -834,7 +849,7 @@ export const WineStoreProvider: React.FC<{ children: ReactNode }> = ({ children 
     setRegisteredUsers(prev =>
       prev.map(u => (u.user_id === user.user_id ? updatedUser : u))
     );
-    saveUserToFirestore(updatedUser).catch((e) => console.warn('User profile sync note:', e));
+    saveUserApi(updatedUser).catch((e: unknown) => console.warn('User profile sync note:', e));
     showToast('Your customer profile details have been saved.', 'success');
     return { success: true };
   };
@@ -1060,7 +1075,8 @@ export const WineStoreProvider: React.FC<{ children: ReactNode }> = ({ children 
 
         cartSubtotal,
         cartCount,
-        isCloudConnected
+        isCloudConnected,
+        isPostgresConnected
       }}
     >
       {children}

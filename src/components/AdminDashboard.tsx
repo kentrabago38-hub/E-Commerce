@@ -41,7 +41,8 @@ export const AdminDashboard: React.FC = () => {
     updateOrderStatus,
     addCategory,
     deleteCategory,
-    isCloudConnected
+    isCloudConnected,
+    isPostgresConnected
   } = useWineStore();
 
   const [activeTab, setActiveTab] = useState<'products' | 'orders' | 'customers' | 'categories' | 'reports'>('products');
@@ -168,7 +169,7 @@ export const AdminDashboard: React.FC = () => {
             </span>
             <span className="text-[#392126]">·</span>
             <span className="px-2 py-0.5 rounded text-[10px] bg-emerald-950/80 text-emerald-300 border border-emerald-800/60 font-mono">
-              {isCloudConnected ? 'Cloud Firestore: Live' : 'Firestore: Connected'}
+              {isPostgresConnected ? 'PostgreSQL (Cloud SQL / Supabase Ready): Live' : 'Database: Connecting...'}
             </span>
           </div>
         </div>
