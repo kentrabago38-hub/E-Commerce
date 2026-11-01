@@ -140,7 +140,7 @@ export const DavaoBranchesSection: React.FC = () => {
                   href={getGoogleMapsDirectionsUrl(DAVAO_BRANCHES[0])}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="py-3 px-6 rounded-lg bg-[#861F32] hover:bg-[#a1253c] text-white text-xs uppercase tracking-wider font-semibold flex items-center gap-2.5 transition-all cursor-pointer border border-[#C6A15B]/40 shadow-xl"
+                  className="gold-shimmer-cta py-3 px-6 rounded-lg bg-[#861F32] hover:bg-[#a1253c] text-white text-xs uppercase tracking-wider font-semibold flex items-center gap-2.5 transition-all cursor-pointer border border-[#C6A15B]/40 shadow-xl"
                   title="Open driving directions in Google Maps"
                 >
                   <Navigation className="w-4 h-4 text-[#C6A15B]" />
@@ -288,7 +288,7 @@ export const DavaoBranchesSection: React.FC = () => {
                   href={getGoogleMapsDirectionsUrl(branch)}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex-1 py-2.5 px-3 rounded-lg bg-[#861F32] hover:bg-[#a1253c] text-white border border-[#C6A15B]/40 text-xs font-semibold uppercase tracking-wider transition-all flex items-center justify-center gap-1.5 shadow-md"
+                  className="gold-shimmer-cta flex-1 py-2.5 px-3 rounded-lg bg-[#861F32] hover:bg-[#a1253c] text-white border border-[#C6A15B]/40 text-xs font-semibold uppercase tracking-wider transition-all flex items-center justify-center gap-1.5 shadow-md"
                   title="Open driving directions in Google Maps"
                 >
                   <Navigation className="w-3.5 h-3.5 text-[#C6A15B]" />

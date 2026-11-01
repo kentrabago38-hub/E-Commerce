@@ -238,7 +238,7 @@ export const Navbar: React.FC = () => {
           {/* Find Your Wine Button */}
           <button
             onClick={() => setIsQuizOpen(true)}
-            className="hidden md:flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-semibold text-[#C6A15B] bg-[#130B0D] hover:bg-[#351116] border border-[#C6A15B]/35 transition-all cursor-pointer shadow-sm hover:border-[#C6A15B]"
+            className="gold-shimmer-cta hidden md:flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-semibold text-[#C6A15B] bg-[#130B0D] hover:bg-[#351116] border border-[#C6A15B]/35 transition-all cursor-pointer shadow-sm hover:border-[#C6A15B]"
             title="Wine Sommelier Quiz"
           >
             <Sparkles className="w-3.5 h-3.5 text-[#C6A15B]" />

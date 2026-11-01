@@ -93,7 +93,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
                 e.stopPropagation();
                 setQuickViewProduct(product);
               }}
-              className="w-full py-2.5 px-4 rounded-lg bg-[#210D12]/95 hover:bg-[#351116] text-[#C6A15B] text-xs font-semibold tracking-wider uppercase border border-[#C6A15B]/40 backdrop-blur-md flex items-center justify-center gap-2 transition-all shadow-xl cursor-pointer"
+              className="gold-shimmer-cta w-full py-2.5 px-4 rounded-lg bg-[#210D12]/95 hover:bg-[#351116] text-[#C6A15B] text-xs font-semibold tracking-wider uppercase border border-[#C6A15B]/40 backdrop-blur-md flex items-center justify-center gap-2 transition-all shadow-xl cursor-pointer"
             >
               <Eye className="w-3.5 h-3.5" />
               <span>Editorial Quick View</span>
@@ -124,7 +124,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
             <button
               onClick={handleAddToCart}
               disabled={isOutOfStock}
-              className="py-2 px-4 rounded-lg bg-[#861F32] hover:bg-[#a1253c] text-white text-xs font-semibold tracking-wider uppercase transition-all flex items-center gap-1.5 cursor-pointer shadow-md"
+              className="gold-shimmer-cta py-2 px-4 rounded-lg bg-[#861F32] hover:bg-[#a1253c] text-white text-xs font-semibold tracking-wider uppercase border border-[#C6A15B]/40 transition-all flex items-center gap-1.5 cursor-pointer shadow-md"
             >
               {addedRecently ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <ShoppingBag className="w-3.5 h-3.5 text-[#C6A15B]" />}
               <span>{addedRecently ? 'In Bag' : 'Add to Bag'}</span>
@@ -204,7 +204,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
             <button
               onClick={handleAddToCart}
               disabled={isOutOfStock}
-              className="py-2 px-3.5 rounded-lg bg-[#861F32] hover:bg-[#a1253c] text-white text-xs font-semibold tracking-wider uppercase border border-[#C6A15B]/40 transition-all flex items-center gap-1.5 cursor-pointer shadow-md"
+              className="gold-shimmer-cta py-2 px-3.5 rounded-lg bg-[#861F32] hover:bg-[#a1253c] text-white text-xs font-semibold tracking-wider uppercase border border-[#C6A15B]/40 transition-all flex items-center gap-1.5 cursor-pointer shadow-md"
             >
               {addedRecently ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <ShoppingBag className="w-3.5 h-3.5 text-[#C6A15B]" />}
               <span>{addedRecently ? 'Acquired' : 'Acquire'}</span>
@@ -331,7 +331,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
           <button
             onClick={handleAddToCart}
             disabled={isOutOfStock}
-            className={`px-3.5 py-2.5 rounded-lg text-xs font-semibold tracking-wider uppercase transition-all flex items-center gap-1.5 shadow-sm cursor-pointer ${
+            className={`gold-shimmer-cta px-3.5 py-2.5 rounded-lg text-xs font-semibold tracking-wider uppercase transition-all flex items-center gap-1.5 shadow-sm cursor-pointer ${
               isOutOfStock
                 ? 'bg-[#1e1114] text-neutral-500 border border-neutral-700/40 cursor-not-allowed'
                 : addedRecently

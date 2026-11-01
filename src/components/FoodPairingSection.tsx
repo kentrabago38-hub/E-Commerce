@@ -207,7 +207,7 @@ export const FoodPairingSection: React.FC = () => {
             <div className="flex flex-col sm:flex-row items-center gap-3 pt-4 border-t border-[#351116]">
               <button
                 onClick={() => addToCart(matchedProduct, 1)}
-                className="w-full sm:w-auto px-6 py-3.5 rounded-lg bg-[#861F32] hover:bg-[#a1253c] text-white text-xs font-semibold tracking-wider uppercase border border-[#C6A15B]/40 transition-all shadow-md flex items-center justify-center gap-2 cursor-pointer"
+                className="gold-shimmer-cta w-full sm:w-auto px-6 py-3.5 rounded-lg bg-[#861F32] hover:bg-[#a1253c] text-white text-xs font-semibold tracking-wider uppercase border border-[#C6A15B]/40 transition-all shadow-md flex items-center justify-center gap-2 cursor-pointer"
               >
                 <ShoppingBag className="w-4 h-4 text-[#C6A15B]" />
                 <span>Add Pairing Wine to Bag</span>
@@ -218,7 +218,7 @@ export const FoodPairingSection: React.FC = () => {
                   setSelectedProduct(matchedProduct);
                   window.scrollTo({ top: 0, behavior: 'smooth' });
                 }}
-                className="w-full sm:w-auto px-5 py-3.5 rounded-lg bg-transparent hover:bg-white/5 text-[#F5EFE7] text-xs font-semibold tracking-wider uppercase border border-white/20 transition-all flex items-center justify-center gap-2 cursor-pointer"
+                className="gold-shimmer-cta w-full sm:w-auto px-5 py-3.5 rounded-lg bg-transparent hover:bg-white/5 text-[#F5EFE7] text-xs font-semibold tracking-wider uppercase border border-white/20 hover:border-[#C6A15B]/50 transition-all flex items-center justify-center gap-2 cursor-pointer"
               >
                 <span>View Full Details</span>
                 <ArrowRight className="w-4 h-4 text-[#C6A15B]" />

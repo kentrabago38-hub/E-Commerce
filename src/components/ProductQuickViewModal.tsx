@@ -158,7 +158,7 @@ export const ProductQuickViewModal: React.FC = () => {
                 <button
                   onClick={handleAddToCart}
                   disabled={isOutOfStock}
-                  className="flex-1 py-3 px-4 rounded-lg bg-[#48151F] hover:bg-[#861F32] text-[#C6A15B] hover:text-white border border-[#C6A15B]/40 text-xs uppercase tracking-wider font-semibold flex items-center justify-center gap-2 transition-all cursor-pointer"
+                  className="gold-shimmer-cta flex-1 py-3 px-4 rounded-lg bg-[#48151F] hover:bg-[#861F32] text-[#C6A15B] hover:text-white border border-[#C6A15B]/40 text-xs uppercase tracking-wider font-semibold flex items-center justify-center gap-2 transition-all cursor-pointer"
                 >
                   <ShoppingBag className="w-4 h-4" />
                   <span>Add to Cart</span>
@@ -181,14 +181,14 @@ export const ProductQuickViewModal: React.FC = () => {
                 <button
                   onClick={handleBuyNow}
                   disabled={isOutOfStock}
-                  className="flex-1 py-3 px-4 rounded-lg bg-[#861F32] hover:bg-[#a1253c] text-white text-xs uppercase tracking-wider font-semibold border border-[#C6A15B]/40 transition-all cursor-pointer shadow-lg"
+                  className="gold-shimmer-cta flex-1 py-3 px-4 rounded-lg bg-[#861F32] hover:bg-[#a1253c] text-white text-xs uppercase tracking-wider font-semibold border border-[#C6A15B]/40 transition-all cursor-pointer shadow-lg"
                 >
                   Instant Checkout
                 </button>
 
                 <button
                   onClick={handleViewFullDetails}
-                  className="py-3 px-4 rounded-lg border border-[#48151F] hover:border-[#C6A15B] text-[#B7AAA1] hover:text-[#F5EFE7] text-xs tracking-wider uppercase font-medium flex items-center gap-1.5 transition-colors cursor-pointer"
+                  className="gold-shimmer-cta py-3 px-4 rounded-lg border border-[#48151F] hover:border-[#C6A15B] text-[#B7AAA1] hover:text-[#F5EFE7] text-xs tracking-wider uppercase font-medium flex items-center gap-1.5 transition-colors cursor-pointer"
                 >
                   <span>Full Details</span>
                   <ArrowRight className="w-3.5 h-3.5" />

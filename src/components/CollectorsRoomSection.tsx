@@ -53,7 +53,7 @@ export const CollectorsRoomSection: React.FC = () => {
                 setActiveTab('collections');
                 window.scrollTo({ top: 0, behavior: 'smooth' });
               }}
-              className="px-6 py-3 rounded-lg bg-[#351116] hover:bg-[#48151F] text-[#C6A15B] text-xs uppercase tracking-[0.15em] font-semibold border border-[#C6A15B]/40 hover:border-[#C6A15B] transition-all flex items-center gap-2 cursor-pointer shadow-lg"
+              className="gold-shimmer-cta px-6 py-3 rounded-lg bg-[#351116] hover:bg-[#48151F] text-[#C6A15B] text-xs uppercase tracking-[0.15em] font-semibold border border-[#C6A15B]/40 hover:border-[#C6A15B] transition-all flex items-center gap-2 cursor-pointer shadow-lg"
             >
               <span>View All Rare Allocations</span>
               <ArrowRight className="w-3.5 h-3.5" />
@@ -153,7 +153,7 @@ export const CollectorsRoomSection: React.FC = () => {
                       e.stopPropagation();
                       addToCart(wine, 1);
                     }}
-                    className="py-2.5 px-4 rounded-lg bg-[#861F32] hover:bg-[#a1253c] text-white text-xs font-semibold tracking-wider uppercase border border-[#C6A15B]/40 hover:border-[#C6A15B] transition-all flex items-center gap-2 cursor-pointer shadow-md"
+                    className="gold-shimmer-cta py-2.5 px-4 rounded-lg bg-[#861F32] hover:bg-[#a1253c] text-white text-xs font-semibold tracking-wider uppercase border border-[#C6A15B]/40 hover:border-[#C6A15B] transition-all flex items-center gap-2 cursor-pointer shadow-md"
                   >
                     <ShoppingBag className="w-3.5 h-3.5 text-[#C6A15B]" />
                     <span>Acquire</span>

@@ -4,26 +4,46 @@ interface FadeInUpProps {
   children: React.ReactNode;
   className?: string;
   delay?: number; // in milliseconds
-  distance?: number; // vertical translate distance in pixels, default 28px
+  distance?: number; // vertical translate distance in pixels, default 24px
+  duration?: number; // in milliseconds, default 900ms
+  threshold?: number; // intersection observer threshold, default 0.08
+  direction?: 'up' | 'none';
 }
 
 export const FadeInUp: React.FC<FadeInUpProps> = ({
   children,
   className = '',
   delay = 0,
-  distance = 28
+  distance = 24,
+  duration = 900,
+  threshold = 0.08,
+  direction = 'up'
 }) => {
   const [isVisible, setIsVisible] = useState(false);
   const domRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    // If running in environment without window or IntersectionObserver, reveal immediately
+    if (typeof window === 'undefined' || typeof IntersectionObserver === 'undefined') {
+      setIsVisible(true);
+      return;
+    }
+
     // Respect user's reduced-motion preference
-    if (typeof window !== 'undefined') {
-      const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-      if (prefersReducedMotion) {
-        setIsVisible(true);
-        return;
-      }
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (prefersReducedMotion) {
+      setIsVisible(true);
+      return;
+    }
+
+    const elem = domRef.current;
+    if (!elem) return;
+
+    // Check if element is already within the viewport on mount
+    const rect = elem.getBoundingClientRect();
+    if (rect.top <= window.innerHeight * 0.92) {
+      setIsVisible(true);
+      return;
     }
 
     const observer = new IntersectionObserver(
@@ -31,35 +51,35 @@ export const FadeInUp: React.FC<FadeInUpProps> = ({
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
             setIsVisible(true);
-            if (domRef.current) {
-              observer.unobserve(domRef.current);
-            }
+            observer.unobserve(entry.target);
           }
         });
       },
       {
-        threshold: 0.1,
+        threshold,
         rootMargin: '0px 0px -40px 0px'
       }
     );
 
-    const elem = domRef.current;
-    if (elem) {
-      observer.observe(elem);
-    }
+    observer.observe(elem);
 
     return () => {
-      if (elem) observer.unobserve(elem);
+      observer.unobserve(elem);
     };
-  }, []);
+  }, [threshold]);
+
+  const translateY = direction === 'up' ? (isVisible ? 0 : distance) : 0;
 
   return (
     <div
       ref={domRef}
-      className={`transition-all duration-1000 ease-[cubic-bezier(0.16,1,0.3,1)] will-change-transform ${className}`}
+      className={`will-change-transform ${className}`}
       style={{
         opacity: isVisible ? 1 : 0,
-        transform: isVisible ? 'translateY(0px)' : `translateY(${distance}px)`,
+        transform: `translate3d(0, ${translateY}px, 0)`,
+        transitionProperty: 'opacity, transform',
+        transitionDuration: `${duration}ms`,
+        transitionTimingFunction: 'cubic-bezier(0.16, 1, 0.3, 1)',
         transitionDelay: `${delay}ms`
       }}
     >

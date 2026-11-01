@@ -293,7 +293,7 @@ export const ProductDetailPage: React.FC<ProductDetailPageProps> = ({ product, o
                 <button
                   onClick={handleAddToCart}
                   disabled={isOutOfStock}
-                  className="flex-1 py-3.5 px-6 rounded-lg bg-[#48151F] hover:bg-[#861F32] text-[#C6A15B] hover:text-white border border-[#C6A15B]/40 text-xs sm:text-sm uppercase tracking-wider font-semibold flex items-center justify-center gap-2 transition-all cursor-pointer shadow-md"
+                  className="gold-shimmer-cta flex-1 py-3.5 px-6 rounded-lg bg-[#48151F] hover:bg-[#861F32] text-[#C6A15B] hover:text-white border border-[#C6A15B]/40 text-xs sm:text-sm uppercase tracking-wider font-semibold flex items-center justify-center gap-2 transition-all cursor-pointer shadow-md"
                 >
                   <ShoppingBag className="w-4 h-4" />
                   <span>Add to Cart</span>
@@ -317,7 +317,7 @@ export const ProductDetailPage: React.FC<ProductDetailPageProps> = ({ product, o
               <button
                 onClick={handleBuyNow}
                 disabled={isOutOfStock}
-                className="w-full py-4 px-6 rounded-lg bg-[#861F32] hover:bg-[#a1253c] text-white text-xs sm:text-sm uppercase tracking-[0.15em] font-semibold border border-[#C6A15B]/40 transition-all cursor-pointer shadow-xl"
+                className="gold-shimmer-cta w-full py-4 px-6 rounded-lg bg-[#861F32] hover:bg-[#a1253c] text-white text-xs sm:text-sm uppercase tracking-[0.15em] font-semibold border border-[#C6A15B]/40 transition-all cursor-pointer shadow-xl"
               >
                 Buy Now — Instant Checkout
               </button>

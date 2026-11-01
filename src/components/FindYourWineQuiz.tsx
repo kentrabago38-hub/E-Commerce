@@ -232,7 +232,7 @@ export const FindYourWineQuiz: React.FC = () => {
             <div className="flex justify-end">
               <button
                 onClick={() => setStep(2)}
-                className="py-3 px-6 rounded-lg bg-[#861F32] hover:bg-[#a1253c] text-[#F5EFE7] text-xs uppercase tracking-wider font-semibold flex items-center gap-2 transition-all cursor-pointer shadow-md"
+                className="gold-shimmer-cta py-3 px-6 rounded-lg bg-[#861F32] hover:bg-[#a1253c] text-[#F5EFE7] text-xs uppercase tracking-wider font-semibold flex items-center gap-2 transition-all cursor-pointer shadow-md border border-[#C6A15B]/40"
               >
                 <span>Next: Choose Occasion</span>
                 <ArrowRight className="w-4 h-4" />
@@ -276,7 +276,7 @@ export const FindYourWineQuiz: React.FC = () => {
               </button>
               <button
                 onClick={() => setStep(3)}
-                className="py-3 px-6 rounded-lg bg-[#861F32] hover:bg-[#a1253c] text-[#F5EFE7] text-xs uppercase tracking-wider font-semibold flex items-center gap-2 transition-all cursor-pointer shadow-md"
+                className="gold-shimmer-cta py-3 px-6 rounded-lg bg-[#861F32] hover:bg-[#a1253c] text-[#F5EFE7] text-xs uppercase tracking-wider font-semibold flex items-center gap-2 transition-all cursor-pointer shadow-md border border-[#C6A15B]/40"
               >
                 <span>View Recommendations</span>
                 <Sparkles className="w-4 h-4 text-[#C6A15B]" />
@@ -340,7 +340,7 @@ export const FindYourWineQuiz: React.FC = () => {
 
                     <button
                       onClick={() => addToCart(wine, 1)}
-                      className="py-2 px-3.5 rounded-lg bg-[#861F32] hover:bg-[#a1253c] text-[#F5EFE7] text-xs uppercase tracking-wider font-semibold flex items-center gap-1.5 transition-colors cursor-pointer"
+                      className="gold-shimmer-cta py-2 px-3.5 rounded-lg bg-[#861F32] hover:bg-[#a1253c] text-[#F5EFE7] text-xs uppercase tracking-wider font-semibold flex items-center gap-1.5 transition-colors cursor-pointer border border-[#C6A15B]/40"
                     >
                       <ShoppingBag className="w-3.5 h-3.5" />
                       <span>Add</span>

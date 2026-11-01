@@ -184,8 +184,10 @@ const MainStoreContent: React.FC = () => {
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {featuredWines.map((wine) => (
-              <ProductCard key={wine.product_id} product={wine} styleVariant="boutique" />
+            {featuredWines.map((wine, idx) => (
+              <FadeInUp key={wine.product_id} delay={idx * 100} distance={18}>
+                <ProductCard product={wine} styleVariant="boutique" />
+              </FadeInUp>
             ))}
           </div>
         </section>

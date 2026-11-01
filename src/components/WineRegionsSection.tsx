@@ -198,7 +198,7 @@ export const WineRegionsSection: React.FC = () => {
 
           <button
             onClick={() => handleExploreRegion(activeRegion)}
-            className="w-full py-3.5 px-6 rounded-lg bg-[#861F32] hover:bg-[#a1253c] text-[#F5EFE7] text-xs font-semibold tracking-wider uppercase border border-[#C6A15B]/40 transition-all flex items-center justify-center gap-2 cursor-pointer shadow-lg"
+            className="gold-shimmer-cta w-full py-3.5 px-6 rounded-lg bg-[#861F32] hover:bg-[#a1253c] text-[#F5EFE7] text-xs font-semibold tracking-wider uppercase border border-[#C6A15B]/40 transition-all flex items-center justify-center gap-2 cursor-pointer shadow-lg"
           >
             <span>Explore {activeRegion.name} Wines</span>
             <ArrowRight className="w-4 h-4 text-[#C6A15B]" />

@@ -86,7 +86,7 @@ export const EditorialStorySection: React.FC = () => {
                   setActiveTab('about');
                   window.scrollTo({ top: 0, behavior: 'smooth' });
                 }}
-                className="py-3.5 px-7 rounded-lg bg-[#861F32] hover:bg-[#a1253c] text-[#F5EFE7] text-xs uppercase tracking-[0.15em] font-semibold border border-[#C6A15B]/40 transition-all cursor-pointer shadow-lg flex items-center gap-2"
+                className="gold-shimmer-cta py-3.5 px-7 rounded-lg bg-[#861F32] hover:bg-[#a1253c] text-[#F5EFE7] text-xs uppercase tracking-[0.15em] font-semibold border border-[#C6A15B]/40 transition-all cursor-pointer shadow-lg flex items-center gap-2"
               >
                 <span>Read Our Full Story</span>
                 <ArrowRight className="w-4 h-4 text-[#C6A15B]" />
@@ -97,7 +97,7 @@ export const EditorialStorySection: React.FC = () => {
                   setActiveTab('guide');
                   window.scrollTo({ top: 0, behavior: 'smooth' });
                 }}
-                className="py-3.5 px-6 rounded-lg bg-[#210D12] hover:bg-[#48151F] text-[#C6A15B] hover:text-[#F5EFE7] text-xs uppercase tracking-[0.15em] font-semibold border border-[#48151F] hover:border-[#C6A15B]/40 transition-all cursor-pointer flex items-center gap-2"
+                className="gold-shimmer-cta py-3.5 px-6 rounded-lg bg-[#210D12] hover:bg-[#48151F] text-[#C6A15B] hover:text-[#F5EFE7] text-xs uppercase tracking-[0.15em] font-semibold border border-[#48151F] hover:border-[#C6A15B]/40 transition-all cursor-pointer flex items-center gap-2"
               >
                 <Compass className="w-4 h-4" />
                 <span>Sommelier Guide</span>

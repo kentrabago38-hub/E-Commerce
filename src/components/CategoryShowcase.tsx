@@ -135,8 +135,14 @@ export const CategoryShowcase: React.FC = () => {
                   {col.description}
                 </p>
 
-                <div className="mt-4 pt-3 border-t border-white/15 flex items-center text-xs font-semibold text-[#C6A15B] uppercase tracking-wider group-hover:text-white transition-colors">
-                  <span>Explore Collection</span>
+                <div className="mt-5 pt-3.5 border-t border-white/15 flex items-center justify-between">
+                  <span className="gold-shimmer-cta inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-[#351116]/80 text-[#C6A15B] group-hover:text-white group-hover:bg-[#861F32] text-xs font-semibold uppercase tracking-wider border border-[#C6A15B]/40 transition-all shadow-md">
+                    <span>View Collection</span>
+                    <ArrowUpRight className="w-3.5 h-3.5" />
+                  </span>
+                  <span className="text-[11px] text-white/60 tracking-widest uppercase font-mono hidden sm:inline">
+                    VÍNEA RESERVE
+                  </span>
                 </div>
               </div>
             </div>

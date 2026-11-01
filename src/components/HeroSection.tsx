@@ -63,7 +63,7 @@ export const HeroSection: React.FC = () => {
               {/* CTA 1: Discover the Collection */}
               <button
                 onClick={handleDiscoverCollection}
-                className="w-full sm:w-auto px-8 py-4 rounded-lg bg-[#861F32] hover:bg-[#a1253c] text-white font-semibold text-xs uppercase tracking-[0.15em] border border-[#C6A15B]/40 shadow-xl transition-all duration-200 cursor-pointer flex items-center justify-center gap-2.5 active:scale-[0.99]"
+                className="gold-shimmer-cta w-full sm:w-auto px-8 py-4 rounded-lg bg-[#861F32] hover:bg-[#a1253c] text-white font-semibold text-xs uppercase tracking-[0.15em] border border-[#C6A15B]/40 shadow-xl transition-all duration-200 cursor-pointer flex items-center justify-center gap-2.5 active:scale-[0.99]"
               >
                 <span>Discover the Collection</span>
                 <ArrowRight className="w-4 h-4 text-[#C6A15B]" />
@@ -72,7 +72,7 @@ export const HeroSection: React.FC = () => {
               {/* CTA 2: Find Your Wine (Champagne Gold Sommelier Quiz) */}
               <button
                 onClick={() => setIsQuizOpen(true)}
-                className="w-full sm:w-auto px-6 py-4 rounded-lg bg-[#130B0D]/90 hover:bg-[#351116] text-[#C6A15B] text-xs uppercase tracking-wider font-semibold border border-[#C6A15B]/40 hover:border-[#C6A15B] backdrop-blur-md transition-all flex items-center justify-center gap-2 cursor-pointer shadow-md"
+                className="gold-shimmer-cta w-full sm:w-auto px-6 py-4 rounded-lg bg-[#130B0D]/90 hover:bg-[#351116] text-[#C6A15B] text-xs uppercase tracking-wider font-semibold border border-[#C6A15B]/40 hover:border-[#C6A15B] backdrop-blur-md transition-all flex items-center justify-center gap-2 cursor-pointer shadow-md"
               >
                 <Sparkles className="w-4 h-4 text-[#C6A15B]" />
                 <span>Find Your Wine</span>

@@ -72,7 +72,7 @@ export const MomentWorthRememberingSection: React.FC = () => {
             <div className="flex flex-col sm:flex-row items-center gap-4">
               <button
                 onClick={() => setIsQuizOpen(true)}
-                className="w-full sm:w-auto px-8 py-4 rounded-lg bg-[#861F32] hover:bg-[#a1253c] text-white font-semibold text-xs uppercase tracking-[0.15em] border border-[#C6A15B]/40 shadow-xl transition-all cursor-pointer flex items-center justify-center gap-2"
+                className="gold-shimmer-cta w-full sm:w-auto px-8 py-4 rounded-lg bg-[#861F32] hover:bg-[#a1253c] text-white font-semibold text-xs uppercase tracking-[0.15em] border border-[#C6A15B]/40 shadow-xl transition-all cursor-pointer flex items-center justify-center gap-2"
               >
                 <span>Find Pairings For Your Occasion</span>
                 <ArrowRight className="w-4 h-4 text-[#C6A15B]" />
@@ -80,7 +80,7 @@ export const MomentWorthRememberingSection: React.FC = () => {
 
               <button
                 onClick={handleBookConcierge}
-                className="w-full sm:w-auto px-6 py-4 rounded-lg bg-[#130B0D]/90 hover:bg-[#351116] text-[#F5EFE7] font-semibold text-xs uppercase tracking-[0.15em] border border-[#48151F] hover:border-[#C6A15B]/50 transition-all cursor-pointer flex items-center justify-center gap-2"
+                className="gold-shimmer-cta w-full sm:w-auto px-6 py-4 rounded-lg bg-[#130B0D]/90 hover:bg-[#351116] text-[#F5EFE7] font-semibold text-xs uppercase tracking-[0.15em] border border-[#48151F] hover:border-[#C6A15B]/50 transition-all cursor-pointer flex items-center justify-center gap-2"
               >
                 <Calendar className="w-4 h-4 text-[#C6A15B]" />
                 <span>Private Tasting In Davao</span>

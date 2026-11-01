@@ -871,7 +871,7 @@ export const CheckoutModal: React.FC = () => {
                   <button
                     type="button"
                     onClick={handlePlaceOrder}
-                    className="py-4 px-8 rounded-lg bg-gradient-to-r from-[#801729] via-[#66101f] to-[#450913] hover:from-[#941b31] hover:to-[#540c18] text-white text-xs sm:text-sm uppercase tracking-[0.15em] font-semibold transition-all cursor-pointer shadow-xl border border-[#d4af37]/40"
+                    className="gold-shimmer-cta py-4 px-8 rounded-lg bg-gradient-to-r from-[#801729] via-[#66101f] to-[#450913] hover:from-[#941b31] hover:to-[#540c18] text-white text-xs sm:text-sm uppercase tracking-[0.15em] font-semibold transition-all cursor-pointer shadow-xl border border-[#d4af37]/40"
                   >
                     PLACE ORDER
                   </button>

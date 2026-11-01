@@ -170,7 +170,7 @@ export const WineGuideSection: React.FC = () => {
             <div className="text-center">
               <button
                 onClick={() => setSelectedArticle(null)}
-                className="py-2.5 px-6 rounded-lg bg-[#861F32] hover:bg-[#a1253c] text-[#F5EFE7] text-xs uppercase tracking-wider font-semibold transition-colors cursor-pointer border border-[#C6A15B]/40"
+                className="gold-shimmer-cta py-2.5 px-6 rounded-lg bg-[#861F32] hover:bg-[#a1253c] text-[#F5EFE7] text-xs uppercase tracking-wider font-semibold transition-colors cursor-pointer border border-[#C6A15B]/40"
               >
                 Close Article
               </button>

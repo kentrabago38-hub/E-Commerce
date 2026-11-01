@@ -143,7 +143,7 @@ export const SommeliersSelectionSection: React.FC = () => {
             <div className="flex flex-col sm:flex-row items-center gap-4 pt-4 border-t border-[#B7AA9B]/30">
               <button
                 onClick={() => addToCart(sommelierPick, 1)}
-                className="w-full sm:w-auto px-8 py-3.5 rounded-lg bg-[#741E2B] hover:bg-[#8e2535] text-white text-xs font-semibold tracking-wider uppercase transition-all shadow-md flex items-center justify-center gap-2 cursor-pointer"
+                className="gold-shimmer-cta w-full sm:w-auto px-8 py-3.5 rounded-lg bg-[#741E2B] hover:bg-[#8e2535] text-white text-xs font-semibold tracking-wider uppercase transition-all shadow-md flex items-center justify-center gap-2 cursor-pointer border border-[#C6A15B]/40"
               >
                 <ShoppingBag className="w-4 h-4 text-[#C6A15B]" />
                 <span>Acquire This Allocation</span>
@@ -151,7 +151,7 @@ export const SommeliersSelectionSection: React.FC = () => {
 
               <button
                 onClick={() => setQuickViewProduct(sommelierPick)}
-                className="w-full sm:w-auto px-6 py-3.5 rounded-lg bg-white hover:bg-[#F5F0E7] text-[#351116] text-xs font-semibold tracking-wider uppercase border border-[#B7AA9B]/60 transition-all flex items-center justify-center gap-2 cursor-pointer"
+                className="gold-shimmer-cta w-full sm:w-auto px-6 py-3.5 rounded-lg bg-white hover:bg-[#F5F0E7] text-[#351116] text-xs font-semibold tracking-wider uppercase border border-[#B7AA9B]/60 transition-all flex items-center justify-center gap-2 cursor-pointer shadow-sm"
               >
                 <Eye className="w-4 h-4 text-[#741E2B]" />
                 <span>Tasting dossier</span>

@@ -94,10 +94,10 @@ export const TheArtOfWineSection: React.FC = () => {
 
               <button
                 onClick={handleExplore}
-                className="inline-flex items-center gap-2 text-xs uppercase tracking-wider text-[#C6A15B] hover:text-[#F5EFE7] font-semibold transition-colors cursor-pointer group"
+                className="gold-shimmer-cta px-5 py-3 rounded-lg bg-[#210D12] hover:bg-[#351116] border border-[#C6A15B]/40 hover:border-[#C6A15B] inline-flex items-center gap-2 text-xs uppercase tracking-wider text-[#C6A15B] hover:text-[#F5EFE7] font-semibold transition-all cursor-pointer shadow-lg"
               >
                 <span>Read The Wine Guide</span>
-                <ArrowRight className="w-4 h-4 text-[#C6A15B] group-hover:translate-x-1 transition-transform" />
+                <ArrowRight className="w-4 h-4 text-[#C6A15B]" />
               </button>
             </div>
           </div>

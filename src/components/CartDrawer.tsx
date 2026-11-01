@@ -258,7 +258,7 @@ export const CartDrawer: React.FC = () => {
               <div className="space-y-2 pt-2">
                 <button
                   onClick={handleProceedToCheckout}
-                  className="w-full py-3.5 px-4 rounded-lg bg-[#861F32] hover:bg-[#a1253c] text-white text-xs uppercase tracking-[0.15em] font-semibold flex items-center justify-center gap-2 border border-[#C6A15B]/40 transition-all cursor-pointer shadow-xl"
+                  className="gold-shimmer-cta w-full py-3.5 px-4 rounded-lg bg-[#861F32] hover:bg-[#a1253c] text-white text-xs uppercase tracking-[0.15em] font-semibold flex items-center justify-center gap-2 border border-[#C6A15B]/40 transition-all cursor-pointer shadow-xl"
                 >
                   <span>Proceed to Checkout</span>
                   <ArrowRight className="w-4 h-4 text-[#C6A15B]" />
