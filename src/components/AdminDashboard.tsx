@@ -42,7 +42,9 @@ export const AdminDashboard: React.FC = () => {
     addCategory,
     deleteCategory,
     isCloudConnected,
-    isPostgresConnected
+    isPostgresConnected,
+    isSupabaseConnected,
+    setIsSupabaseConfigOpen
   } = useWineStore();
 
   const [activeTab, setActiveTab] = useState<'products' | 'orders' | 'customers' | 'categories' | 'reports'>('products');
@@ -168,9 +170,14 @@ export const AdminDashboard: React.FC = () => {
               Authenticated: <strong className="text-white">{adminUser?.name || 'Master Sommelier Julian Vance'}</strong> ({adminUser?.email || 'admin@vinea.com'}) · <span className="text-[#D5B15C]">{adminUser?.title || 'Master Sommelier'}</span>
             </span>
             <span className="text-[#392126]">·</span>
-            <span className="px-2 py-0.5 rounded text-[10px] bg-emerald-950/80 text-emerald-300 border border-emerald-800/60 font-mono">
-              {isPostgresConnected ? 'PostgreSQL (Cloud SQL / Supabase Ready): Live' : 'Database: Connecting...'}
-            </span>
+            <button
+              onClick={() => setIsSupabaseConfigOpen(true)}
+              className="px-2.5 py-0.5 rounded text-[10px] bg-emerald-950/80 hover:bg-emerald-900 text-emerald-300 border border-emerald-800/60 font-mono flex items-center gap-1.5 cursor-pointer transition-colors"
+              title="Click to view or edit Supabase connection credentials"
+            >
+              <span className={`w-1.5 h-1.5 rounded-full ${isSupabaseConnected ? 'bg-emerald-400 animate-pulse' : 'bg-amber-400'}`}></span>
+              <span>{isSupabaseConnected ? 'Supabase & Postgres: Connected' : 'Supabase: Ready (Click to Configure)'}</span>
+            </button>
           </div>
         </div>
 

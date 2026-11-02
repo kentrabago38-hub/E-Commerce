@@ -27,6 +27,23 @@ import {
   fetchReviewsApi,
   createReviewApi
 } from '../services/apiClient';
+import { isSupabaseConfigured } from '../lib/supabase';
+import {
+  seedInitialDataIfEmpty,
+  subscribeToProducts,
+  subscribeToCategories,
+  subscribeToOrders,
+  saveOrderToSupabase,
+  updateOrderStatusInSupabase,
+  saveProductToSupabase,
+  updateProductStockInSupabase,
+  deleteProductFromSupabase,
+  saveUserToSupabase,
+  saveReviewToSupabase,
+  supabaseSignUp,
+  supabaseSignIn,
+  supabaseSignOut
+} from '../services/dbService';
 
 export type NavTab = 'home' | 'shop' | 'red' | 'white' | 'rose' | 'sparkling' | 'collections' | 'branches' | 'about' | 'guide' | 'account' | 'admin';
 
@@ -145,6 +162,9 @@ interface WineStoreContextType {
   cartCount: number;
   isCloudConnected: boolean;
   isPostgresConnected: boolean;
+  isSupabaseConnected: boolean;
+  isSupabaseConfigOpen: boolean;
+  setIsSupabaseConfigOpen: (open: boolean) => void;
 }
 
 const WineStoreContext = createContext<WineStoreContextType | undefined>(undefined);
@@ -331,22 +351,28 @@ export const WineStoreProvider: React.FC<{ children: ReactNode }> = ({ children 
   const [toasts, setToasts] = useState<ToastMessage[]>([]);
   const [isCloudConnected, setIsCloudConnected] = useState<boolean>(true);
   const [isPostgresConnected, setIsPostgresConnected] = useState<boolean>(true);
+  const [isSupabaseConnected, setIsSupabaseConnected] = useState<boolean>(isSupabaseConfigured);
+  const [isSupabaseConfigOpen, setIsSupabaseConfigOpen] = useState<boolean>(false);
 
-  // PostgreSQL real-time synchronization & initial boot
+  // Supabase & PostgreSQL real-time synchronization & initial boot
   useEffect(() => {
     let isMounted = true;
+    let unsubProducts: () => void = () => {};
+    let unsubCats: () => void = () => {};
+    let unsubOrders: () => void = () => {};
 
     const initDb = async () => {
       try {
         const isHealthy = await checkPostgresHealth();
-        if (isHealthy) {
-          if (isMounted) {
-            setIsPostgresConnected(true);
-            setIsCloudConnected(true);
-          }
+        if (isHealthy && isMounted) {
+          setIsPostgresConnected(true);
+          setIsCloudConnected(true);
         }
 
-        // Fetch persisted data from PostgreSQL database
+        // Initialize and seed Supabase if empty
+        await seedInitialDataIfEmpty().catch(() => {});
+
+        // Fetch persisted data from PostgreSQL / Supabase backend
         const [pgProducts, pgCategories, pgOrders, pgUsers, pgReviews] = await Promise.all([
           fetchProductsApi(),
           fetchCategoriesApi(),
@@ -373,14 +399,31 @@ export const WineStoreProvider: React.FC<{ children: ReactNode }> = ({ children 
           }
         }
       } catch (err) {
-        console.warn('PostgreSQL database initialization note:', err);
+        console.warn('Database initialization note:', err);
       }
     };
 
     initDb();
 
+    // Setup Supabase real-time channels if Supabase credentials are configured
+    if (isSupabaseConfigured) {
+      setIsSupabaseConnected(true);
+      unsubProducts = subscribeToProducts((fresh) => {
+        if (fresh && fresh.length > 0 && isMounted) setProducts(fresh);
+      });
+      unsubCats = subscribeToCategories((fresh) => {
+        if (fresh && fresh.length > 0 && isMounted) setCategories(fresh);
+      });
+      unsubOrders = subscribeToOrders((fresh) => {
+        if (fresh && fresh.length > 0 && isMounted) setOrders(fresh);
+      });
+    }
+
     return () => {
       isMounted = false;
+      unsubProducts();
+      unsubCats();
+      unsubOrders();
     };
   }, []);
 
@@ -595,12 +638,14 @@ export const WineStoreProvider: React.FC<{ children: ReactNode }> = ({ children 
     setActiveOrderConfirmation(newOrder);
     showToast(`Order #${newOrderId} placed successfully!`, 'success');
 
-    // Persist Order and updated stock to PostgreSQL database
+    // Persist Order and updated stock to Supabase & backend
+    saveOrderToSupabase(newOrder).catch((e: unknown) => console.warn('Supabase order sync note:', e));
     createOrderApi(newOrder).catch((e: unknown) => console.warn('Order sync note:', e));
     orderData.items.forEach((item) => {
       const currentProd = products.find((p) => p.product_id === item.product_id);
       if (currentProd) {
         const nextStock = Math.max(0, currentProd.stock - item.quantity);
+        updateProductStockInSupabase(item.product_id, nextStock).catch(() => {});
         updateProductStockApi(item.product_id, nextStock).catch(() => {});
       }
     });
@@ -612,6 +657,7 @@ export const WineStoreProvider: React.FC<{ children: ReactNode }> = ({ children 
     setOrders(prev =>
       prev.map(o => (o.order_id === orderId ? { ...o, status } : o))
     );
+    updateOrderStatusInSupabase(orderId, status).catch(() => {});
     updateOrderStatusApi(orderId, status).catch((e: unknown) => console.warn('Status sync note:', e));
     showToast(`Order #${orderId} status changed to ${status}`, 'info');
   };
@@ -626,12 +672,14 @@ export const WineStoreProvider: React.FC<{ children: ReactNode }> = ({ children 
       reviews_count: 1
     };
     setProducts(prev => [newProduct, ...prev]);
+    saveProductToSupabase(newProduct).catch(() => {});
     createProductApi(newProduct).catch((e: unknown) => console.warn('Product add note:', e));
     showToast(`Product "${newProduct.name}" added to catalog.`, 'success');
   };
 
   const updateProduct = (updated: Product) => {
     setProducts(prev => prev.map(p => (p.product_id === updated.product_id ? updated : p)));
+    saveProductToSupabase(updated).catch(() => {});
     updateProductApi(updated).catch((e: unknown) => console.warn('Product update note:', e));
     showToast(`Updated "${updated.name}".`, 'success');
   };
@@ -639,6 +687,7 @@ export const WineStoreProvider: React.FC<{ children: ReactNode }> = ({ children 
   const deleteProduct = (productId: string) => {
     const prod = products.find(p => p.product_id === productId);
     setProducts(prev => prev.filter(p => p.product_id !== productId));
+    deleteProductFromSupabase(productId).catch(() => {});
     deleteProductApi(productId).catch((e: unknown) => console.warn('Product delete note:', e));
     showToast(`Deleted "${prod?.name || 'Wine'}" from catalog.`, 'info');
   };
@@ -647,6 +696,7 @@ export const WineStoreProvider: React.FC<{ children: ReactNode }> = ({ children 
     setProducts(prev =>
       prev.map(p => (p.product_id === productId ? { ...p, stock: Math.max(0, stock) } : p))
     );
+    updateProductStockInSupabase(productId, stock).catch(() => {});
     updateProductStockApi(productId, stock).catch((e: unknown) => console.warn('Stock update note:', e));
     showToast(`Stock updated to ${stock}.`, 'info');
   };
@@ -684,6 +734,7 @@ export const WineStoreProvider: React.FC<{ children: ReactNode }> = ({ children 
     };
 
     setReviews(prev => [newReview, ...prev]);
+    saveReviewToSupabase(newReview).catch(() => {});
     createReviewApi(newReview).catch((e: unknown) => console.warn('Review sync note:', e));
 
     // Recalculate average rating
@@ -754,6 +805,9 @@ export const WineStoreProvider: React.FC<{ children: ReactNode }> = ({ children 
     setUser(matched);
     setIsAuthModalOpen(false);
     setAuthRedirectReason(null);
+    if (isSupabaseConfigured) {
+      supabaseSignIn(email, pass).catch((err) => console.warn('Supabase auth note:', err));
+    }
     showToast(`Welcome back, ${matched.name}!`, 'success');
     return { success: true };
   };
@@ -828,7 +882,15 @@ export const WineStoreProvider: React.FC<{ children: ReactNode }> = ({ children 
 
     setRegisteredUsers(prev => [newUser, ...prev]);
     setUser(newUser);
+    saveUserToSupabase(newUser).catch((e: unknown) => console.warn('Supabase user register note:', e));
     saveUserApi(newUser).catch((e: unknown) => console.warn('User register sync note:', e));
+    if (isSupabaseConfigured) {
+      supabaseSignUp(email, data.password.trim(), {
+        name: data.name.trim(),
+        phone: data.phone.trim(),
+        branch: data.favorite_davao_branch
+      }).catch((err) => console.warn('Supabase signup note:', err));
+    }
     setIsAuthModalOpen(false);
     setAuthRedirectReason(null);
     showToast(`Account created! Welcome to VÍNEA Cellars, ${newUser.name}.`, 'success');
@@ -838,6 +900,9 @@ export const WineStoreProvider: React.FC<{ children: ReactNode }> = ({ children 
   const logoutCustomer = () => {
     setUser(null);
     setIsAccountOpen(false);
+    if (isSupabaseConfigured) {
+      supabaseSignOut().catch(() => {});
+    }
     showToast('You have signed out of your account.', 'info');
   };
 
@@ -849,6 +914,7 @@ export const WineStoreProvider: React.FC<{ children: ReactNode }> = ({ children 
     setRegisteredUsers(prev =>
       prev.map(u => (u.user_id === user.user_id ? updatedUser : u))
     );
+    saveUserToSupabase(updatedUser).catch((e: unknown) => console.warn('Supabase profile sync note:', e));
     saveUserApi(updatedUser).catch((e: unknown) => console.warn('User profile sync note:', e));
     showToast('Your customer profile details have been saved.', 'success');
     return { success: true };
@@ -1076,7 +1142,10 @@ export const WineStoreProvider: React.FC<{ children: ReactNode }> = ({ children 
         cartSubtotal,
         cartCount,
         isCloudConnected,
-        isPostgresConnected
+        isPostgresConnected,
+        isSupabaseConnected,
+        isSupabaseConfigOpen,
+        setIsSupabaseConfigOpen
       }}
     >
       {children}

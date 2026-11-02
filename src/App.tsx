@@ -28,6 +28,7 @@ import { OrderConfirmationModal } from './components/OrderConfirmationModal';
 import { AccountModal } from './components/AccountModal';
 import { CustomerAuthModal } from './components/CustomerAuthModal';
 import { FindYourWineQuiz } from './components/FindYourWineQuiz';
+import { SupabaseConfigModal } from './components/SupabaseConfigModal';
 import { ToastContainer } from './components/Toast';
 import { Sparkles, ArrowRight, Award, Wine } from 'lucide-react';
 
@@ -263,13 +264,17 @@ const MainStoreContent: React.FC = () => {
 };
 
 const AppLayout: React.FC = () => {
-  const { isVisitingAdmin } = useWineStore();
+  const { isVisitingAdmin, isSupabaseConfigOpen, setIsSupabaseConfigOpen } = useWineStore();
 
   // Dedicated, completely separated Admin Portal (Login or Dashboard)
   if (isVisitingAdmin) {
     return (
       <div className="min-h-screen bg-[#130B0D] text-[#F5EFE7]">
         <AdminPortal />
+        <SupabaseConfigModal
+          isOpen={isSupabaseConfigOpen}
+          onClose={() => setIsSupabaseConfigOpen(false)}
+        />
         <ToastContainer />
       </div>
     );
@@ -291,6 +296,10 @@ const AppLayout: React.FC = () => {
       <AccountModal />
       <CustomerAuthModal />
       <FindYourWineQuiz />
+      <SupabaseConfigModal
+        isOpen={isSupabaseConfigOpen}
+        onClose={() => setIsSupabaseConfigOpen(false)}
+      />
       <ToastContainer />
     </div>
   );

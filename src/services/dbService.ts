@@ -1,13 +1,4 @@
-import {
-  collection,
-  doc,
-  getDocs,
-  setDoc,
-  updateDoc,
-  deleteDoc,
-  onSnapshot
-} from 'firebase/firestore';
-import { db, handleFirestoreError, OperationType } from '../lib/firebase';
+import { supabase, isSupabaseConfigured } from '../lib/supabase';
 import { Product, Category, Order, Review, User } from '../types/wine';
 import {
   INITIAL_PRODUCTS,
@@ -17,198 +8,410 @@ import {
   INITIAL_REGISTERED_USERS
 } from '../data/mockData';
 
-const PRODUCTS_COLLECTION = 'products';
-const CATEGORIES_COLLECTION = 'categories';
-const ORDERS_COLLECTION = 'orders';
-const REVIEWS_COLLECTION = 'reviews';
-const USERS_COLLECTION = 'users';
+export const PRODUCTS_TABLE = 'products';
+export const CATEGORIES_TABLE = 'categories';
+export const ORDERS_TABLE = 'orders';
+export const REVIEWS_TABLE = 'reviews';
+export const USERS_TABLE = 'users';
 
-// Seed initial data if collection is empty
+export enum OperationType {
+  CREATE = 'create',
+  UPDATE = 'update',
+  DELETE = 'delete',
+  LIST = 'list',
+  GET = 'get',
+  WRITE = 'write',
+}
+
+export function handleDatabaseError(error: unknown, operation: OperationType, table: string) {
+  const message = error instanceof Error ? error.message : JSON.stringify(error);
+  console.warn(`[Supabase DB Note] Failed ${operation} on table '${table}':`, message);
+}
+
+// Backwards-compatible alias for any residual Firestore error handlers
+export const handleFirestoreError = handleDatabaseError;
+
+/**
+ * Seed initial sample catalog data into Supabase if tables are empty.
+ */
 export async function seedInitialDataIfEmpty(): Promise<void> {
+  if (!isSupabaseConfigured) {
+    console.info('[Supabase] Running in local demo mode. Initial data loaded from local storage & memory.');
+    return;
+  }
+
   try {
-    const productsSnap = await getDocs(collection(db, PRODUCTS_COLLECTION));
-    if (productsSnap.empty) {
-      console.log('Seeding initial VÍNEA catalog to Firestore...');
-      for (const prod of INITIAL_PRODUCTS) {
-        await setDoc(doc(db, PRODUCTS_COLLECTION, prod.product_id), prod);
-      }
+    // 1. Check & Seed Products
+    const { data: existingProducts, error: prodErr } = await supabase
+      .from(PRODUCTS_TABLE)
+      .select('product_id')
+      .limit(1);
+
+    if (!prodErr && (!existingProducts || existingProducts.length === 0)) {
+      console.log('Seeding initial VÍNEA catalog to Supabase...');
+      await supabase.from(PRODUCTS_TABLE).upsert(INITIAL_PRODUCTS, { onConflict: 'product_id' });
     }
 
-    const categoriesSnap = await getDocs(collection(db, CATEGORIES_COLLECTION));
-    if (categoriesSnap.empty) {
-      for (const cat of INITIAL_CATEGORIES) {
-        await setDoc(doc(db, CATEGORIES_COLLECTION, cat.category_id), cat);
-      }
+    // 2. Check & Seed Categories
+    const { data: existingCats, error: catErr } = await supabase
+      .from(CATEGORIES_TABLE)
+      .select('category_id')
+      .limit(1);
+
+    if (!catErr && (!existingCats || existingCats.length === 0)) {
+      await supabase.from(CATEGORIES_TABLE).upsert(INITIAL_CATEGORIES, { onConflict: 'category_id' });
     }
 
-    const ordersSnap = await getDocs(collection(db, ORDERS_COLLECTION));
-    if (ordersSnap.empty) {
-      for (const ord of INITIAL_ORDERS) {
-        await setDoc(doc(db, ORDERS_COLLECTION, ord.order_id), ord);
-      }
+    // 3. Check & Seed Orders
+    const { data: existingOrders, error: ordErr } = await supabase
+      .from(ORDERS_TABLE)
+      .select('order_id')
+      .limit(1);
+
+    if (!ordErr && (!existingOrders || existingOrders.length === 0)) {
+      await supabase.from(ORDERS_TABLE).upsert(INITIAL_ORDERS, { onConflict: 'order_id' });
     }
 
-    const reviewsSnap = await getDocs(collection(db, REVIEWS_COLLECTION));
-    if (reviewsSnap.empty) {
-      for (const rev of INITIAL_REVIEWS) {
-        await setDoc(doc(db, REVIEWS_COLLECTION, rev.review_id), rev);
-      }
+    // 4. Check & Seed Reviews
+    const { data: existingReviews, error: revErr } = await supabase
+      .from(REVIEWS_TABLE)
+      .select('review_id')
+      .limit(1);
+
+    if (!revErr && (!existingReviews || existingReviews.length === 0)) {
+      await supabase.from(REVIEWS_TABLE).upsert(INITIAL_REVIEWS, { onConflict: 'review_id' });
     }
 
-    const usersSnap = await getDocs(collection(db, USERS_COLLECTION));
-    if (usersSnap.empty) {
-      for (const usr of INITIAL_REGISTERED_USERS) {
-        await setDoc(doc(db, USERS_COLLECTION, usr.user_id), usr);
-      }
+    // 5. Check & Seed Users
+    const { data: existingUsers, error: usrErr } = await supabase
+      .from(USERS_TABLE)
+      .select('user_id')
+      .limit(1);
+
+    if (!usrErr && (!existingUsers || existingUsers.length === 0)) {
+      await supabase.from(USERS_TABLE).upsert(INITIAL_REGISTERED_USERS, { onConflict: 'user_id' });
     }
   } catch (error) {
-    console.warn('Initial seeding note (may be running in offline/cached mode):', error);
+    console.warn('[Supabase Seeding Note]:', error);
   }
 }
 
-// Subscribe to real-time products
+/**
+ * Fetch all products from Supabase
+ */
+export async function fetchProductsFromSupabase(): Promise<Product[] | null> {
+  if (!isSupabaseConfigured) return null;
+  try {
+    const { data, error } = await supabase
+      .from(PRODUCTS_TABLE)
+      .select('*')
+      .order('name', { ascending: true });
+
+    if (error) throw error;
+    return (data as Product[]) || null;
+  } catch (err) {
+    handleDatabaseError(err, OperationType.LIST, PRODUCTS_TABLE);
+    return null;
+  }
+}
+
+/**
+ * Real-time subscription to Products with PostgreSQL changes
+ */
 export function subscribeToProducts(
   onData: (products: Product[]) => void,
   onError?: (err: unknown) => void
 ): () => void {
-  return onSnapshot(
-    collection(db, PRODUCTS_COLLECTION),
-    (snapshot) => {
-      if (!snapshot.empty) {
-        const list = snapshot.docs.map((d) => d.data() as Product);
-        onData(list);
-      }
-    },
-    (error) => {
-      console.warn('Products subscription note:', error);
-      if (onError) onError(error);
-      try {
-        handleFirestoreError(error, OperationType.GET, PRODUCTS_COLLECTION);
-      } catch {
-        // Logged
-      }
+  // If not configured with live credentials, return no-op cleanup
+  if (!isSupabaseConfigured) {
+    return () => {};
+  }
+
+  // Initial fetch
+  fetchProductsFromSupabase().then((items) => {
+    if (items && items.length > 0) {
+      onData(items);
     }
-  );
+  }).catch((err) => {
+    if (onError) onError(err);
+  });
+
+  // Subscribe to real-time postgres changes
+  const channel = supabase
+    .channel('public:products')
+    .on(
+      'postgres_changes',
+      { event: '*', schema: 'public', table: PRODUCTS_TABLE },
+      async () => {
+        const refreshed = await fetchProductsFromSupabase();
+        if (refreshed) onData(refreshed);
+      }
+    )
+    .subscribe((status) => {
+      if (status === 'CHANNEL_ERROR' && onError) {
+        onError(new Error('Supabase channel subscription failed'));
+      }
+    });
+
+  return () => {
+    supabase.removeChannel(channel);
+  };
 }
 
-// Subscribe to real-time categories
+/**
+ * Fetch categories from Supabase
+ */
+export async function fetchCategoriesFromSupabase(): Promise<Category[] | null> {
+  if (!isSupabaseConfigured) return null;
+  try {
+    const { data, error } = await supabase
+      .from(CATEGORIES_TABLE)
+      .select('*')
+      .order('category_name', { ascending: true });
+
+    if (error) throw error;
+    return (data as Category[]) || null;
+  } catch (err) {
+    handleDatabaseError(err, OperationType.LIST, CATEGORIES_TABLE);
+    return null;
+  }
+}
+
+/**
+ * Real-time subscription to Categories
+ */
 export function subscribeToCategories(
   onData: (categories: Category[]) => void,
   onError?: (err: unknown) => void
 ): () => void {
-  return onSnapshot(
-    collection(db, CATEGORIES_COLLECTION),
-    (snapshot) => {
-      if (!snapshot.empty) {
-        const list = snapshot.docs.map((d) => d.data() as Category);
-        onData(list);
+  if (!isSupabaseConfigured) return () => {};
+
+  fetchCategoriesFromSupabase().then((cats) => {
+    if (cats && cats.length > 0) onData(cats);
+  }).catch(onError);
+
+  const channel = supabase
+    .channel('public:categories')
+    .on(
+      'postgres_changes',
+      { event: '*', schema: 'public', table: CATEGORIES_TABLE },
+      async () => {
+        const refreshed = await fetchCategoriesFromSupabase();
+        if (refreshed) onData(refreshed);
       }
-    },
-    (error) => {
-      console.warn('Categories subscription note:', error);
-      if (onError) onError(error);
-      try {
-        handleFirestoreError(error, OperationType.GET, CATEGORIES_COLLECTION);
-      } catch {
-        // Logged
-      }
-    }
-  );
+    )
+    .subscribe();
+
+  return () => {
+    supabase.removeChannel(channel);
+  };
 }
 
-// Subscribe to real-time orders
+/**
+ * Fetch orders from Supabase
+ */
+export async function fetchOrdersFromSupabase(): Promise<Order[] | null> {
+  if (!isSupabaseConfigured) return null;
+  try {
+    const { data, error } = await supabase
+      .from(ORDERS_TABLE)
+      .select('*')
+      .order('order_date', { ascending: false });
+
+    if (error) throw error;
+    return (data as Order[]) || null;
+  } catch (err) {
+    handleDatabaseError(err, OperationType.LIST, ORDERS_TABLE);
+    return null;
+  }
+}
+
+/**
+ * Real-time subscription to Orders
+ */
 export function subscribeToOrders(
   onData: (orders: Order[]) => void,
   onError?: (err: unknown) => void
 ): () => void {
-  return onSnapshot(
-    collection(db, ORDERS_COLLECTION),
-    (snapshot) => {
-      if (!snapshot.empty) {
-        const list = snapshot.docs.map((d) => d.data() as Order);
-        // Sort descending by order date or ID
-        list.sort((a, b) => (b.order_date || '').localeCompare(a.order_date || ''));
-        onData(list);
+  if (!isSupabaseConfigured) return () => {};
+
+  fetchOrdersFromSupabase().then((ords) => {
+    if (ords && ords.length > 0) onData(ords);
+  }).catch(onError);
+
+  const channel = supabase
+    .channel('public:orders')
+    .on(
+      'postgres_changes',
+      { event: '*', schema: 'public', table: ORDERS_TABLE },
+      async () => {
+        const refreshed = await fetchOrdersFromSupabase();
+        if (refreshed) onData(refreshed);
       }
+    )
+    .subscribe();
+
+  return () => {
+    supabase.removeChannel(channel);
+  };
+}
+
+/**
+ * Save Order to Supabase
+ */
+export async function saveOrderToSupabase(order: Order): Promise<void> {
+  if (!isSupabaseConfigured) return;
+  try {
+    const { error } = await supabase
+      .from(ORDERS_TABLE)
+      .upsert(order, { onConflict: 'order_id' });
+
+    if (error) throw error;
+  } catch (error) {
+    handleDatabaseError(error, OperationType.WRITE, ORDERS_TABLE);
+  }
+}
+
+/**
+ * Update Order Status in Supabase
+ */
+export async function updateOrderStatusInSupabase(orderId: string, status: Order['status']): Promise<void> {
+  if (!isSupabaseConfigured) return;
+  try {
+    const { error } = await supabase
+      .from(ORDERS_TABLE)
+      .update({ status })
+      .eq('order_id', orderId);
+
+    if (error) throw error;
+  } catch (error) {
+    handleDatabaseError(error, OperationType.UPDATE, ORDERS_TABLE);
+  }
+}
+
+/**
+ * Save or Update Product in Supabase
+ */
+export async function saveProductToSupabase(product: Product): Promise<void> {
+  if (!isSupabaseConfigured) return;
+  try {
+    const { error } = await supabase
+      .from(PRODUCTS_TABLE)
+      .upsert(product, { onConflict: 'product_id' });
+
+    if (error) throw error;
+  } catch (error) {
+    handleDatabaseError(error, OperationType.WRITE, PRODUCTS_TABLE);
+  }
+}
+
+/**
+ * Update Product Stock in Supabase
+ */
+export async function updateProductStockInSupabase(productId: string, stock: number): Promise<void> {
+  if (!isSupabaseConfigured) return;
+  try {
+    const { error } = await supabase
+      .from(PRODUCTS_TABLE)
+      .update({ stock })
+      .eq('product_id', productId);
+
+    if (error) throw error;
+  } catch (error) {
+    handleDatabaseError(error, OperationType.UPDATE, PRODUCTS_TABLE);
+  }
+}
+
+/**
+ * Delete Product in Supabase
+ */
+export async function deleteProductFromSupabase(productId: string): Promise<void> {
+  if (!isSupabaseConfigured) return;
+  try {
+    const { error } = await supabase
+      .from(PRODUCTS_TABLE)
+      .delete()
+      .eq('product_id', productId);
+
+    if (error) throw error;
+  } catch (error) {
+    handleDatabaseError(error, OperationType.DELETE, PRODUCTS_TABLE);
+  }
+}
+
+/**
+ * Save or Update User Profile in Supabase
+ */
+export async function saveUserToSupabase(user: User): Promise<void> {
+  if (!isSupabaseConfigured) return;
+  try {
+    const { error } = await supabase
+      .from(USERS_TABLE)
+      .upsert(user, { onConflict: 'user_id' });
+
+    if (error) throw error;
+  } catch (error) {
+    handleDatabaseError(error, OperationType.WRITE, USERS_TABLE);
+  }
+}
+
+/**
+ * Save Review to Supabase
+ */
+export async function saveReviewToSupabase(review: Review): Promise<void> {
+  if (!isSupabaseConfigured) return;
+  try {
+    const { error } = await supabase
+      .from(REVIEWS_TABLE)
+      .upsert(review, { onConflict: 'review_id' });
+
+    if (error) throw error;
+  } catch (error) {
+    handleDatabaseError(error, OperationType.WRITE, REVIEWS_TABLE);
+  }
+}
+
+/**
+ * Supabase Customer Authentication methods
+ */
+export async function supabaseSignUp(email: string, password: string, metadata?: Record<string, unknown>) {
+  if (!isSupabaseConfigured) return { data: null, error: null };
+  return await supabase.auth.signUp({
+    email,
+    password,
+    options: {
+      data: metadata || {},
     },
-    (error) => {
-      console.warn('Orders subscription note:', error);
-      if (onError) onError(error);
-      try {
-        handleFirestoreError(error, OperationType.GET, ORDERS_COLLECTION);
-      } catch {
-        // Logged
-      }
-    }
-  );
+  });
 }
 
-// Save Order to Firestore
-export async function saveOrderToFirestore(order: Order): Promise<void> {
-  const path = `${ORDERS_COLLECTION}/${order.order_id}`;
-  try {
-    await setDoc(doc(db, ORDERS_COLLECTION, order.order_id), order);
-  } catch (error) {
-    handleFirestoreError(error, OperationType.WRITE, path);
-  }
+export async function supabaseSignIn(email: string, password: string) {
+  if (!isSupabaseConfigured) return { data: null, error: null };
+  return await supabase.auth.signInWithPassword({
+    email,
+    password,
+  });
 }
 
-// Update Order Status in Firestore
-export async function updateOrderStatusInFirestore(orderId: string, status: Order['status']): Promise<void> {
-  const path = `${ORDERS_COLLECTION}/${orderId}`;
-  try {
-    await updateDoc(doc(db, ORDERS_COLLECTION, orderId), { status });
-  } catch (error) {
-    handleFirestoreError(error, OperationType.UPDATE, path);
-  }
+export async function supabaseSignOut() {
+  if (!isSupabaseConfigured) return;
+  await supabase.auth.signOut();
 }
 
-// Save or Update Product in Firestore
-export async function saveProductToFirestore(product: Product): Promise<void> {
-  const path = `${PRODUCTS_COLLECTION}/${product.product_id}`;
-  try {
-    await setDoc(doc(db, PRODUCTS_COLLECTION, product.product_id), product);
-  } catch (error) {
-    handleFirestoreError(error, OperationType.WRITE, path);
-  }
+export async function getSupabaseCurrentUser() {
+  if (!isSupabaseConfigured) return null;
+  const { data: { user } } = await supabase.auth.getUser();
+  return user;
 }
 
-// Update Product Stock in Firestore
-export async function updateProductStockInFirestore(productId: string, stock: number): Promise<void> {
-  const path = `${PRODUCTS_COLLECTION}/${productId}`;
-  try {
-    await updateDoc(doc(db, PRODUCTS_COLLECTION, productId), { stock });
-  } catch (error) {
-    handleFirestoreError(error, OperationType.UPDATE, path);
-  }
-}
-
-// Delete Product in Firestore
-export async function deleteProductFromFirestore(productId: string): Promise<void> {
-  const path = `${PRODUCTS_COLLECTION}/${productId}`;
-  try {
-    await deleteDoc(doc(db, PRODUCTS_COLLECTION, productId));
-  } catch (error) {
-    handleFirestoreError(error, OperationType.DELETE, path);
-  }
-}
-
-// Save or Update User Profile in Firestore
-export async function saveUserToFirestore(user: User): Promise<void> {
-  const path = `${USERS_COLLECTION}/${user.user_id}`;
-  try {
-    await setDoc(doc(db, USERS_COLLECTION, user.user_id), user, { merge: true });
-  } catch (error) {
-    handleFirestoreError(error, OperationType.WRITE, path);
-  }
-}
-
-// Save Review to Firestore
-export async function saveReviewToFirestore(review: Review): Promise<void> {
-  const path = `${REVIEWS_COLLECTION}/${review.review_id}`;
-  try {
-    await setDoc(doc(db, REVIEWS_COLLECTION, review.review_id), review);
-  } catch (error) {
-    handleFirestoreError(error, OperationType.WRITE, path);
-  }
-}
+// --------------------------------------------------------------------------
+// BACKWARDS-COMPATIBILITY ALIASES
+// (Allows any existing components or references to migrate seamlessly)
+// --------------------------------------------------------------------------
+export const saveOrderToFirestore = saveOrderToSupabase;
+export const updateOrderStatusInFirestore = updateOrderStatusInSupabase;
+export const saveProductToFirestore = saveProductToSupabase;
+export const updateProductStockInFirestore = updateProductStockInSupabase;
+export const deleteProductFromFirestore = deleteProductFromSupabase;
+export const saveUserToFirestore = saveUserToSupabase;
+export const saveReviewToFirestore = saveReviewToSupabase;
