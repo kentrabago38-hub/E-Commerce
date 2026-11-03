@@ -31,6 +31,7 @@ import {
   Compass
 } from 'lucide-react';
 import { DAVAO_BRANCHES } from '../data/mockData';
+import { VineaRewardsSection } from './VineaRewardsSection';
 
 const AVATAR_PRESETS = [
   {
@@ -342,6 +343,21 @@ export const AccountModal: React.FC = () => {
               </button>
 
               <button
+                onClick={() => setActiveSubTab('rewards')}
+                className={`w-full flex items-center justify-between px-3 py-2.5 rounded-lg transition-colors cursor-pointer ${
+                  activeSubTab === 'rewards' ? 'bg-[#2A0D14] text-[#D5B15C] border border-[#D5B15C]/35 font-semibold' : 'text-[#C1B7B4] hover:text-white hover:bg-white/5'
+                }`}
+              >
+                <div className="flex items-center gap-2.5">
+                  <Award className="w-4 h-4 text-[#D5B15C]" />
+                  <span>VÍNEA Rewards</span>
+                </div>
+                <span className="px-2 py-0.5 rounded-full bg-[#7F1427] text-[#D5B15C] text-[10px] font-mono border border-[#D5B15C]/40">
+                  {(user.loyalty_points ?? 0).toLocaleString()} pts
+                </span>
+              </button>
+
+              <button
                 onClick={() => setActiveSubTab('profile')}
                 className={`w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg transition-colors cursor-pointer ${
                   activeSubTab === 'profile' ? 'bg-[#2A0D14] text-[#D5B15C] border border-[#D5B15C]/35 font-semibold' : 'text-[#C1B7B4] hover:text-white hover:bg-white/5'
@@ -527,6 +543,17 @@ export const AccountModal: React.FC = () => {
                 </div>
               )}
             </div>
+          )}
+
+          {/* TAB: REWARDS */}
+          {activeSubTab === 'rewards' && (
+            <VineaRewardsSection
+              onNavigateToCatalog={() => {
+                setIsAccountOpen(false);
+                setActiveTab('shop');
+              }}
+              onNavigateToTracking={() => setActiveSubTab('orders')}
+            />
           )}
 
           {/* TAB: EDIT PROFILE INFO */}

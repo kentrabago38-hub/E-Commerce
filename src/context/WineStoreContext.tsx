@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { Product, Category, CartItem, Order, User, Review, GuideArticle, OrderStatus, DeliveryAddress } from '../types/wine';
+import { Product, Category, CartItem, Order, User, Review, GuideArticle, OrderStatus, DeliveryAddress, LoyaltyHistoryItem } from '../types/wine';
 import {
   INITIAL_CATEGORIES,
   INITIAL_PRODUCTS,
@@ -87,7 +87,7 @@ interface WineStoreContextType {
   isCartOpen: boolean;
   isCheckoutOpen: boolean;
   isAccountOpen: boolean;
-  accountActiveSubTab: 'orders' | 'tracking' | 'profile' | 'avatar' | 'password' | 'preferences' | 'wishlist' | 'addresses';
+  accountActiveSubTab: 'orders' | 'tracking' | 'rewards' | 'profile' | 'avatar' | 'password' | 'preferences' | 'wishlist' | 'addresses';
   isQuizOpen: boolean;
   activeOrderConfirmation: Order | null;
   toasts: ToastMessage[];
@@ -101,7 +101,7 @@ interface WineStoreContextType {
   setIsCartOpen: (open: boolean) => void;
   setIsCheckoutOpen: (open: boolean) => void;
   setIsAccountOpen: (open: boolean) => void;
-  setAccountActiveSubTab: (tab: 'orders' | 'tracking' | 'profile' | 'avatar' | 'password' | 'preferences' | 'wishlist' | 'addresses') => void;
+  setAccountActiveSubTab: (tab: 'orders' | 'tracking' | 'rewards' | 'profile' | 'avatar' | 'password' | 'preferences' | 'wishlist' | 'addresses') => void;
   openWishlist: () => void;
   setIsQuizOpen: (open: boolean) => void;
   setActiveOrderConfirmation: (o: Order | null) => void;
@@ -121,6 +121,7 @@ interface WineStoreContextType {
   logoutCustomer: () => void;
   updateUserProfile: (updates: Partial<User>) => { success: boolean; error?: string };
   changeCustomerPassword: (currentPassword: string, newPassword: string) => { success: boolean; error?: string };
+  redeemPerk: (perkId: string, pointCost: number, perkTitle: string) => { success: boolean; code?: string; message: string };
   requireAuthForAction: (reason?: string) => boolean;
   setIsAdminMode: (admin: boolean) => void;
   setIsVisitingAdmin: (visiting: boolean) => void;
@@ -246,7 +247,7 @@ export const WineStoreProvider: React.FC<{ children: ReactNode }> = ({ children 
   const [isAuthModalOpen, setIsAuthModalOpen] = useState<boolean>(false);
   const [authModalMode, setAuthModalMode] = useState<'login' | 'register'>('login');
   const [authRedirectReason, setAuthRedirectReason] = useState<string | null>(null);
-  const [accountActiveSubTab, setAccountActiveSubTab] = useState<'orders' | 'tracking' | 'profile' | 'avatar' | 'password' | 'preferences' | 'wishlist' | 'addresses'>('orders');
+  const [accountActiveSubTab, setAccountActiveSubTab] = useState<'orders' | 'tracking' | 'rewards' | 'profile' | 'avatar' | 'password' | 'preferences' | 'wishlist' | 'addresses'>('orders');
 
   const openWishlist = () => {
     setAccountActiveSubTab('wishlist');
@@ -636,7 +637,40 @@ export const WineStoreProvider: React.FC<{ children: ReactNode }> = ({ children 
     setOrders(prev => [newOrder, ...prev]);
     clearCart();
     setActiveOrderConfirmation(newOrder);
-    showToast(`Order #${newOrderId} placed successfully!`, 'success');
+
+    // Calculate & award loyalty points to the member
+    const userTier = user.membership_tier || 'Connoisseur';
+    const multiplier = userTier === 'Sommelier Reserve' ? 2.0 : userTier === 'Grand Cru' ? 1.5 : 1.0;
+    const pointsEarned = Math.round((newOrder.subtotal / 10) * multiplier);
+    const existingPts = user.loyalty_points ?? 0;
+    const existingLifetime = user.lifetime_points ?? existingPts;
+    const nextPoints = existingPts + pointsEarned;
+    const nextLifetime = existingLifetime + pointsEarned;
+    const updatedTier = nextPoints >= 7500 ? 'Sommelier Reserve' : nextPoints >= 2500 ? 'Grand Cru' : 'Connoisseur';
+
+    const orderLoyaltyRecord: LoyaltyHistoryItem = {
+      id: `hist-ord-${Date.now()}`,
+      date: new Date().toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' }),
+      title: `Order Allocation #${newOrderId} Completed`,
+      description: `Earned ${pointsEarned} VÍNEA Points (${multiplier}x multiplier on ${newOrder.items.length} vintage(s))`,
+      points: pointsEarned,
+      type: 'order'
+    };
+
+    const updatedUserWithPoints: User = {
+      ...user,
+      loyalty_points: nextPoints,
+      lifetime_points: nextLifetime,
+      membership_tier: updatedTier,
+      rewards_history: [orderLoyaltyRecord, ...(user.rewards_history || [])]
+    };
+
+    setUser(updatedUserWithPoints);
+    setRegisteredUsers(prev => prev.map(u => (u.user_id === user.user_id ? updatedUserWithPoints : u)));
+    saveUserToSupabase(updatedUserWithPoints).catch(() => {});
+    saveUserApi(updatedUserWithPoints).catch(() => {});
+
+    showToast(`Order #${newOrderId} placed successfully! +${pointsEarned} VÍNEA Points earned.`, 'success');
 
     // Persist Order and updated stock to Supabase & backend
     saveOrderToSupabase(newOrder).catch((e: unknown) => console.warn('Supabase order sync note:', e));
@@ -946,6 +980,55 @@ export const WineStoreProvider: React.FC<{ children: ReactNode }> = ({ children 
     return { success: true };
   };
 
+  const redeemPerk = (perkId: string, pointCost: number, perkTitle: string): { success: boolean; code?: string; message: string } => {
+    if (!user) {
+      showToast('Please sign in to your customer account to redeem rewards.', 'error');
+      return { success: false, message: 'Customer authentication required' };
+    }
+
+    const currentPoints = user.loyalty_points ?? 0;
+    if (pointCost > 0 && currentPoints < pointCost) {
+      showToast(`Insufficient points. You need ${pointCost} pts, but currently have ${currentPoints} pts.`, 'error');
+      return { success: false, message: 'Insufficient points' };
+    }
+
+    const voucherCode = `VN-RW-${Math.random().toString(36).substring(2, 7).toUpperCase()}`;
+    const nextPoints = Math.max(0, currentPoints - pointCost);
+    const currentRedeemed = user.redeemed_perks || [];
+    const nextRedeemed = currentRedeemed.includes(perkId) ? currentRedeemed : [...currentRedeemed, perkId];
+
+    const redemptionRecord: LoyaltyHistoryItem = {
+      id: `hist-red-${Date.now()}`,
+      date: new Date().toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' }),
+      title: pointCost > 0 ? `Redeemed: ${perkTitle}` : `Activated: ${perkTitle}`,
+      description: pointCost > 0
+        ? `Used ${pointCost} loyalty points. Voucher Code: ${voucherCode}`
+        : `Tier member benefit active. Reference: ${voucherCode}`,
+      points: -pointCost,
+      type: 'redemption',
+      code: voucherCode
+    };
+
+    const updatedUser: User = {
+      ...user,
+      loyalty_points: nextPoints,
+      redeemed_perks: nextRedeemed,
+      rewards_history: [redemptionRecord, ...(user.rewards_history || [])]
+    };
+
+    setUser(updatedUser);
+    setRegisteredUsers(prev => prev.map(u => (u.user_id === user.user_id ? updatedUser : u)));
+    saveUserToSupabase(updatedUser).catch(() => {});
+    saveUserApi(updatedUser).catch(() => {});
+
+    showToast(`Perk claimed! Code: ${voucherCode}`, 'success');
+    return {
+      success: true,
+      code: voucherCode,
+      message: `Successfully redeemed "${perkTitle}"! Your code is ${voucherCode}.`
+    };
+  };
+
   const requireAuthForAction = (reason?: string): boolean => {
     if (!user) {
       if (reason) setAuthRedirectReason(reason);
@@ -1102,6 +1185,7 @@ export const WineStoreProvider: React.FC<{ children: ReactNode }> = ({ children 
         logoutCustomer,
         updateUserProfile,
         changeCustomerPassword,
+        redeemPerk,
         requireAuthForAction,
         setIsAdminMode,
         setIsVisitingAdmin,

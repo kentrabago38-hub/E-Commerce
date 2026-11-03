@@ -19,6 +19,10 @@ import {
 } from '../data/mockData.ts';
 
 export async function seedPostgresIfEmpty(): Promise<void> {
+  if (!process.env.SQL_HOST) {
+    // No PostgreSQL configured, skip database seeding
+    return;
+  }
   try {
     const existingProducts = await getAllProducts();
     if (existingProducts.length === 0) {

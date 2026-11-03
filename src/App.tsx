@@ -7,6 +7,7 @@ import { ProductCard } from './components/ProductCard';
 import { ProductCatalog } from './components/ProductCatalog';
 import { ProductDetailPage } from './components/ProductDetailPage';
 import { WineGuideSection } from './components/WineGuideSection';
+import { NewsletterSubscriptionSection } from './components/NewsletterSubscriptionSection';
 import { DavaoBranchesSection } from './components/DavaoBranchesSection';
 import { AboutSection } from './components/AboutSection';
 import { EditorialStorySection } from './components/EditorialStorySection';
@@ -258,6 +259,11 @@ const MainStoreContent: React.FC = () => {
       {/* 13. Sommelier Wine Guide Articles */}
       <FadeInUp>
         <WineGuideSection />
+      </FadeInUp>
+
+      {/* 14. Elegant Newsletter Subscription Section */}
+      <FadeInUp>
+        <NewsletterSubscriptionSection />
       </FadeInUp>
     </main>
   );

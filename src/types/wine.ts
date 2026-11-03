@@ -123,7 +123,38 @@ export interface User {
   delivery_instructions?: string;
   membership_tier?: 'Connoisseur' | 'Grand Cru' | 'Sommelier Reserve';
   bio?: string;
+  loyalty_points?: number;
+  lifetime_points?: number;
+  redeemed_perks?: string[];
+  rewards_history?: LoyaltyHistoryItem[];
 }
+
+export type LoyaltyTier = 'Connoisseur' | 'Grand Cru' | 'Sommelier Reserve';
+
+export interface LoyaltyHistoryItem {
+  id: string;
+  date: string;
+  title: string;
+  description: string;
+  points: number; // positive = earned, negative = redeemed
+  type: 'order' | 'welcome' | 'redemption' | 'bonus' | 'review';
+  code?: string;
+}
+
+export interface MemberPerk {
+  id: string;
+  title: string;
+  tagline: string;
+  description: string;
+  tierRequired: LoyaltyTier;
+  pointCost?: number;
+  category: 'delivery' | 'sommelier' | 'allocation' | 'experience' | 'voucher';
+  valueLabel: string;
+  iconName: string;
+  codePrefix?: string;
+  isComplimentaryForTier?: boolean;
+}
+
 
 export interface GuideArticle {
   id: string;

@@ -533,6 +533,43 @@ export const INITIAL_USER: User = {
   favorite_davao_branch: 'VÍNEA Lanang Flagship & Subterranean Cellar',
   delivery_instructions: 'Please call mobile upon arrival at One Oasis gate. Leave with building concierge if unattended.',
   membership_tier: 'Grand Cru',
+  loyalty_points: 3850,
+  lifetime_points: 5420,
+  redeemed_perks: ['perk-white-glove-delivery'],
+  rewards_history: [
+    {
+      id: 'hist-001',
+      date: 'Sep 28, 2026',
+      title: 'Order Allocation #VN-98421 Completed',
+      description: 'Château Lumière Cabernet Sauvignon & Provençal Rosé (1.5x Grand Cru accelerator applied)',
+      points: 2450,
+      type: 'order'
+    },
+    {
+      id: 'hist-002',
+      date: 'Aug 14, 2026',
+      title: 'Davao Flagship Cellar Tasting Visit',
+      description: 'Attended Premier Crus sensory workshop at VÍNEA Lanang Subterranean Lounge',
+      points: 500,
+      type: 'bonus'
+    },
+    {
+      id: 'hist-003',
+      date: 'Jul 02, 2026',
+      title: 'Cellar Review & Sommelier Tasting Notes Submission',
+      description: 'Reviewed Château Margaux 2015 and awarded community collector rating',
+      points: 250,
+      type: 'review'
+    },
+    {
+      id: 'hist-004',
+      date: 'Jun 18, 2026',
+      title: 'Annual Birthday Vintage Bonus',
+      description: 'Complimentary celebratory cellar credit from VÍNEA Cellarmasters',
+      points: 650,
+      type: 'bonus'
+    }
+  ],
   bio: 'Private Bordeaux and Champagne collector based in Davao City.',
   saved_addresses: [
     {
@@ -562,6 +599,27 @@ export const INITIAL_REGISTERED_USERS: User[] = [
     favorite_davao_branch: 'VÍNEA Matina Town Square Cellar & Lounge',
     delivery_instructions: 'Deliver to law offices at Matina during office hours.',
     membership_tier: 'Connoisseur',
+    loyalty_points: 1200,
+    lifetime_points: 1200,
+    redeemed_perks: [],
+    rewards_history: [
+      {
+        id: 'hist-r1',
+        date: 'Aug 20, 2026',
+        title: 'Welcome Cellar Member Enrolment',
+        description: 'Verified collector onboarding bonus for VÍNEA Davao portal',
+        points: 500,
+        type: 'welcome'
+      },
+      {
+        id: 'hist-r2',
+        date: 'Sep 10, 2026',
+        title: 'Matina Cellar Allocation Purchase',
+        description: 'Bodega Solaria Gran Reserva 2018 acquisition',
+        points: 700,
+        type: 'order'
+      }
+    ],
     bio: 'Collector of Italian Piedmont and Tuscan allocations.',
     saved_addresses: [
       {

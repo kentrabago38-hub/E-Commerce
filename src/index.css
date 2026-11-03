@@ -152,11 +152,45 @@
   border-color: rgba(198, 161, 91, 0.85);
 }
 
+@keyframes goldBorderShimmer {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+.gold-shimmer-input-wrapper {
+  position: relative;
+  border-radius: 0.75rem;
+  padding: 1.5px;
+  background: linear-gradient(
+    115deg,
+    rgba(198, 161, 91, 0.3),
+    rgba(245, 239, 231, 0.75),
+    rgba(198, 161, 91, 0.95),
+    rgba(134, 31, 50, 0.5),
+    rgba(198, 161, 91, 0.3)
+  );
+  background-size: 260% 260%;
+  animation: goldBorderShimmer 7s ease infinite;
+  transition: box-shadow 0.3s ease;
+}
+
+.gold-shimmer-input-wrapper:focus-within {
+  box-shadow: 0 0 30px -4px rgba(198, 161, 91, 0.45), 0 0 14px -1px rgba(134, 31, 50, 0.3);
+  animation-duration: 3.5s;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .gold-shimmer-cta::after,
-  .btn-gold-shimmer::after {
+  .btn-gold-shimmer::after,
+  .gold-shimmer-input-wrapper {
     animation: none !important;
-    display: none !important;
   }
 }
 

@@ -20,6 +20,13 @@ import {
   insertReviewRecord
 } from './src/db/queries.ts';
 import { seedPostgresIfEmpty } from './src/db/seedPostgres.ts';
+import {
+  INITIAL_PRODUCTS,
+  INITIAL_CATEGORIES,
+  INITIAL_ORDERS,
+  INITIAL_REVIEWS,
+  INITIAL_REGISTERED_USERS
+} from './src/data/mockData.ts';
 
 dotenv.config();
 
@@ -27,38 +34,60 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const app = express();
-const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 3000;
+
+// Determine port: prioritize --port CLI argument or default strictly to 3000.
+// Cloud Run injects PORT=8080 into process.env which is reserved for the platform proxy.
+function getListenPort(): number {
+  const portArgIndex = process.argv.indexOf('--port');
+  if (portArgIndex !== -1 && process.argv[portArgIndex + 1]) {
+    const val = parseInt(process.argv[portArgIndex + 1], 10);
+    if (!isNaN(val) && val > 0) return val;
+  }
+  return 3000;
+}
+
+const PORT = getListenPort();
 const isProduction = process.env.NODE_ENV === 'production';
+const hasPostgres = Boolean(process.env.SQL_HOST);
+
+// Resilient in-memory storage when PostgreSQL is not configured
+let inMemoryProducts = [...INITIAL_PRODUCTS];
+let inMemoryCategories = [...INITIAL_CATEGORIES];
+let inMemoryOrders = [...INITIAL_ORDERS];
+let inMemoryUsers = [...INITIAL_REGISTERED_USERS];
+let inMemoryReviews = [...INITIAL_REVIEWS];
 
 app.use(express.json({ limit: '10mb' }));
 
 // 1. Health check endpoint
 app.get('/api/health', async (_req: Request, res: Response) => {
-  try {
-    res.json({
-      status: 'ok',
-      database: 'postgresql',
-      timestamp: new Date().toISOString()
-    });
-  } catch (error: any) {
-    res.status(500).json({ error: error.message || 'Database error' });
-  }
+  res.json({
+    status: 'ok',
+    database: hasPostgres ? 'postgresql' : 'in-memory',
+    timestamp: new Date().toISOString()
+  });
 });
 
 // 2. Products API
 app.get('/api/products', async (_req: Request, res: Response) => {
-  try {
-    const list = await getAllProducts();
-    res.json(list);
-  } catch (error: any) {
-    console.error('API Error in GET /api/products:', error);
-    res.status(500).json({ error: error.message || 'Failed to fetch products' });
+  if (hasPostgres) {
+    try {
+      const list = await getAllProducts();
+      return res.json(list);
+    } catch (error: any) {
+      console.warn('Postgres query failed, falling back to in-memory store:', error.message);
+    }
   }
+  res.json(inMemoryProducts);
 });
 
 app.post('/api/products', async (req: Request, res: Response) => {
   try {
-    await insertProduct(req.body);
+    if (hasPostgres) {
+      await insertProduct(req.body);
+    } else {
+      inMemoryProducts.push(req.body);
+    }
     res.status(201).json({ success: true, product: req.body });
   } catch (error: any) {
     console.error('API Error in POST /api/products:', error);
@@ -68,7 +97,11 @@ app.post('/api/products', async (req: Request, res: Response) => {
 
 app.put('/api/products/:id', async (req: Request, res: Response) => {
   try {
-    await updateProductRecord(req.body);
+    if (hasPostgres) {
+      await updateProductRecord(req.body);
+    } else {
+      inMemoryProducts = inMemoryProducts.map((p) => (p.product_id === req.body.product_id ? req.body : p));
+    }
     res.json({ success: true, product: req.body });
   } catch (error: any) {
     console.error('API Error in PUT /api/products/:id:', error);
@@ -80,7 +113,11 @@ app.patch('/api/products/:id/stock', async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
     const { stock } = req.body;
-    await updateStockRecord(id, stock);
+    if (hasPostgres) {
+      await updateStockRecord(id, stock);
+    } else {
+      inMemoryProducts = inMemoryProducts.map((p) => (p.product_id === id ? { ...p, stock } : p));
+    }
     res.json({ success: true, productId: id, stock });
   } catch (error: any) {
     console.error('API Error in PATCH /api/products/:id/stock:', error);
@@ -91,7 +128,11 @@ app.patch('/api/products/:id/stock', async (req: Request, res: Response) => {
 app.delete('/api/products/:id', async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    await deleteProductRecord(id);
+    if (hasPostgres) {
+      await deleteProductRecord(id);
+    } else {
+      inMemoryProducts = inMemoryProducts.filter((p) => p.product_id !== id);
+    }
     res.json({ success: true, deletedId: id });
   } catch (error: any) {
     console.error('API Error in DELETE /api/products/:id:', error);
@@ -101,18 +142,24 @@ app.delete('/api/products/:id', async (req: Request, res: Response) => {
 
 // 3. Categories API
 app.get('/api/categories', async (_req: Request, res: Response) => {
-  try {
-    const list = await getAllCategories();
-    res.json(list);
-  } catch (error: any) {
-    console.error('API Error in GET /api/categories:', error);
-    res.status(500).json({ error: error.message || 'Failed to fetch categories' });
+  if (hasPostgres) {
+    try {
+      const list = await getAllCategories();
+      return res.json(list);
+    } catch (error: any) {
+      console.warn('Postgres query failed, falling back to in-memory categories:', error.message);
+    }
   }
+  res.json(inMemoryCategories);
 });
 
 app.post('/api/categories', async (req: Request, res: Response) => {
   try {
-    await insertCategory(req.body);
+    if (hasPostgres) {
+      await insertCategory(req.body);
+    } else {
+      inMemoryCategories.push(req.body);
+    }
     res.status(201).json({ success: true, category: req.body });
   } catch (error: any) {
     console.error('API Error in POST /api/categories:', error);
@@ -123,7 +170,11 @@ app.post('/api/categories', async (req: Request, res: Response) => {
 app.delete('/api/categories/:id', async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    await deleteCategoryRecord(id);
+    if (hasPostgres) {
+      await deleteCategoryRecord(id);
+    } else {
+      inMemoryCategories = inMemoryCategories.filter((c) => c.category_id !== id);
+    }
     res.json({ success: true, deletedId: id });
   } catch (error: any) {
     console.error('API Error in DELETE /api/categories/:id:', error);
@@ -133,18 +184,24 @@ app.delete('/api/categories/:id', async (req: Request, res: Response) => {
 
 // 4. Orders API
 app.get('/api/orders', async (_req: Request, res: Response) => {
-  try {
-    const list = await getAllOrders();
-    res.json(list);
-  } catch (error: any) {
-    console.error('API Error in GET /api/orders:', error);
-    res.status(500).json({ error: error.message || 'Failed to fetch orders' });
+  if (hasPostgres) {
+    try {
+      const list = await getAllOrders();
+      return res.json(list);
+    } catch (error: any) {
+      console.warn('Postgres query failed, falling back to in-memory orders:', error.message);
+    }
   }
+  res.json(inMemoryOrders);
 });
 
 app.post('/api/orders', async (req: Request, res: Response) => {
   try {
-    await insertOrder(req.body);
+    if (hasPostgres) {
+      await insertOrder(req.body);
+    } else {
+      inMemoryOrders.unshift(req.body);
+    }
     res.status(201).json({ success: true, order: req.body });
   } catch (error: any) {
     console.error('API Error in POST /api/orders:', error);
@@ -156,7 +213,11 @@ app.patch('/api/orders/:id/status', async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
     const { status } = req.body;
-    await updateOrderStatusRecord(id, status);
+    if (hasPostgres) {
+      await updateOrderStatusRecord(id, status);
+    } else {
+      inMemoryOrders = inMemoryOrders.map((o) => (o.order_id === id ? { ...o, status } : o));
+    }
     res.json({ success: true, orderId: id, status });
   } catch (error: any) {
     console.error('API Error in PATCH /api/orders/:id/status:', error);
@@ -166,18 +227,29 @@ app.patch('/api/orders/:id/status', async (req: Request, res: Response) => {
 
 // 5. Users API
 app.get('/api/users', async (_req: Request, res: Response) => {
-  try {
-    const list = await getAllUsers();
-    res.json(list);
-  } catch (error: any) {
-    console.error('API Error in GET /api/users:', error);
-    res.status(500).json({ error: error.message || 'Failed to fetch users' });
+  if (hasPostgres) {
+    try {
+      const list = await getAllUsers();
+      return res.json(list);
+    } catch (error: any) {
+      console.warn('Postgres query failed, falling back to in-memory users:', error.message);
+    }
   }
+  res.json(inMemoryUsers);
 });
 
 app.post('/api/users', async (req: Request, res: Response) => {
   try {
-    await upsertUserRecord(req.body);
+    if (hasPostgres) {
+      await upsertUserRecord(req.body);
+    } else {
+      const idx = inMemoryUsers.findIndex((u) => u.user_id === req.body.user_id || u.email === req.body.email);
+      if (idx >= 0) {
+        inMemoryUsers[idx] = { ...inMemoryUsers[idx], ...req.body };
+      } else {
+        inMemoryUsers.push(req.body);
+      }
+    }
     res.json({ success: true, user: req.body });
   } catch (error: any) {
     console.error('API Error in POST /api/users:', error);
@@ -187,18 +259,24 @@ app.post('/api/users', async (req: Request, res: Response) => {
 
 // 6. Reviews API
 app.get('/api/reviews', async (_req: Request, res: Response) => {
-  try {
-    const list = await getAllReviews();
-    res.json(list);
-  } catch (error: any) {
-    console.error('API Error in GET /api/reviews:', error);
-    res.status(500).json({ error: error.message || 'Failed to fetch reviews' });
+  if (hasPostgres) {
+    try {
+      const list = await getAllReviews();
+      return res.json(list);
+    } catch (error: any) {
+      console.warn('Postgres query failed, falling back to in-memory reviews:', error.message);
+    }
   }
+  res.json(inMemoryReviews);
 });
 
 app.post('/api/reviews', async (req: Request, res: Response) => {
   try {
-    await insertReviewRecord(req.body);
+    if (hasPostgres) {
+      await insertReviewRecord(req.body);
+    } else {
+      inMemoryReviews.unshift(req.body);
+    }
     res.status(201).json({ success: true, review: req.body });
   } catch (error: any) {
     console.error('API Error in POST /api/reviews:', error);
@@ -207,9 +285,11 @@ app.post('/api/reviews', async (req: Request, res: Response) => {
 });
 
 // Initial database seeding if empty
-seedPostgresIfEmpty().catch((err) => {
-  console.warn('Initial seeding note:', err);
-});
+if (hasPostgres) {
+  seedPostgresIfEmpty().catch((err) => {
+    console.warn('Initial seeding note:', err);
+  });
+}
 
 // 7. Mount Vite in dev mode or serve static files in prod
 if (!isProduction) {
@@ -227,6 +307,14 @@ if (!isProduction) {
   });
 }
 
-app.listen(PORT, '0.0.0.0', () => {
-  console.log(`VÍNEA Full-Stack Server running on http://0.0.0.0:${PORT} with PostgreSQL backend.`);
+const server = app.listen(PORT, '0.0.0.0', () => {
+  console.log(`VÍNEA Full-Stack Server running on http://0.0.0.0:${PORT} (${hasPostgres ? 'PostgreSQL' : 'In-Memory/Resilient'} backend).`);
+});
+
+server.on('error', (err: any) => {
+  if (err.code === 'EADDRINUSE') {
+    console.error(`Port ${PORT} is in use.`);
+  } else {
+    console.error('Server error:', err);
+  }
 });

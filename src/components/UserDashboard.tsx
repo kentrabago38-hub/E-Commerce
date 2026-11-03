@@ -3,6 +3,7 @@ import { useWineStore } from '../context/WineStoreContext';
 import { WineType, DeliveryAddress, OrderStatus } from '../types/wine';
 import { formatPeso } from '../utils/formatCurrency';
 import { DAVAO_BRANCHES } from '../data/mockData';
+import { VineaRewardsSection } from './VineaRewardsSection';
 import {
   User as UserIcon,
   Package,
@@ -95,7 +96,7 @@ export const UserDashboard: React.FC = () => {
     setAccountActiveSubTab
   } = useWineStore();
 
-  const [activeTabState, setActiveTabState] = useState<'orders' | 'tracking' | 'profile' | 'avatar' | 'password' | 'preferences' | 'addresses' | 'wishlist'>(
+  const [activeTabState, setActiveTabState] = useState<'orders' | 'tracking' | 'rewards' | 'profile' | 'avatar' | 'password' | 'preferences' | 'addresses' | 'wishlist'>(
     (accountActiveSubTab as any) || 'orders'
   );
 
@@ -427,7 +428,7 @@ export const UserDashboard: React.FC = () => {
         </div>
 
         {/* Customer Metrics */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-8 pt-8 border-t border-[#48151F]">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3.5 mt-8 pt-8 border-t border-[#48151F]">
           <div className="p-4 rounded-xl bg-[#130B0D]/80 border border-[#48151F]">
             <span className="text-[10px] text-[#B7AAA1]/70 uppercase tracking-wider block mb-1">Total Orders</span>
             <span className="font-serif text-2xl text-[#F5EFE7] font-normal">{userOrders.length}</span>
@@ -440,13 +441,33 @@ export const UserDashboard: React.FC = () => {
             <span className="text-[10px] text-[#B7AAA1] block mt-0.5">Direct winery pricing</span>
           </div>
 
+          {/* VÍNEA Rewards Metric Button */}
+          <button
+            onClick={() => setActiveTabState('rewards')}
+            className="p-4 rounded-xl bg-gradient-to-br from-[#260B12] to-[#130B0D] border border-[#C6A15B]/50 hover:border-[#C6A15B] text-left transition-all cursor-pointer group shadow-lg"
+          >
+            <div className="flex items-center justify-between mb-1">
+              <span className="text-[10px] text-[#C6A15B] uppercase tracking-wider font-semibold flex items-center gap-1">
+                <Award className="w-3 h-3" />
+                <span>VÍNEA Rewards</span>
+              </span>
+              <span className="text-[9px] text-[#D5B15C] font-mono group-hover:translate-x-0.5 transition-transform">→</span>
+            </div>
+            <span className="font-serif text-2xl text-[#D5B15C] font-normal tabular-nums block">
+              {(user.loyalty_points ?? 0).toLocaleString()} <span className="text-xs font-sans text-[#C1B7B4]">pts</span>
+            </span>
+            <span className="text-[10px] text-[#C1B7B4] block mt-0.5 group-hover:text-white transition-colors">
+              {user.membership_tier || 'Grand Cru'} · View Perks
+            </span>
+          </button>
+
           <div className="p-4 rounded-xl bg-[#130B0D]/80 border border-[#48151F]">
             <span className="text-[10px] text-[#B7AAA1]/70 uppercase tracking-wider block mb-1">Saved In Wishlist</span>
             <span className="font-serif text-2xl text-[#F5EFE7] font-normal">{wishlist.length}</span>
             <span className="text-[10px] text-[#B7AAA1] block mt-0.5">Bottles reserved</span>
           </div>
 
-          <div className="p-4 rounded-xl bg-[#130B0D]/80 border border-[#48151F]">
+          <div className="col-span-2 sm:col-span-1 p-4 rounded-xl bg-[#130B0D]/80 border border-[#48151F]">
             <span className="text-[10px] text-[#B7AAA1]/70 uppercase tracking-wider block mb-1">Member Status</span>
             <span className="font-serif text-2xl text-emerald-400 font-normal">Active (21+)</span>
             <span className="text-[10px] text-[#B7AAA1] block mt-0.5">Davao cold-chain verified</span>
@@ -506,6 +527,23 @@ export const UserDashboard: React.FC = () => {
                   Cold-Chain
                 </span>
               )}
+            </button>
+
+            <button
+              onClick={() => setActiveTabState('rewards')}
+              className={`w-full flex items-center justify-between px-3.5 py-3 rounded-lg text-xs font-medium transition-all cursor-pointer ${
+                activeTabState === 'rewards'
+                  ? 'bg-[#48151F] text-[#C6A15B] border border-[#C6A15B]/40 font-semibold shadow-md'
+                  : 'text-[#B7AAA1] hover:text-[#F5EFE7] hover:bg-[#210D12]'
+              }`}
+            >
+              <div className="flex items-center gap-2.5">
+                <Award className="w-4 h-4 text-[#D5B15C]" />
+                <span>VÍNEA Rewards & Perks</span>
+              </div>
+              <span className="px-2 py-0.5 rounded-full bg-[#7F1427] text-[#D5B15C] text-[10px] font-mono border border-[#D5B15C]/40">
+                {(user.loyalty_points ?? 0).toLocaleString()} pts
+              </span>
             </button>
 
             <button
@@ -1307,6 +1345,14 @@ export const UserDashboard: React.FC = () => {
                 </div>
               );
             })()}
+
+            {/* TAB: VÍNEA REWARDS */}
+            {activeTabState === 'rewards' && (
+              <VineaRewardsSection
+                onNavigateToCatalog={() => setActiveTab('shop')}
+                onNavigateToTracking={() => setActiveTabState('tracking')}
+              />
+            )}
 
             {/* TAB: PROFILE INFO */}
             {activeTabState === 'profile' && (
