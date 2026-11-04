@@ -137,18 +137,6 @@ export const CheckoutModal: React.FC = () => {
     }
   };
 
-  const handleFillDemoMaria = () => {
-    setLoginEmail('maria.santos@vinea.ph');
-    setLoginPassword('vinea123');
-    setLoginError('');
-  };
-
-  const handleFillDemoRoberto = () => {
-    setLoginEmail('roberto.tan@vinea.ph');
-    setLoginPassword('vinea123');
-    setLoginError('');
-  };
-
   const handlePlaceOrder = () => {
     if (!user) return;
 
@@ -276,7 +264,7 @@ export const CheckoutModal: React.FC = () => {
                       required
                       value={loginEmail}
                       onChange={(e) => setLoginEmail(e.target.value)}
-                      placeholder="maria.santos@vinea.ph"
+                      placeholder="collector@example.ph"
                       className="w-full pl-9 pr-3 py-2.5 rounded-lg bg-black/50 border border-neutral-700 text-sm text-white placeholder-neutral-500 focus:outline-none focus:border-[#d4af37]"
                     />
                   </div>
@@ -314,38 +302,6 @@ export const CheckoutModal: React.FC = () => {
                   <span>Sign In & Continue Checkout</span>
                   <ArrowRight className="w-4 h-4 text-[#dfbe76]" />
                 </button>
-
-                {/* Quick 1-click Demo credentials */}
-                <div className="mt-6 pt-5 border-t border-white/10">
-                  <span className="text-[10px] text-neutral-400 uppercase tracking-wider block font-semibold mb-2 text-center">
-                    Quick Test Sign-In
-                  </span>
-                  <div className="grid grid-cols-2 gap-2">
-                    <button
-                      type="button"
-                      onClick={handleFillDemoMaria}
-                      className="p-2.5 rounded-lg bg-[#210f17] hover:bg-[#341624] border border-[#d4af37]/30 text-left cursor-pointer"
-                    >
-                      <div className="flex items-center justify-between text-[#dfbe76] text-[11px] font-semibold">
-                        <span>Maria Santos</span>
-                        <KeyRound className="w-3 h-3" />
-                      </div>
-                      <span className="text-[10px] text-neutral-300 block truncate">maria.santos@vinea.ph</span>
-                    </button>
-
-                    <button
-                      type="button"
-                      onClick={handleFillDemoRoberto}
-                      className="p-2.5 rounded-lg bg-[#210f17] hover:bg-[#341624] border border-[#d4af37]/30 text-left cursor-pointer"
-                    >
-                      <div className="flex items-center justify-between text-[#dfbe76] text-[11px] font-semibold">
-                        <span>Roberto Tan</span>
-                        <KeyRound className="w-3 h-3" />
-                      </div>
-                      <span className="text-[10px] text-neutral-300 block truncate">roberto.tan@vinea.ph</span>
-                    </button>
-                  </div>
-                </div>
               </form>
             )}
 

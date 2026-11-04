@@ -216,44 +216,6 @@ export const UserDashboard: React.FC = () => {
               Create New Account
             </button>
           </div>
-
-          {/* Quick Demo Logins for Fast Evaluation */}
-          <div className="pt-8 border-t border-[#392126] text-left max-w-lg mx-auto">
-            <span className="text-[10px] uppercase tracking-wider text-[#918481] block mb-3 font-semibold text-center">
-              1-Click Instant Demo Customer Sign-In
-            </span>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <button
-                onClick={() => {
-                  setAuthModalMode('login');
-                  setIsAuthModalOpen(true);
-                }}
-                className="p-3 rounded-xl bg-[#100809] hover:bg-[#2A0D14] border border-[#392126] hover:border-[#D5B15C]/50 text-left transition-colors cursor-pointer"
-              >
-                <div className="flex items-center justify-between text-[#D5B15C] text-xs font-semibold mb-0.5">
-                  <span>Maria Santos</span>
-                  <KeyRound className="w-3.5 h-3.5" />
-                </div>
-                <span className="text-[11px] text-[#C1B7B4] block">maria.santos@vinea.ph</span>
-                <span className="text-[10px] text-[#918481]">Davao Grand Cru Member</span>
-              </button>
-
-              <button
-                onClick={() => {
-                  setAuthModalMode('login');
-                  setIsAuthModalOpen(true);
-                }}
-                className="p-3 rounded-xl bg-[#100809] hover:bg-[#2A0D14] border border-[#392126] hover:border-[#D5B15C]/50 text-left transition-colors cursor-pointer"
-              >
-                <div className="flex items-center justify-between text-[#D5B15C] text-xs font-semibold mb-0.5">
-                  <span>Atty. Roberto Tan</span>
-                  <KeyRound className="w-3.5 h-3.5" />
-                </div>
-                <span className="text-[11px] text-[#C1B7B4] block">roberto.tan@vinea.ph</span>
-                <span className="text-[10px] text-[#918481]">Matina Cellar Member</span>
-              </button>
-            </div>
-          </div>
         </div>
       </div>
     );

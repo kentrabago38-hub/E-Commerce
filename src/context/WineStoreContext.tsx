@@ -30,15 +30,20 @@ import {
 import { isSupabaseConfigured } from '../lib/supabase';
 import {
   seedInitialDataIfEmpty,
+  syncAllCatalogToSupabase,
+  CatalogSyncResult,
   subscribeToProducts,
   subscribeToCategories,
   subscribeToOrders,
   saveOrderToSupabase,
+  syncAllLocalOrdersToSupabase,
   updateOrderStatusInSupabase,
   saveProductToSupabase,
   updateProductStockInSupabase,
   deleteProductFromSupabase,
   saveUserToSupabase,
+  syncAllLocalUsersToSupabase,
+  fetchUsersFromSupabase,
   saveReviewToSupabase,
   supabaseSignUp,
   supabaseSignIn,
@@ -166,6 +171,9 @@ interface WineStoreContextType {
   isSupabaseConnected: boolean;
   isSupabaseConfigOpen: boolean;
   setIsSupabaseConfigOpen: (open: boolean) => void;
+  syncOrdersToSupabase: () => Promise<void>;
+  syncUsersToSupabase: () => Promise<{ syncedCount: number; failedCount: number; lastError?: string }>;
+  syncCatalogToSupabase: () => Promise<CatalogSyncResult>;
 }
 
 const WineStoreContext = createContext<WineStoreContextType | undefined>(undefined);
@@ -211,7 +219,18 @@ export const WineStoreProvider: React.FC<{ children: ReactNode }> = ({ children 
   const [orders, setOrders] = useState<Order[]>(() => {
     try {
       const saved = localStorage.getItem('vinea_orders');
-      return saved ? JSON.parse(saved) : INITIAL_ORDERS;
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed)) {
+          return parsed.filter(
+            (o: Order) =>
+              o.email !== 'maria.santos@vinea.ph' &&
+              o.order_id !== 'VN-98421' &&
+              o.order_id !== 'VN-96104'
+          );
+        }
+      }
+      return INITIAL_ORDERS;
     } catch {
       return INITIAL_ORDERS;
     }
@@ -229,7 +248,20 @@ export const WineStoreProvider: React.FC<{ children: ReactNode }> = ({ children 
   const [registeredUsers, setRegisteredUsers] = useState<User[]>(() => {
     try {
       const saved = localStorage.getItem('vinea_registered_users');
-      return saved ? JSON.parse(saved) : INITIAL_REGISTERED_USERS;
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed)) {
+          // Remove legacy demo accounts, preserving authentic user-created accounts
+          return parsed.filter(
+            (u: User) =>
+              u.email !== 'maria.santos@vinea.ph' &&
+              u.email !== 'roberto.tan@vinea.ph' &&
+              u.user_id !== 'usr-101' &&
+              u.user_id !== 'usr-102'
+          );
+        }
+      }
+      return INITIAL_REGISTERED_USERS;
     } catch {
       return INITIAL_REGISTERED_USERS;
     }
@@ -238,7 +270,21 @@ export const WineStoreProvider: React.FC<{ children: ReactNode }> = ({ children 
   const [user, setUser] = useState<User | null>(() => {
     try {
       const saved = localStorage.getItem('vinea_current_user');
-      return saved ? JSON.parse(saved) : null;
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (
+          parsed &&
+          (parsed.email === 'maria.santos@vinea.ph' ||
+            parsed.email === 'roberto.tan@vinea.ph' ||
+            parsed.user_id === 'usr-101' ||
+            parsed.user_id === 'usr-102')
+        ) {
+          localStorage.removeItem('vinea_current_user');
+          return null;
+        }
+        return parsed;
+      }
+      return null;
     } catch {
       return null;
     }
@@ -371,7 +417,10 @@ export const WineStoreProvider: React.FC<{ children: ReactNode }> = ({ children 
         }
 
         // Initialize and seed Supabase if empty
-        await seedInitialDataIfEmpty().catch(() => {});
+        const seedResult = await seedInitialDataIfEmpty().catch(() => null);
+        if (seedResult && seedResult.success && isMounted) {
+          showToast(`Supabase tables were empty: Auto-seeded ${seedResult.productsCount} luxury wines & ${seedResult.categoriesCount} categories!`, 'success');
+        }
 
         // Fetch persisted data from PostgreSQL / Supabase backend
         const [pgProducts, pgCategories, pgOrders, pgUsers, pgReviews] = await Promise.all([
@@ -398,6 +447,37 @@ export const WineStoreProvider: React.FC<{ children: ReactNode }> = ({ children 
           if (pgReviews && pgReviews.length > 0) {
             setReviews(pgReviews);
           }
+        }
+
+        // Supabase user accounts synchronization
+        if (isSupabaseConfigured) {
+          const remoteUsers = await fetchUsersFromSupabase().catch(() => null);
+          if (remoteUsers && remoteUsers.length > 0 && isMounted) {
+            setRegisteredUsers(prev => {
+              const map = new Map<string, User>();
+              remoteUsers.forEach(u => map.set(u.email.toLowerCase(), u));
+              prev.forEach(u => {
+                if (!map.has(u.email.toLowerCase())) {
+                  map.set(u.email.toLowerCase(), u);
+                }
+              });
+              return Array.from(map.values());
+            });
+          }
+
+          // Auto-sync any user-created accounts residing in localStorage up to Supabase
+          try {
+            const localSaved = localStorage.getItem('vinea_registered_users');
+            if (localSaved) {
+              const parsed = JSON.parse(localSaved);
+              if (Array.isArray(parsed) && parsed.length > 0) {
+                const res = await syncAllLocalUsersToSupabase(parsed);
+                if (res.syncedCount > 0 && isMounted) {
+                  console.log(`[Supabase User Sync] Synced ${res.syncedCount} local accounts to Supabase.`);
+                }
+              }
+            }
+          } catch {}
         }
       } catch (err) {
         console.warn('Database initialization note:', err);
@@ -673,7 +753,20 @@ export const WineStoreProvider: React.FC<{ children: ReactNode }> = ({ children 
     showToast(`Order #${newOrderId} placed successfully! +${pointsEarned} VÍNEA Points earned.`, 'success');
 
     // Persist Order and updated stock to Supabase & backend
-    saveOrderToSupabase(newOrder).catch((e: unknown) => console.warn('Supabase order sync note:', e));
+    saveOrderToSupabase(newOrder)
+      .then((res) => {
+        if (res.success) {
+          showToast(`Order #${newOrderId} synced to your Supabase database!`, 'success');
+        } else if (res.isTableMissing) {
+          showToast(`Notice: Supabase 'orders' table not found. Open 'Database: Supabase' in footer & run SQL schema.`, 'info');
+        } else if (res.isRlsBlocked) {
+          showToast(`Notice: Supabase RLS blocked insert. Run the updated SQL schema to allow orders.`, 'error');
+        } else if (res.error && res.code !== 'NOT_CONFIGURED') {
+          console.warn('[Supabase Sync Notice]:', res.error);
+        }
+      })
+      .catch((e: unknown) => console.warn('Supabase order sync note:', e));
+
     createOrderApi(newOrder).catch((e: unknown) => console.warn('Order sync note:', e));
     orderData.items.forEach((item) => {
       const currentProd = products.find((p) => p.product_id === item.product_id);
@@ -685,6 +778,54 @@ export const WineStoreProvider: React.FC<{ children: ReactNode }> = ({ children 
     });
 
     return newOrder;
+  };
+
+  const syncOrdersToSupabase = async () => {
+    if (!isSupabaseConfigured) {
+      showToast('Supabase is not configured yet. Set up credentials in footer first.', 'error');
+      return;
+    }
+    showToast('Syncing orders to Supabase...', 'info');
+    const res = await syncAllLocalOrdersToSupabase(orders);
+    if (res.syncedCount > 0) {
+      showToast(`Successfully synced ${res.syncedCount} order(s) to Supabase!`, 'success');
+    } else if (res.lastError) {
+      showToast(`Sync notice: ${res.lastError}`, 'error');
+    } else {
+      showToast('All orders are up to date in Supabase.', 'info');
+    }
+  };
+
+  const syncUsersToSupabase = async (): Promise<{ syncedCount: number; failedCount: number; lastError?: string }> => {
+    if (!isSupabaseConfigured) {
+      showToast('Supabase is not configured yet. Set up credentials in footer first.', 'error');
+      return { syncedCount: 0, failedCount: 0, lastError: 'Not configured' };
+    }
+    showToast('Syncing customer accounts to Supabase...', 'info');
+    const res = await syncAllLocalUsersToSupabase(registeredUsers);
+    if (res.syncedCount > 0) {
+      showToast(`Successfully synced ${res.syncedCount} customer account(s) to live Supabase!`, 'success');
+    } else if (res.lastError) {
+      showToast(`User sync notice: ${res.lastError}`, 'error');
+    } else {
+      showToast('All customer accounts are already synchronized in Supabase.', 'info');
+    }
+    return res;
+  };
+
+  const syncCatalogToSupabase = async (): Promise<CatalogSyncResult> => {
+    if (!isSupabaseConfigured) {
+      showToast('Supabase is not configured yet. Connect credentials in footer first.', 'error');
+      return { success: false, productsCount: 0, categoriesCount: 0, ordersCount: 0, usersCount: 0, error: 'Not configured' };
+    }
+    showToast('Uploading full wine catalog, categories & data to Supabase...', 'info');
+    const res = await syncAllCatalogToSupabase();
+    if (res.success) {
+      showToast(`Successfully seeded ${res.productsCount} wines and ${res.categoriesCount} categories to Supabase!`, 'success');
+    } else {
+      showToast(`Catalog seeding notice: ${res.error || 'Failed to populate Supabase tables.'}`, 'error');
+    }
+    return res;
   };
 
   const updateOrderStatus = (orderId: string, status: OrderStatus) => {
@@ -916,15 +1057,30 @@ export const WineStoreProvider: React.FC<{ children: ReactNode }> = ({ children 
 
     setRegisteredUsers(prev => [newUser, ...prev]);
     setUser(newUser);
-    saveUserToSupabase(newUser).catch((e: unknown) => console.warn('Supabase user register note:', e));
-    saveUserApi(newUser).catch((e: unknown) => console.warn('User register sync note:', e));
+
     if (isSupabaseConfigured) {
+      saveUserToSupabase(newUser)
+        .then((res) => {
+          if (res.success) {
+            showToast(`Account saved to your live Supabase database!`, 'success');
+          } else if (res.isTableMissing) {
+            showToast(`Notice: Supabase 'users' table not found. Run SQL schema in Supabase.`, 'info');
+          } else if (res.isRlsBlocked) {
+            showToast(`Notice: Supabase RLS blocked user insert. Ensure public insert policy is enabled.`, 'error');
+          } else if (res.error) {
+            console.warn('[Supabase User Register Notice]:', res.error);
+          }
+        })
+        .catch((e: unknown) => console.warn('Supabase user register note:', e));
+
       supabaseSignUp(email, data.password.trim(), {
         name: data.name.trim(),
         phone: data.phone.trim(),
         branch: data.favorite_davao_branch
       }).catch((err) => console.warn('Supabase signup note:', err));
     }
+
+    saveUserApi(newUser).catch((e: unknown) => console.warn('User register sync note:', e));
     setIsAuthModalOpen(false);
     setAuthRedirectReason(null);
     showToast(`Account created! Welcome to VÍNEA Cellars, ${newUser.name}.`, 'success');
@@ -1229,7 +1385,10 @@ export const WineStoreProvider: React.FC<{ children: ReactNode }> = ({ children 
         isPostgresConnected,
         isSupabaseConnected,
         isSupabaseConfigOpen,
-        setIsSupabaseConfigOpen
+        setIsSupabaseConfigOpen,
+        syncOrdersToSupabase,
+        syncUsersToSupabase,
+        syncCatalogToSupabase
       }}
     >
       {children}

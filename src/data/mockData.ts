@@ -518,251 +518,44 @@ export const DAVAO_BRANCHES: DavaoBranch[] = [
   }
 ];
 
-export const INITIAL_USER: User = {
-  user_id: 'usr-101',
-  name: 'Maria Santos',
-  email: 'maria.santos@vinea.ph',
-  phone: '+63 917 842 1920',
-  password: 'vinea123',
-  role: 'customer',
-  member_since: 'October 2024',
-  avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80',
-  date_of_birth: '1992-06-18',
-  preferred_wine_types: ['Red', 'Sparkling'],
-  flavor_preference: 'Dry, full-bodied reds with French oak and vintage Blanc de Blancs',
-  favorite_davao_branch: 'VÍNEA Lanang Flagship & Subterranean Cellar',
-  delivery_instructions: 'Please call mobile upon arrival at One Oasis gate. Leave with building concierge if unattended.',
-  membership_tier: 'Grand Cru',
-  loyalty_points: 3850,
-  lifetime_points: 5420,
-  redeemed_perks: ['perk-white-glove-delivery'],
-  rewards_history: [
-    {
-      id: 'hist-001',
-      date: 'Sep 28, 2026',
-      title: 'Order Allocation #VN-98421 Completed',
-      description: 'Château Lumière Cabernet Sauvignon & Provençal Rosé (1.5x Grand Cru accelerator applied)',
-      points: 2450,
-      type: 'order'
-    },
-    {
-      id: 'hist-002',
-      date: 'Aug 14, 2026',
-      title: 'Davao Flagship Cellar Tasting Visit',
-      description: 'Attended Premier Crus sensory workshop at VÍNEA Lanang Subterranean Lounge',
-      points: 500,
-      type: 'bonus'
-    },
-    {
-      id: 'hist-003',
-      date: 'Jul 02, 2026',
-      title: 'Cellar Review & Sommelier Tasting Notes Submission',
-      description: 'Reviewed Château Margaux 2015 and awarded community collector rating',
-      points: 250,
-      type: 'review'
-    },
-    {
-      id: 'hist-004',
-      date: 'Jun 18, 2026',
-      title: 'Annual Birthday Vintage Bonus',
-      description: 'Complimentary celebratory cellar credit from VÍNEA Cellarmasters',
-      points: 650,
-      type: 'bonus'
-    }
-  ],
-  bio: 'Private Bordeaux and Champagne collector based in Davao City.',
-  saved_addresses: [
-    {
-      street: 'Penthouse 12A, One Oasis Davao, Eco West Drive',
-      city: 'Davao City',
-      state: 'Davao del Sur',
-      postalCode: '8000',
-      country: 'Philippines'
-    }
-  ]
-};
+export const INITIAL_USER: User | null = null;
 
-export const INITIAL_REGISTERED_USERS: User[] = [
-  INITIAL_USER,
-  {
-    user_id: 'usr-102',
-    name: 'Atty. Roberto Tan',
-    email: 'roberto.tan@vinea.ph',
-    phone: '+63 918 552 8901',
-    password: 'vinea123',
-    role: 'customer',
-    member_since: 'January 2025',
-    avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80',
-    date_of_birth: '1985-11-04',
-    preferred_wine_types: ['Red', 'White'],
-    flavor_preference: 'Barolo, Brunello di Montalcino, and Chablis Premier Cru',
-    favorite_davao_branch: 'VÍNEA Matina Town Square Cellar & Lounge',
-    delivery_instructions: 'Deliver to law offices at Matina during office hours.',
-    membership_tier: 'Connoisseur',
-    loyalty_points: 1200,
-    lifetime_points: 1200,
-    redeemed_perks: [],
-    rewards_history: [
-      {
-        id: 'hist-r1',
-        date: 'Aug 20, 2026',
-        title: 'Welcome Cellar Member Enrolment',
-        description: 'Verified collector onboarding bonus for VÍNEA Davao portal',
-        points: 500,
-        type: 'welcome'
-      },
-      {
-        id: 'hist-r2',
-        date: 'Sep 10, 2026',
-        title: 'Matina Cellar Allocation Purchase',
-        description: 'Bodega Solaria Gran Reserva 2018 acquisition',
-        points: 700,
-        type: 'order'
-      }
-    ],
-    bio: 'Collector of Italian Piedmont and Tuscan allocations.',
-    saved_addresses: [
-      {
-        street: 'Suite 404, Matina IT Park, MacArthur Hwy',
-        city: 'Davao City',
-        state: 'Davao del Sur',
-        postalCode: '8000',
-        country: 'Philippines'
-      }
-    ]
-  }
-];
+export const INITIAL_REGISTERED_USERS: User[] = [];
 
-export const INITIAL_ORDERS: Order[] = [
-  {
-    order_id: 'VN-98421',
-    user_id: 'usr-101',
-    customer_name: 'Maria Santos',
-    email: 'maria.santos@vinea.ph',
-    phone: '+63 917 842 1920',
-    order_date: '2026-09-28',
-    subtotal: 18150,
-    shipping: 0,
-    discount: 1815,
-    discount_code: 'VINEA10',
-    total_amount: 16335,
-    payment_method: 'Credit/Debit Card',
-    delivery_address: {
-      street: 'Penthouse 12A, One Oasis Davao, Eco West Drive',
-      city: 'Davao City',
-      state: 'Davao del Sur',
-      postalCode: '8000',
-      country: 'Philippines'
-    },
-    status: 'Shipped',
-    estimated_delivery: 'October 8, 2026',
-    tracking_number: 'VNX-DVO-8921PH',
-    items: [
-      {
-        order_item_id: 'item-1',
-        product_id: 'prod-001',
-        name: 'Château Lumière Cabernet Sauvignon',
-        winery: 'Château Lumière',
-        vintage: 2021,
-        quantity: 1,
-        price: 7950,
-        image: '/src/assets/images/category_red_wine_1791213197300.jpg',
-        wine_type: 'Red'
-      },
-      {
-        order_item_id: 'item-2',
-        product_id: 'prod-005',
-        name: 'Domaine de la Reine Brut Grand Cru',
-        winery: 'Domaine de la Reine',
-        vintage: 2018,
-        quantity: 1,
-        price: 10200,
-        image: '/src/assets/images/category_sparkling_wine_1791213218531.jpg',
-        wine_type: 'Sparkling'
-      }
-    ]
-  },
-  {
-    order_id: 'VN-96104',
-    user_id: 'usr-101',
-    customer_name: 'Maria Santos',
-    email: 'maria.santos@vinea.ph',
-    phone: '+63 917 842 1920',
-    order_date: '2026-09-12',
-    subtotal: 7650,
-    shipping: 250,
-    discount: 0,
-    total_amount: 7900,
-    payment_method: 'E-Wallet',
-    delivery_address: {
-      street: 'Penthouse 12A, One Oasis Davao, Eco West Drive',
-      city: 'Davao City',
-      state: 'Davao del Sur',
-      postalCode: '8000',
-      country: 'Philippines'
-    },
-    status: 'Delivered',
-    estimated_delivery: 'September 15, 2026',
-    tracking_number: 'VNX-DVO-4102PH',
-    items: [
-      {
-        order_item_id: 'item-3',
-        product_id: 'prod-002',
-        name: 'Villa Rosé Provençal',
-        winery: 'Villa Rosé Estates',
-        vintage: 2024,
-        quantity: 2,
-        price: 2650,
-        image: '/src/assets/images/category_red_wine_1791213197300.jpg',
-        wine_type: 'Rosé'
-      },
-      {
-        order_item_id: 'item-4',
-        product_id: 'prod-007',
-        name: 'Cloud Valley Sauvignon Blanc',
-        winery: 'Cloud Valley Vintners',
-        vintage: 2023,
-        quantity: 1,
-        price: 2350,
-        image: '/src/assets/images/category_white_wine_1791213207550.jpg',
-        wine_type: 'White'
-      }
-    ]
-  }
-];
+export const INITIAL_ORDERS: Order[] = [];
 
 export const INITIAL_REVIEWS: Review[] = [
   {
     review_id: 'rev-01',
-    user_id: 'usr-101',
-    user_name: 'Maria Santos (Davao City)',
+    user_id: 'cellar-panel-01',
+    user_name: 'Cellar Master Panel (Davao Flagship)',
     product_id: 'prod-001',
     rating: 5,
-    comment: 'The depth of cassis and graphite in this 2021 vintage is breathtaking. Picked it up at the Lanang Premier branch chilled and in pristine condition. Paired with ribeye from Bajada, perfection!',
+    comment: 'The depth of cassis and graphite in this 2021 vintage is breathtaking. Cellared in pristine climate-controlled conditions with taut, silky tannins.',
     review_date: '2 weeks ago'
   },
   {
     review_id: 'rev-02',
-    user_id: 'usr-102',
-    user_name: 'Atty. Roberto Tan (Matina)',
+    user_id: 'collector-panel-02',
+    user_name: 'Verified Collector (Matina)',
     product_id: 'prod-001',
     rating: 5,
-    comment: 'Impeccable balance. Tannins are taut yet refined, with tremendous cellaring potential. VÍNEA delivered this in Davao with their temperature-controlled van within 2 hours.',
+    comment: 'Impeccable balance. Tannins are taut yet refined, with tremendous cellaring potential. VÍNEA delivered in Davao with their temperature-controlled van within 2 hours.',
     review_date: '1 month ago'
   },
   {
     review_id: 'rev-03',
-    user_id: 'usr-103',
-    user_name: 'Camilla D. (Azuela Cove)',
+    user_id: 'collector-panel-03',
+    user_name: 'Private Collector (Azuela Cove)',
     product_id: 'prod-002',
     rating: 5,
-    comment: 'Bone dry with the most delicate saline strawberry notes. We love drinking this during sunset at the Azuela Cove branch while enjoying fresh oysters.',
+    comment: 'Bone dry with the most delicate saline strawberry notes. Exceptional paired with fresh Davao seafood at sunset.',
     review_date: '3 weeks ago'
   },
   {
     review_id: 'rev-04',
-    user_id: 'usr-104',
-    user_name: 'Dr. Michael Chen (Abreeza)',
+    user_id: 'collector-panel-04',
+    user_name: 'Sommelier Member (Abreeza)',
     product_id: 'prod-004',
     rating: 5,
     comment: 'The brioche and hazelnut notes paired with vibrant chalk minerality are quintessential Côte de Beaune. Davao finally has a genuine world-class wine merchant.',

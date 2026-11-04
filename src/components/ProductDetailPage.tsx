@@ -394,14 +394,30 @@ export const ProductDetailPage: React.FC<ProductDetailPageProps> = ({ product, o
                   Aromas & Bouquet
                 </span>
                 <div className="flex flex-wrap gap-2">
-                  {product.tasting_notes.aroma.map((note, idx) => (
-                    <span
-                      key={idx}
-                      className="px-2.5 py-1 rounded bg-[#251119] border border-[#3b1a26] text-xs text-neutral-200"
-                    >
-                      {note}
-                    </span>
-                  ))}
+                  {(() => {
+                    let aromas: string[] = ['Blackberry', 'Cassis', 'French Oak'];
+                    if (product.tasting_notes) {
+                      let tn = product.tasting_notes;
+                      if (typeof tn === 'string') {
+                        try { tn = JSON.parse(tn); } catch {}
+                      }
+                      if (tn && typeof tn === 'object') {
+                        if (Array.isArray(tn.aroma)) {
+                          aromas = tn.aroma;
+                        } else if (typeof tn.aroma === 'string' && tn.aroma) {
+                          aromas = (tn.aroma as string).split(',').map((s: string) => s.trim());
+                        }
+                      }
+                    }
+                    return aromas.map((note, idx) => (
+                      <span
+                        key={idx}
+                        className="px-2.5 py-1 rounded bg-[#251119] border border-[#3b1a26] text-xs text-neutral-200"
+                      >
+                        {note}
+                      </span>
+                    ));
+                  })()}
                 </div>
               </div>
 
@@ -410,7 +426,9 @@ export const ProductDetailPage: React.FC<ProductDetailPageProps> = ({ product, o
                   Palate & Texture
                 </span>
                 <p className="text-neutral-300 leading-relaxed font-light">
-                  {product.tasting_notes.palate}
+                  {typeof product.tasting_notes === 'string'
+                    ? product.tasting_notes
+                    : product.tasting_notes?.palate || 'Structured, velvety tannins, refined fruit concentration and noble French oak.'}
                 </p>
               </div>
 
@@ -419,7 +437,9 @@ export const ProductDetailPage: React.FC<ProductDetailPageProps> = ({ product, o
                   Finish & Longevity
                 </span>
                 <p className="text-neutral-300 leading-relaxed font-light">
-                  {product.tasting_notes.finish}
+                  {typeof product.tasting_notes === 'object'
+                    ? product.tasting_notes?.finish || 'Persistent, harmonious finish with lingering mineral and spice notes.'
+                    : 'Persistent, harmonious finish.'}
                 </p>
               </div>
             </div>

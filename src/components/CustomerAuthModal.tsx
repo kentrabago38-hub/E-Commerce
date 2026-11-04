@@ -14,8 +14,7 @@ import {
   ShieldCheck,
   Sparkles,
   ArrowRight,
-  AlertCircle,
-  KeyRound
+  AlertCircle
 } from 'lucide-react';
 import { DAVAO_BRANCHES } from '../data/mockData';
 
@@ -118,18 +117,6 @@ export const CustomerAuthModal: React.FC = () => {
         setIsCheckoutOpen(true);
       }
     }
-  };
-
-  const handleFillDemoMaria = () => {
-    setLoginEmail('maria.santos@vinea.ph');
-    setLoginPassword('vinea123');
-    setLoginError('');
-  };
-
-  const handleFillDemoRoberto = () => {
-    setLoginEmail('roberto.tan@vinea.ph');
-    setLoginPassword('vinea123');
-    setLoginError('');
   };
 
   return (
@@ -254,40 +241,6 @@ export const CustomerAuthModal: React.FC = () => {
               <span>Sign In to Account</span>
               <ArrowRight className="w-4 h-4 text-[#C6A15B]" />
             </button>
-
-            {/* Quick Demo Credentials for fast evaluation */}
-            <div className="mt-6 pt-5 border-t border-[#48151F]">
-              <span className="text-[10px] text-[#B7AAA1] uppercase tracking-wider block font-semibold mb-2.5 text-center">
-                Quick Demo Sign-In (1-Click)
-              </span>
-              <div className="grid grid-cols-2 gap-2">
-                <button
-                  type="button"
-                  onClick={handleFillDemoMaria}
-                  className="p-2.5 rounded-lg bg-[#210D12] hover:bg-[#48151F]/40 border border-[#48151F] hover:border-[#C6A15B]/50 text-left transition-colors cursor-pointer"
-                >
-                  <div className="flex items-center justify-between text-[#C6A15B] text-[11px] font-semibold">
-                    <span>Maria Santos</span>
-                    <KeyRound className="w-3 h-3" />
-                  </div>
-                  <span className="text-[10px] text-[#B7AAA1] block truncate">maria.santos@vinea.ph</span>
-                  <span className="text-[9px] text-[#B7AAA1]/75 block">Davao Grand Cru Member</span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={handleFillDemoRoberto}
-                  className="p-2.5 rounded-lg bg-[#210D12] hover:bg-[#48151F]/40 border border-[#48151F] hover:border-[#C6A15B]/50 text-left transition-colors cursor-pointer"
-                >
-                  <div className="flex items-center justify-between text-[#C6A15B] text-[11px] font-semibold">
-                    <span>Atty. Roberto Tan</span>
-                    <KeyRound className="w-3 h-3" />
-                  </div>
-                  <span className="text-[10px] text-[#B7AAA1] block truncate">roberto.tan@vinea.ph</span>
-                  <span className="text-[9px] text-[#B7AAA1]/75 block">Matina Cellar Member</span>
-                </button>
-              </div>
-            </div>
           </form>
         )}
 

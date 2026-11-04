@@ -103,32 +103,64 @@ export const SommeliersSelectionSection: React.FC = () => {
               </p>
 
               {/* Sommelier Tasting Notes Grid */}
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 p-4 rounded-xl bg-[#F5F0E7] border border-[#B7AA9B]/30 mb-8 text-xs">
-                <div>
-                  <span className="text-[#741E2B] uppercase tracking-wider font-semibold block text-[11px] mb-1">
-                    Aroma
-                  </span>
-                  <p className="text-[#211D1C] font-light leading-tight">
-                    {sommelierPick.tasting_notes?.aroma.join(', ') || 'Blackberry, dark plum, sweet tobacco'}
-                  </p>
-                </div>
-                <div>
-                  <span className="text-[#741E2B] uppercase tracking-wider font-semibold block text-[11px] mb-1">
-                    Palate
-                  </span>
-                  <p className="text-[#211D1C] font-light leading-tight">
-                    {sommelierPick.tasting_notes?.palate || 'Structured, velvety tannins, crushed gravel'}
-                  </p>
-                </div>
-                <div>
-                  <span className="text-[#741E2B] uppercase tracking-wider font-semibold block text-[11px] mb-1">
-                    Finish & Cellar
-                  </span>
-                  <p className="text-[#211D1C] font-light leading-tight">
-                    {sommelierPick.tasting_notes?.finish || 'Persistent, harmonious oak finish. Drink 2026–2038.'}
-                  </p>
-                </div>
-              </div>
+              {(() => {
+                let aromaText = 'Blackberry, dark plum, sweet tobacco';
+                let palateText = 'Structured, velvety tannins, crushed gravel';
+                let finishText = 'Persistent, harmonious oak finish. Drink 2026–2038.';
+
+                if (sommelierPick.tasting_notes) {
+                  const rawNotes: unknown = sommelierPick.tasting_notes;
+                  let parsedNotes: Record<string, unknown> | null = null;
+                  if (typeof rawNotes === 'string') {
+                    try {
+                      parsedNotes = JSON.parse(rawNotes);
+                    } catch {
+                      palateText = rawNotes;
+                    }
+                  } else if (typeof rawNotes === 'object' && rawNotes !== null) {
+                    parsedNotes = rawNotes as Record<string, unknown>;
+                  }
+
+                  if (parsedNotes) {
+                    if (Array.isArray(parsedNotes.aroma) && parsedNotes.aroma.length > 0) {
+                      aromaText = parsedNotes.aroma.join(', ');
+                    } else if (typeof parsedNotes.aroma === 'string' && parsedNotes.aroma) {
+                      aromaText = parsedNotes.aroma;
+                    }
+                    if (parsedNotes.palate) palateText = String(parsedNotes.palate);
+                    if (parsedNotes.finish) finishText = String(parsedNotes.finish);
+                  }
+                }
+
+                return (
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 p-4 rounded-xl bg-[#F5F0E7] border border-[#B7AA9B]/30 mb-8 text-xs">
+                    <div>
+                      <span className="text-[#741E2B] uppercase tracking-wider font-semibold block text-[11px] mb-1">
+                        Aroma
+                      </span>
+                      <p className="text-[#211D1C] font-light leading-tight">
+                        {aromaText}
+                      </p>
+                    </div>
+                    <div>
+                      <span className="text-[#741E2B] uppercase tracking-wider font-semibold block text-[11px] mb-1">
+                        Palate
+                      </span>
+                      <p className="text-[#211D1C] font-light leading-tight">
+                        {palateText}
+                      </p>
+                    </div>
+                    <div>
+                      <span className="text-[#741E2B] uppercase tracking-wider font-semibold block text-[11px] mb-1">
+                        Finish & Cellar
+                      </span>
+                      <p className="text-[#211D1C] font-light leading-tight">
+                        {finishText}
+                      </p>
+                    </div>
+                  </div>
+                );
+              })()}
 
               {/* Master Sommelier Tasting Quote */}
               <blockquote className="border-l-2 border-[#C6A15B] pl-4 italic text-sm text-[#574E4C] mb-8 font-serif">
