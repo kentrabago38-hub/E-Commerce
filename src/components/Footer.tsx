@@ -9,9 +9,7 @@ import {
   Twitter,
   Linkedin,
   ShieldCheck,
-  Heart,
-  Lock,
-  Database
+  Heart
 } from 'lucide-react';
 
 export const Footer: React.FC = () => {
@@ -19,10 +17,7 @@ export const Footer: React.FC = () => {
     setActiveTab,
     setSelectedProduct,
     showToast,
-    resetAgeGate,
-    enterAdminPortal,
-    isSupabaseConnected,
-    setIsSupabaseConfigOpen
+    resetAgeGate
   } = useWineStore();
   const [email, setEmail] = useState('');
   const [subscribed, setSubscribed] = useState(false);
@@ -223,15 +218,6 @@ export const Footer: React.FC = () => {
             <span>·</span>
             <button onClick={resetAgeGate} className="hover:text-[#F5EFE7] underline cursor-pointer">
               Re-Verify Legal Age
-            </button>
-            <span>·</span>
-            <button
-              onClick={() => setIsSupabaseConfigOpen(true)}
-              className="hover:text-[#3ECF8E] flex items-center gap-1.5 cursor-pointer text-[#C6A15B] transition-colors"
-              title="Configure or inspect Supabase database connection"
-            >
-              <Database className="w-3 h-3 text-[#3ECF8E]" />
-              <span>Supabase {isSupabaseConnected ? 'Connected' : 'Setup'}</span>
             </button>
           </div>
 

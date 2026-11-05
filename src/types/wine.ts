@@ -36,6 +36,7 @@ export interface Product {
   original_price?: number;
   stock: number;
   image: string;
+  images?: string[];
   bottle_color?: string;
   accent_color?: string;
   description: string;

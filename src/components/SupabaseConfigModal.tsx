@@ -227,10 +227,10 @@ export const SupabaseConfigModal: React.FC<Props> = ({ isOpen, onClose }) => {
             </div>
             <div>
               <h2 className="text-lg font-serif tracking-wide text-[#F5EFE7]">
-                Supabase Database Setup
+                Cellar Admin: Supabase Database Setup
               </h2>
               <p className="text-xs text-[#B7AAA1]">
-                Connect your live Supabase PostgreSQL database & auth
+                Administrative console: Connect your live Supabase PostgreSQL database & cloud tables
               </p>
             </div>
           </div>

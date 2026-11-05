@@ -91,7 +91,6 @@ export const UserDashboard: React.FC = () => {
     changeCustomerPassword,
     setIsAuthModalOpen,
     setAuthModalMode,
-    enterAdminPortal,
     accountActiveSubTab,
     setAccountActiveSubTab
   } = useWineStore();

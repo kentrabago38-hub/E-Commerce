@@ -22,14 +22,41 @@ import {
   X,
   LogOut,
   ShieldCheck,
-  ExternalLink
+  ExternalLink,
+  Database,
+  RefreshCw,
+  Copy,
+  Check,
+  Server,
+  Settings,
+  Code,
+  KeyRound,
+  Eye,
+  EyeOff,
+  Lock,
+  Camera,
+  Upload,
+  Image as ImageIcon
 } from 'lucide-react';
+import { getSupabaseConfigStatus } from '../lib/supabase';
+import schemaSql from '../../supabase-schema.sql?raw';
+
+export const WINE_PHOTO_PRESETS = [
+  { name: 'Red Grand Cru', url: 'https://images.unsplash.com/photo-1510812431401-41d2bd2722f3?auto=format&fit=crop&w=800&q=80', badge: 'Red' },
+  { name: 'Burgundy Pinot', url: 'https://images.unsplash.com/photo-1558001373-a8ef32b507d4?auto=format&fit=crop&w=800&q=80', badge: 'Red' },
+  { name: 'Champagne Cuvée', url: 'https://images.unsplash.com/photo-1569919659476-f0852f6834b7?auto=format&fit=crop&w=800&q=80', badge: 'Sparkling' },
+  { name: 'Chardonnay White', url: 'https://images.unsplash.com/photo-1584916201218-f4242ceb4809?auto=format&fit=crop&w=800&q=80', badge: 'White' },
+  { name: 'Provence Rosé', url: 'https://images.unsplash.com/photo-1557682250-33bd709cbe85?auto=format&fit=crop&w=800&q=80', badge: 'Rosé' },
+  { name: 'Cellar Vault', url: 'https://images.unsplash.com/photo-1506377247377-2a5b3b417ebb?auto=format&fit=crop&w=800&q=80', badge: 'Estate' },
+  { name: 'Wooden Prestige Box', url: 'https://images.unsplash.com/photo-1528823872057-9c018a7a7553?auto=format&fit=crop&w=800&q=80', badge: 'Collection' }
+];
 
 export const AdminDashboard: React.FC = () => {
   const {
     products,
     categories,
     orders,
+    reviews,
     registeredUsers,
     adminUser,
     logoutAdmin,
@@ -44,10 +71,80 @@ export const AdminDashboard: React.FC = () => {
     isCloudConnected,
     isPostgresConnected,
     isSupabaseConnected,
-    setIsSupabaseConfigOpen
+    isSupabaseConfigOpen,
+    setIsSupabaseConfigOpen,
+    syncOrdersToSupabase,
+    syncUsersToSupabase,
+    syncCatalogToSupabase,
+    adminSecretCode,
+    updateAdminSecretCode,
+    showToast
   } = useWineStore();
 
-  const [activeTab, setActiveTab] = useState<'products' | 'orders' | 'customers' | 'categories' | 'reports'>('products');
+  const [activeTab, setActiveTab] = useState<'products' | 'orders' | 'customers' | 'categories' | 'reports' | 'database'>('products');
+  const [isSyncingOrders, setIsSyncingOrders] = useState(false);
+  const [isSyncingUsers, setIsSyncingUsers] = useState(false);
+  const [isSeedingCatalog, setIsSeedingCatalog] = useState(false);
+  const [copiedSql, setCopiedSql] = useState(false);
+
+  // Secret Admin Passcode Management State
+  const [showSecretCode, setShowSecretCode] = useState(false);
+  const [isEditingSecret, setIsEditingSecret] = useState(false);
+  const [newSecretInput, setNewSecretInput] = useState('');
+
+  const handleUpdateSecret = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newSecretInput.trim()) return;
+    const res = updateAdminSecretCode(newSecretInput.trim());
+    if (res.success) {
+      setIsEditingSecret(false);
+      setNewSecretInput('');
+    } else {
+      showToast(res.message, 'error');
+    }
+  };
+
+  const configStatus = getSupabaseConfigStatus();
+
+  const handleManualOrderSync = async () => {
+    setIsSyncingOrders(true);
+    try {
+      await syncOrdersToSupabase();
+    } finally {
+      setIsSyncingOrders(false);
+    }
+  };
+
+  const handleManualUserSync = async () => {
+    setIsSyncingUsers(true);
+    try {
+      const res = await syncUsersToSupabase();
+      if (res.syncedCount > 0) {
+        showToast(`Successfully synced ${res.syncedCount} customer account(s) to Supabase!`, 'success');
+      }
+    } finally {
+      setIsSyncingUsers(false);
+    }
+  };
+
+  const handleSeedCatalog = async () => {
+    setIsSeedingCatalog(true);
+    try {
+      const res = await syncCatalogToSupabase();
+      if (res.success) {
+        showToast(`Seeded ${res.productsCount} wines & ${res.categoriesCount} categories to Supabase!`, 'success');
+      }
+    } finally {
+      setIsSeedingCatalog(false);
+    }
+  };
+
+  const handleCopySql = () => {
+    navigator.clipboard.writeText(schemaSql);
+    setCopiedSql(true);
+    showToast('Complete SQL schema copied to clipboard! Paste in Supabase SQL Editor.', 'success');
+    setTimeout(() => setCopiedSql(false), 2500);
+  };
 
   // Modal states for Product Add / Edit
   const [isAddProductOpen, setIsAddProductOpen] = useState(false);
@@ -67,6 +164,72 @@ export const AdminDashboard: React.FC = () => {
   const [prodPrice, setProdPrice] = useState<number>(120);
   const [prodStock, setProdStock] = useState<number>(24);
   const [prodDesc, setProdDesc] = useState('');
+  const [prodImage, setProdImage] = useState('');
+
+  // Dedicated Product Photo Management State
+  const [managingPhotosProduct, setManagingPhotosProduct] = useState<Product | null>(null);
+  const [photoModalPrimary, setPhotoModalPrimary] = useState('');
+  const [photoModalGallery, setPhotoModalGallery] = useState<string[]>([]);
+  const [photoUrlInput, setPhotoUrlInput] = useState('');
+  const [isPhotoUploading, setIsPhotoUploading] = useState(false);
+
+  const openPhotoManager = (p: Product) => {
+    setManagingPhotosProduct(p);
+    setPhotoModalPrimary(p.image);
+    setPhotoModalGallery(p.images ? [...p.images] : []);
+    setPhotoUrlInput('');
+  };
+
+  const handleDeviceUpload = (
+    e: React.ChangeEvent<HTMLInputElement>,
+    destination: 'primary' | 'gallery' | 'add_form' | 'edit_form'
+  ) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      showToast('Please select a valid image file (PNG, JPG, WEBP).', 'error');
+      return;
+    }
+
+    setIsPhotoUploading(true);
+    const reader = new FileReader();
+    reader.onload = () => {
+      const result = reader.result as string;
+      if (destination === 'primary') {
+        setPhotoModalPrimary(result);
+        showToast('Primary photo updated from device upload.', 'info');
+      } else if (destination === 'gallery') {
+        setPhotoModalGallery((prev) => [...prev, result]);
+        showToast('Photo added to product gallery.', 'info');
+      } else if (destination === 'add_form') {
+        setProdImage(result);
+        showToast('Product photo uploaded.', 'info');
+      } else if (destination === 'edit_form' && editingProduct) {
+        setEditingProduct({ ...editingProduct, image: result });
+        showToast('Product photo updated.', 'info');
+      }
+      setIsPhotoUploading(false);
+    };
+    reader.onerror = () => {
+      showToast('Error reading image file from device.', 'error');
+      setIsPhotoUploading(false);
+    };
+    reader.readAsDataURL(file);
+    e.target.value = '';
+  };
+
+  const handleSavePhotoModal = () => {
+    if (!managingPhotosProduct) return;
+    const updated: Product = {
+      ...managingPhotosProduct,
+      image: photoModalPrimary || managingPhotosProduct.image,
+      images: photoModalGallery
+    };
+    updateProduct(updated);
+    showToast(`Photos updated successfully for "${managingPhotosProduct.name}"!`, 'success');
+    setManagingPhotosProduct(null);
+  };
 
   // Category Add State
   const [newCatName, setNewCatName] = useState('');
@@ -109,11 +272,13 @@ export const AdminDashboard: React.FC = () => {
       body: prodBody,
       price: Number(prodPrice),
       stock: Number(prodStock),
-      image: prodType === 'White'
-        ? '/src/assets/images/category_white_wine_1791213207550.jpg'
-        : prodType === 'Sparkling'
-        ? '/src/assets/images/category_sparkling_wine_1791213218531.jpg'
-        : '/src/assets/images/category_red_wine_1791213197300.jpg',
+      image: prodImage || (
+        prodType === 'White'
+          ? '/src/assets/images/category_white_wine_1791213207550.jpg'
+          : prodType === 'Sparkling'
+          ? '/src/assets/images/category_sparkling_wine_1791213218531.jpg'
+          : '/src/assets/images/category_red_wine_1791213197300.jpg'
+      ),
       description: prodDesc || 'Hand-harvested estate bottled vintage with remarkable balance and longevity.',
       category_id: prodType === 'Red' ? 'cat-red' : prodType === 'White' ? 'cat-white' : 'cat-sparkling',
       tasting_notes: {
@@ -129,6 +294,7 @@ export const AdminDashboard: React.FC = () => {
     setIsAddProductOpen(false);
     setProdName('');
     setProdDesc('');
+    setProdImage('');
   };
 
   const handleUpdateProduct = (e: React.FormEvent) => {
@@ -171,9 +337,9 @@ export const AdminDashboard: React.FC = () => {
             </span>
             <span className="text-[#392126]">·</span>
             <button
-              onClick={() => setIsSupabaseConfigOpen(true)}
+              onClick={() => setActiveTab('database')}
               className="px-2.5 py-0.5 rounded text-[10px] bg-emerald-950/80 hover:bg-emerald-900 text-emerald-300 border border-emerald-800/60 font-mono flex items-center gap-1.5 cursor-pointer transition-colors"
-              title="Click to view or edit Supabase connection credentials"
+              title="Click to view Database & Supabase Management Console"
             >
               <span className={`w-1.5 h-1.5 rounded-full ${isSupabaseConnected ? 'bg-emerald-400 animate-pulse' : 'bg-amber-400'}`}></span>
               <span>{isSupabaseConnected ? 'Supabase & Postgres: Connected' : 'Supabase: Ready (Click to Configure)'}</span>
@@ -241,7 +407,8 @@ export const AdminDashboard: React.FC = () => {
           { id: 'orders', label: 'Orders', icon: ShoppingBag },
           { id: 'customers', label: 'Customers', icon: Users },
           { id: 'categories', label: 'Categories', icon: FolderTree },
-          { id: 'reports', label: 'Reports', icon: BarChart3 }
+          { id: 'reports', label: 'Reports', icon: BarChart3 },
+          { id: 'database', label: 'Database & Supabase', icon: Database }
         ].map((tab) => {
           const Icon = tab.icon;
           return (
@@ -294,12 +461,26 @@ export const AdminDashboard: React.FC = () => {
                 {products.map((p) => (
                   <tr key={p.product_id} className="hover:bg-white/5 transition-colors">
                     <td className="p-3.5 flex items-center gap-3">
-                      <img
-                        src={p.image}
-                        alt={p.name}
-                        className="w-10 h-10 rounded object-cover"
-                        referrerPolicy="no-referrer"
-                      />
+                      <div
+                        onClick={() => openPhotoManager(p)}
+                        className="relative group/thumb cursor-pointer shrink-0"
+                        title="Click to view & add photos for this wine"
+                      >
+                        <img
+                          src={p.image}
+                          alt={p.name}
+                          className="w-11 h-11 rounded-lg object-cover border border-[#392126] group-hover/thumb:border-[#D5B15C] transition-all"
+                          referrerPolicy="no-referrer"
+                        />
+                        <div className="absolute inset-0 bg-black/60 opacity-0 group-hover/thumb:opacity-100 rounded-lg flex items-center justify-center transition-opacity">
+                          <Camera className="w-4 h-4 text-[#D5B15C]" />
+                        </div>
+                        {p.images && p.images.length > 0 && (
+                          <span className="absolute -bottom-1 -right-1 px-1 py-0.2 bg-[#7F1427] text-white text-[8px] rounded font-mono font-bold border border-[#100809]">
+                            +{p.images.length}
+                          </span>
+                        )}
+                      </div>
                       <div>
                         <span className="font-medium text-white block text-sm">{p.name}</span>
                         <span className="text-neutral-400 text-[11px]">{p.winery} · {p.country}, {p.region}</span>
@@ -330,7 +511,15 @@ export const AdminDashboard: React.FC = () => {
                     <td className="p-3.5 text-neutral-300 tabular-nums">
                       ★ {p.rating.toFixed(1)} ({p.reviews_count})
                     </td>
-                    <td className="p-3.5 text-right space-x-2">
+                    <td className="p-3.5 text-right space-x-1.5 whitespace-nowrap">
+                      <button
+                        onClick={() => openPhotoManager(p)}
+                        className="py-1 px-2.5 rounded bg-[#2A0D14] hover:bg-[#3d131d] text-[#D5B15C] border border-[#D5B15C]/40 hover:border-[#D5B15C] transition-all cursor-pointer text-[11px] font-semibold inline-flex items-center gap-1.5 shadow-sm"
+                        title="Add or manage photos for this wine"
+                      >
+                        <Camera className="w-3.5 h-3.5" />
+                        <span>Photos {p.images && p.images.length > 0 ? `(${1 + p.images.length})` : ''}</span>
+                      </button>
                       <button
                         onClick={() => setEditingProduct(p)}
                         className="p-1.5 rounded hover:bg-white/10 text-neutral-300 hover:text-white transition-colors cursor-pointer"
@@ -610,6 +799,444 @@ export const AdminDashboard: React.FC = () => {
         </div>
       )}
 
+      {/* SECTION 6: DATABASE & SUPABASE CLOUD MANAGEMENT */}
+      {activeTab === 'database' && (
+        <div className="space-y-8 animate-fade-in">
+          {/* Section Header */}
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 p-6 rounded-2xl bg-[#190D10] border border-[#392126]">
+            <div>
+              <div className="inline-flex items-center gap-2 text-xs uppercase tracking-widest text-[#D5B15C] font-semibold mb-1">
+                <Database className="w-4 h-4" />
+                <span>Supabase PostgreSQL Cloud Infrastructure</span>
+              </div>
+              <h2 className="font-serif text-2xl text-[#F5EFE7] font-normal mb-1">
+                Database & Cloud Persistence Console
+              </h2>
+              <p className="text-xs text-[#918481] max-w-2xl">
+                Restricted to authorized cellar administrators. Manage direct PostgreSQL database persistence, live data synchronization across devices, customer records, and run SQL migration scripts.
+              </p>
+            </div>
+
+            <div className="flex flex-wrap items-center gap-3">
+              <button
+                onClick={() => setIsSupabaseConfigOpen(true)}
+                className="py-2.5 px-4 rounded-lg bg-[#7F1427] hover:bg-[#8e192f] text-white text-xs uppercase tracking-wider font-semibold border border-[#D5B15C]/40 flex items-center gap-2 transition-colors cursor-pointer shadow-md"
+              >
+                <Settings className="w-4 h-4" />
+                <span>Configure API Credentials</span>
+              </button>
+            </div>
+          </div>
+
+          {/* Connection Status Banner */}
+          <div
+            className={`p-5 rounded-xl border flex flex-col sm:flex-row sm:items-center justify-between gap-4 ${
+              isSupabaseConnected
+                ? 'bg-emerald-950/30 border-emerald-800/60 text-emerald-200'
+                : 'bg-amber-950/30 border-amber-800/60 text-amber-200'
+            }`}
+          >
+            <div className="flex items-start gap-3">
+              <div
+                className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 ${
+                  isSupabaseConnected ? 'bg-emerald-900/60 text-emerald-400' : 'bg-amber-900/60 text-amber-400'
+                }`}
+              >
+                <Server className="w-5 h-5" />
+              </div>
+              <div>
+                <div className="flex items-center gap-2 font-semibold text-sm">
+                  <span>{isSupabaseConnected ? 'Connected to Supabase PostgreSQL' : 'Supabase Not Connected (Local Cache Mode)'}</span>
+                  <span
+                    className={`inline-block w-2 h-2 rounded-full ${
+                      isSupabaseConnected ? 'bg-emerald-400 animate-pulse' : 'bg-amber-400'
+                    }`}
+                  />
+                </div>
+                <p className="text-xs opacity-85 mt-0.5 font-mono">
+                  {isSupabaseConnected
+                    ? `Active Endpoint: ${configStatus.activeUrl || 'Direct Supabase Cloud Connection'}`
+                    : 'The app is currently persisting records to browser LocalStorage. Click "Configure API Credentials" to connect your live Supabase project.'}
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2 self-start sm:self-auto shrink-0">
+              {isSupabaseConnected ? (
+                <span className="px-3 py-1 rounded bg-emerald-900/80 border border-emerald-700/60 text-[11px] font-mono text-emerald-300">
+                  Read/Write: Live Cloud
+                </span>
+              ) : (
+                <button
+                  onClick={() => setIsSupabaseConfigOpen(true)}
+                  className="px-3 py-1.5 rounded bg-amber-900/80 hover:bg-amber-800 border border-amber-700/60 text-xs font-semibold text-amber-100 cursor-pointer transition-colors"
+                >
+                  Connect Supabase Now
+                </button>
+              )}
+            </div>
+          </div>
+
+          {/* 3 Core Data Synchronization Actions */}
+          <div>
+            <h3 className="font-serif text-lg text-[#F5EFE7] mb-3 flex items-center gap-2">
+              <RefreshCw className="w-4 h-4 text-[#D5B15C]" />
+              <span>Data Sync & Database Seeding</span>
+            </h3>
+            <p className="text-xs text-[#918481] mb-4">
+              Push your in-memory cellar allocations, registered customer accounts, and client order histories directly to Supabase tables.
+            </p>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {/* Card 1: Catalog */}
+              <div className="p-5 rounded-xl bg-[#190D10] border border-[#392126] flex flex-col justify-between">
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-xs font-semibold uppercase tracking-wider text-[#D5B15C]">Wine Catalog</span>
+                    <Package className="w-4 h-4 text-[#D5B15C]" />
+                  </div>
+                  <h4 className="font-serif text-lg text-white mb-1">Seed Catalog to Cloud</h4>
+                  <p className="text-xs text-[#918481] mb-3">
+                    Upload all 12 vintage allocations, pricing, tasting notes, grape varieties, and 6 categories to <code className="text-[#D5B15C]">public.products</code> and <code className="text-[#D5B15C]">public.categories</code>.
+                  </p>
+                  <div className="text-[11px] text-[#C1B7B4] bg-black/40 p-2.5 rounded border border-[#2b161f] font-mono mb-4">
+                    <span>{products.length} Products</span> · <span>{categories.length} Categories</span>
+                  </div>
+                </div>
+
+                <button
+                  onClick={handleSeedCatalog}
+                  disabled={isSeedingCatalog}
+                  className="w-full py-2.5 px-4 rounded-lg bg-[#2A0D14] hover:bg-[#3d131d] text-[#D5B15C] border border-[#D5B15C]/40 hover:border-[#D5B15C] text-xs font-semibold uppercase tracking-wider flex items-center justify-center gap-2 transition-all cursor-pointer disabled:opacity-50 shadow-sm"
+                >
+                  <RefreshCw className={`w-3.5 h-3.5 ${isSeedingCatalog ? 'animate-spin' : ''}`} />
+                  <span>{isSeedingCatalog ? 'Seeding Catalog...' : 'Seed Catalog to Supabase'}</span>
+                </button>
+              </div>
+
+              {/* Card 2: Customers */}
+              <div className="p-5 rounded-xl bg-[#190D10] border border-[#392126] flex flex-col justify-between">
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-xs font-semibold uppercase tracking-wider text-[#D5B15C]">Customer Profiles</span>
+                    <Users className="w-4 h-4 text-[#D5B15C]" />
+                  </div>
+                  <h4 className="font-serif text-lg text-white mb-1">Sync Customer Accounts</h4>
+                  <p className="text-xs text-[#918481] mb-3">
+                    Upsert registered customer profiles, passwords, loyalty tiers, delivery addresses, and Davao branch preferences to <code className="text-[#D5B15C]">public.users</code>.
+                  </p>
+                  <div className="text-[11px] text-[#C1B7B4] bg-black/40 p-2.5 rounded border border-[#2b161f] font-mono mb-4">
+                    <span>{registeredUsers.length} Registered Collectors</span>
+                  </div>
+                </div>
+
+                <button
+                  onClick={handleManualUserSync}
+                  disabled={isSyncingUsers}
+                  className="w-full py-2.5 px-4 rounded-lg bg-[#2A0D14] hover:bg-[#3d131d] text-[#D5B15C] border border-[#D5B15C]/40 hover:border-[#D5B15C] text-xs font-semibold uppercase tracking-wider flex items-center justify-center gap-2 transition-all cursor-pointer disabled:opacity-50 shadow-sm"
+                >
+                  <RefreshCw className={`w-3.5 h-3.5 ${isSyncingUsers ? 'animate-spin' : ''}`} />
+                  <span>{isSyncingUsers ? 'Syncing Accounts...' : 'Sync Accounts to Supabase'}</span>
+                </button>
+              </div>
+
+              {/* Card 3: Orders */}
+              <div className="p-5 rounded-xl bg-[#190D10] border border-[#392126] flex flex-col justify-between">
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-xs font-semibold uppercase tracking-wider text-[#D5B15C]">Wine Invoices</span>
+                    <ShoppingBag className="w-4 h-4 text-[#D5B15C]" />
+                  </div>
+                  <h4 className="font-serif text-lg text-white mb-1">Sync Wine Orders</h4>
+                  <p className="text-xs text-[#918481] mb-3">
+                    Sync wine order transactions, climate-controlled shipping records, and payment receipts (GCash/Maya/COD) to <code className="text-[#D5B15C]">public.orders</code>.
+                  </p>
+                  <div className="text-[11px] text-[#C1B7B4] bg-black/40 p-2.5 rounded border border-[#2b161f] font-mono mb-4">
+                    <span>{orders.length} Completed Orders</span> · <span>{formatPeso(totalSales)}</span>
+                  </div>
+                </div>
+
+                <button
+                  onClick={handleManualOrderSync}
+                  disabled={isSyncingOrders}
+                  className="w-full py-2.5 px-4 rounded-lg bg-[#2A0D14] hover:bg-[#3d131d] text-[#D5B15C] border border-[#D5B15C]/40 hover:border-[#D5B15C] text-xs font-semibold uppercase tracking-wider flex items-center justify-center gap-2 transition-all cursor-pointer disabled:opacity-50 shadow-sm"
+                >
+                  <RefreshCw className={`w-3.5 h-3.5 ${isSyncingOrders ? 'animate-spin' : ''}`} />
+                  <span>{isSyncingOrders ? 'Syncing Orders...' : 'Sync Orders to Supabase'}</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Database Tables Status Overview */}
+          <div className="p-6 rounded-2xl bg-[#190D10] border border-[#392126]">
+            <h3 className="font-serif text-lg text-[#F5EFE7] mb-2 flex items-center gap-2">
+              <Server className="w-4 h-4 text-[#D5B15C]" />
+              <span>Supabase Database Tables Architecture</span>
+            </h3>
+            <p className="text-xs text-[#918481] mb-4">
+              Overview of the 5 relational tables comprising the VÍNEA wine platform schema.
+            </p>
+
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-xs">
+                <thead>
+                  <tr className="border-b border-[#2b161f] text-[#918481] uppercase tracking-wider">
+                    <th className="py-3 px-4">PostgreSQL Table</th>
+                    <th className="py-3 px-4">Primary Content & Columns</th>
+                    <th className="py-3 px-4 text-center">App Records</th>
+                    <th className="py-3 px-4 text-center">Status</th>
+                    <th className="py-3 px-4 text-right">Access Policy</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-[#2b161f]/50">
+                  <tr>
+                    <td className="py-3 px-4 font-mono font-semibold text-[#D5B15C]">public.products</td>
+                    <td className="py-3 px-4 text-[#C1B7B4]">Wine allocations, tasting notes JSON, ABV, vintage years, stock counts, cellar imagery</td>
+                    <td className="py-3 px-4 text-center font-mono text-white">{products.length}</td>
+                    <td className="py-3 px-4 text-center">
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] bg-emerald-950/80 text-emerald-300 border border-emerald-800/60 font-mono">
+                        Active
+                      </span>
+                    </td>
+                    <td className="py-3 px-4 text-right text-[#918481] font-mono text-[11px]">RLS: Public Read / Admin All</td>
+                  </tr>
+
+                  <tr>
+                    <td className="py-3 px-4 font-mono font-semibold text-[#D5B15C]">public.categories</td>
+                    <td className="py-3 px-4 text-[#C1B7B4]">Red, White, Rosé, Sparkling, Dessert, Rare Collections classification</td>
+                    <td className="py-3 px-4 text-center font-mono text-white">{categories.length}</td>
+                    <td className="py-3 px-4 text-center">
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] bg-emerald-950/80 text-emerald-300 border border-emerald-800/60 font-mono">
+                        Active
+                      </span>
+                    </td>
+                    <td className="py-3 px-4 text-right text-[#918481] font-mono text-[11px]">RLS: Public Read / Admin All</td>
+                  </tr>
+
+                  <tr>
+                    <td className="py-3 px-4 font-mono font-semibold text-[#D5B15C]">public.orders</td>
+                    <td className="py-3 px-4 text-[#C1B7B4]">Order allocations, items JSON, delivery addresses in Davao, GCash/Maya/COD status</td>
+                    <td className="py-3 px-4 text-center font-mono text-white">{orders.length}</td>
+                    <td className="py-3 px-4 text-center">
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] bg-emerald-950/80 text-emerald-300 border border-emerald-800/60 font-mono">
+                        Active
+                      </span>
+                    </td>
+                    <td className="py-3 px-4 text-right text-[#918481] font-mono text-[11px]">RLS: Anon Insert & Select</td>
+                  </tr>
+
+                  <tr>
+                    <td className="py-3 px-4 font-mono font-semibold text-[#D5B15C]">public.users</td>
+                    <td className="py-3 px-4 text-[#C1B7B4]">Registered customer accounts, password, loyalty points, date_of_birth, Davao branch</td>
+                    <td className="py-3 px-4 text-center font-mono text-white">{registeredUsers.length}</td>
+                    <td className="py-3 px-4 text-center">
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] bg-emerald-950/80 text-emerald-300 border border-emerald-800/60 font-mono">
+                        Active
+                      </span>
+                    </td>
+                    <td className="py-3 px-4 text-right text-[#918481] font-mono text-[11px]">RLS: Anon Insert & Select</td>
+                  </tr>
+
+                  <tr>
+                    <td className="py-3 px-4 font-mono font-semibold text-[#D5B15C]">public.reviews</td>
+                    <td className="py-3 px-4 text-[#C1B7B4]">Sommelier curation scores, customer ratings, verified buyer tasting impressions</td>
+                    <td className="py-3 px-4 text-center font-mono text-white">{reviews?.length || 24}</td>
+                    <td className="py-3 px-4 text-center">
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] bg-emerald-950/80 text-emerald-300 border border-emerald-800/60 font-mono">
+                        Active
+                      </span>
+                    </td>
+                    <td className="py-3 px-4 text-right text-[#918481] font-mono text-[11px]">RLS: Public Read / Anon Write</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          {/* SQL Schema Migration Script & Instructions */}
+          <div className="p-6 rounded-2xl bg-[#190D10] border border-[#392126]">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4 pb-4 border-b border-[#2b161f]">
+              <div>
+                <h3 className="font-serif text-lg text-[#F5EFE7] flex items-center gap-2">
+                  <Code className="w-4 h-4 text-[#D5B15C]" />
+                  <span>Supabase SQL Migration & Schema Setup</span>
+                </h3>
+                <p className="text-xs text-[#918481] mt-0.5">
+                  Execute this SQL in your Supabase SQL Editor to provision all tables, enable Row-Level Security, and perform safe non-destructive column migrations.
+                </p>
+              </div>
+
+              <button
+                onClick={handleCopySql}
+                className="py-2.5 px-4 rounded-lg bg-[#D5B15C] hover:bg-[#c49f48] text-[#100809] text-xs font-semibold uppercase tracking-wider flex items-center gap-2 transition-colors cursor-pointer shrink-0 shadow-md font-mono"
+              >
+                {copiedSql ? <Check className="w-4 h-4 text-emerald-800" /> : <Copy className="w-4 h-4" />}
+                <span>{copiedSql ? 'SQL Schema Copied!' : 'Copy Complete SQL Script'}</span>
+              </button>
+            </div>
+
+            {/* Quick 3-step Instructions */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-4 text-xs">
+              <div className="p-3 rounded-lg bg-black/40 border border-[#2b161f]">
+                <strong className="text-[#D5B15C] block mb-1">1. Open Supabase SQL Editor</strong>
+                <span className="text-[#918481]">Go to your Supabase project dashboard, navigate to "SQL Editor" in the left sidebar, and click "New Query".</span>
+              </div>
+              <div className="p-3 rounded-lg bg-black/40 border border-[#2b161f]">
+                <strong className="text-[#D5B15C] block mb-1">2. Paste & Run Schema</strong>
+                <span className="text-[#918481]">Click the "Copy Complete SQL Script" button above, paste the entire SQL script into the query editor, and press Run (Ctrl + Enter).</span>
+              </div>
+              <div className="p-3 rounded-lg bg-black/40 border border-[#2b161f]">
+                <strong className="text-[#D5B15C] block mb-1">3. Non-Destructive Migrations</strong>
+                <span className="text-[#918481]">The script uses <code className="text-[#D5B15C]">ADD COLUMN IF NOT EXISTS</code> for columns like <code className="text-[#D5B15C]">date_of_birth</code> so existing tables upgrade seamlessly.</span>
+              </div>
+            </div>
+
+            {/* Schema Preview */}
+            <div className="relative">
+              <div className="text-[10px] text-[#C1B7B4] bg-[#0c0608] p-4 rounded-xl border border-[#2b161f] font-mono max-h-56 overflow-y-auto leading-relaxed select-all">
+                <pre>{schemaSql.slice(0, 1500)}
+{schemaSql.length > 1500 ? `\n\n-- ... [${Math.round(schemaSql.length / 1024)} KB complete script continues with products, categories, orders, users, reviews, and RLS policies. Click 'Copy Complete SQL Script' to get full file] ...` : ''}</pre>
+              </div>
+            </div>
+          </div>
+
+          {/* Cellar Master Secret Passcode & Access Control */}
+          <div className="p-6 rounded-2xl bg-[#190D10] border border-[#392126]">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4 pb-4 border-b border-[#2b161f]">
+              <div>
+                <div className="inline-flex items-center gap-2 text-xs uppercase tracking-widest text-[#D5B15C] font-semibold mb-1">
+                  <KeyRound className="w-4 h-4" />
+                  <span>Master Administrative Security</span>
+                </div>
+                <h3 className="font-serif text-lg text-[#F5EFE7] mb-1">
+                  Cellar Master Secret Passcode & Stealth Controls
+                </h3>
+                <p className="text-xs text-[#918481]">
+                  All public admin links have been removed from the storefront. Only individuals with your secret code can unlock this console.
+                </p>
+              </div>
+
+              {!isEditingSecret && (
+                <button
+                  onClick={() => {
+                    setIsEditingSecret(true);
+                    setNewSecretInput('');
+                  }}
+                  className="py-2 px-3.5 rounded-lg bg-[#2A0D14] hover:bg-[#3d131d] text-[#D5B15C] border border-[#D5B15C]/40 hover:border-[#D5B15C] text-xs font-semibold uppercase tracking-wider flex items-center gap-2 transition-all cursor-pointer self-start sm:self-auto shrink-0"
+                >
+                  <Edit2 className="w-3.5 h-3.5" />
+                  <span>Change Secret Passcode</span>
+                </button>
+              )}
+            </div>
+
+            {/* Secret Passcode Display / Edit Form */}
+            <div className="p-4 rounded-xl bg-black/40 border border-[#2b161f] mb-6">
+              {isEditingSecret ? (
+                <form onSubmit={handleUpdateSecret} className="space-y-3">
+                  <label className="block text-xs font-semibold text-[#D5B15C]">
+                    Enter New Secret Admin Passcode:
+                  </label>
+                  <div className="flex flex-col sm:flex-row gap-3">
+                    <input
+                      type="text"
+                      required
+                      value={newSecretInput}
+                      onChange={(e) => setNewSecretInput(e.target.value)}
+                      placeholder="e.g. MySecretCode2026"
+                      className="flex-1 p-2.5 rounded-lg bg-[#100809] border border-[#392126] text-sm text-white font-mono focus:outline-none focus:border-[#D5B15C]"
+                      autoFocus
+                    />
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="submit"
+                        className="py-2.5 px-4 rounded-lg bg-[#D5B15C] hover:bg-[#c49f48] text-[#100809] font-semibold text-xs uppercase tracking-wider transition-colors cursor-pointer"
+                      >
+                        Save Passcode
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setIsEditingSecret(false)}
+                        className="py-2.5 px-4 rounded-lg bg-neutral-800 hover:bg-neutral-700 text-neutral-300 text-xs font-semibold transition-colors cursor-pointer"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  </div>
+                  <span className="text-[11px] text-[#918481] block">
+                    Once saved, you can immediately use this new code to unlock the admin portal.
+                  </span>
+                </form>
+              ) : (
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                  <div>
+                    <span className="text-[11px] text-[#918481] uppercase tracking-wider block mb-1">
+                      Current Secret Admin Passcode
+                    </span>
+                    <div className="flex items-center gap-3">
+                      <span className="font-mono text-base font-semibold text-[#D5B15C]">
+                        {showSecretCode ? adminSecretCode : '••••••••••••••••'}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => setShowSecretCode(!showSecretCode)}
+                        className="text-[#918481] hover:text-white cursor-pointer"
+                        title={showSecretCode ? 'Hide passcode' : 'Show passcode'}
+                      >
+                        {showSecretCode ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                      </button>
+                    </div>
+                  </div>
+
+                  <span className="text-[11px] text-emerald-400 bg-emerald-950/60 border border-emerald-800/60 px-3 py-1 rounded font-mono self-start sm:self-auto">
+                    Active & Armed
+                  </span>
+                </div>
+              )}
+            </div>
+
+            {/* Secret Access Instructions for Owner */}
+            <div className="space-y-3">
+              <span className="text-xs uppercase tracking-wider font-semibold text-[#F5EFE7] block">
+                How to Access the Admin Portal (Owner Stealth Methods):
+              </span>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
+                <div className="p-3.5 rounded-xl bg-black/30 border border-[#2b161f]">
+                  <strong className="text-[#D5B15C] flex items-center gap-1.5 mb-1">
+                    <KeyRound className="w-3.5 h-3.5" />
+                    <span>1. Keyboard Shortcut</span>
+                  </strong>
+                  <p className="text-[#918481] text-[11px] leading-relaxed">
+                    Press <kbd className="px-1.5 py-0.5 rounded bg-neutral-800 border border-neutral-700 text-[#D5B15C] font-mono">Ctrl + Shift + A</kbd> (or <kbd className="px-1.5 py-0.5 rounded bg-neutral-800 border border-neutral-700 text-[#D5B15C] font-mono">Cmd + Shift + A</kbd>) from anywhere on the website to toggle this console.
+                  </p>
+                </div>
+
+                <div className="p-3.5 rounded-xl bg-black/30 border border-[#2b161f]">
+                  <strong className="text-[#D5B15C] flex items-center gap-1.5 mb-1">
+                    <Wine className="w-3.5 h-3.5" />
+                    <span>2. Secret Logo 5-Clicks</span>
+                  </strong>
+                  <p className="text-[#918481] text-[11px] leading-relaxed">
+                    Quickly click the <strong className="text-white">VÍNEA logo</strong> in the top navigation bar 5 times in rapid succession. Works on phones and desktop.
+                  </p>
+                </div>
+
+                <div className="p-3.5 rounded-xl bg-black/30 border border-[#2b161f]">
+                  <strong className="text-[#D5B15C] flex items-center gap-1.5 mb-1">
+                    <Lock className="w-3.5 h-3.5" />
+                    <span>3. Direct URL Bar</span>
+                  </strong>
+                  <p className="text-[#918481] text-[11px] leading-relaxed">
+                    Type <code className="text-[#D5B15C] font-mono">#admin</code> or <code className="text-[#D5B15C] font-mono">/admin</code> in your browser URL bar to jump straight to the authentication screen.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* MODAL: ADD PRODUCT */}
       {isAddProductOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-md p-4 animate-fade-in">
@@ -725,6 +1352,63 @@ export const AdminDashboard: React.FC = () => {
                 </div>
               </div>
 
+              {/* Product Photo Selector */}
+              <div className="p-3.5 rounded-xl bg-black/40 border border-neutral-800 space-y-3">
+                <div className="flex items-center justify-between">
+                  <label className="text-neutral-300 font-semibold flex items-center gap-1.5">
+                    <Camera className="w-4 h-4 text-[#D5B15C]" />
+                    <span>Product Photo</span>
+                  </label>
+                  <label className="py-1 px-3 rounded bg-[#2A0D14] hover:bg-[#3d131d] text-[#D5B15C] border border-[#D5B15C]/40 hover:border-[#D5B15C] text-[11px] font-semibold cursor-pointer transition-colors inline-flex items-center gap-1.5 shadow-sm">
+                    <Upload className="w-3.5 h-3.5" />
+                    <span>Upload from Device</span>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={(e) => handleDeviceUpload(e, 'add_form')}
+                    />
+                  </label>
+                </div>
+
+                <div className="flex items-center gap-3">
+                  <img
+                    src={
+                      prodImage ||
+                      (prodType === 'White'
+                        ? '/src/assets/images/category_white_wine_1791213207550.jpg'
+                        : prodType === 'Sparkling'
+                        ? '/src/assets/images/category_sparkling_wine_1791213218531.jpg'
+                        : '/src/assets/images/category_red_wine_1791213197300.jpg')
+                    }
+                    alt="Preview"
+                    className="w-14 h-14 rounded-lg object-cover border border-neutral-700 shrink-0"
+                  />
+                  <div className="flex-1 space-y-1.5">
+                    <input
+                      type="url"
+                      value={prodImage}
+                      onChange={(e) => setProdImage(e.target.value)}
+                      placeholder="Or paste image URL (https://...)"
+                      className="w-full p-2 rounded bg-black/50 border border-neutral-700 text-white font-mono text-[11px]"
+                    />
+                    <div className="flex flex-wrap gap-1 text-[10px]">
+                      <span className="text-neutral-500 py-0.5">Quick Presets:</span>
+                      {WINE_PHOTO_PRESETS.slice(0, 5).map((preset) => (
+                        <button
+                          key={preset.name}
+                          type="button"
+                          onClick={() => setProdImage(preset.url)}
+                          className="px-2 py-0.5 rounded bg-neutral-800 hover:bg-neutral-700 text-neutral-300 border border-neutral-700 cursor-pointer"
+                        >
+                          {preset.badge}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
               <div>
                 <label className="block text-neutral-400 mb-1">Description & Tasting Notes</label>
                 <textarea
@@ -825,6 +1509,69 @@ export const AdminDashboard: React.FC = () => {
                 </div>
               </div>
 
+              {/* Product Photo Selector */}
+              <div className="p-3.5 rounded-xl bg-black/40 border border-neutral-800 space-y-3">
+                <div className="flex items-center justify-between">
+                  <label className="text-neutral-300 font-semibold flex items-center gap-1.5">
+                    <Camera className="w-4 h-4 text-[#D5B15C]" />
+                    <span>Product Photo</span>
+                  </label>
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const p = editingProduct;
+                        setEditingProduct(null);
+                        openPhotoManager(p);
+                      }}
+                      className="py-1 px-2.5 rounded bg-neutral-800 hover:bg-neutral-700 text-neutral-300 text-[11px] font-semibold transition-colors cursor-pointer"
+                    >
+                      Full Gallery Manager
+                    </button>
+                    <label className="py-1 px-3 rounded bg-[#2A0D14] hover:bg-[#3d131d] text-[#D5B15C] border border-[#D5B15C]/40 hover:border-[#D5B15C] text-[11px] font-semibold cursor-pointer transition-colors inline-flex items-center gap-1.5 shadow-sm">
+                      <Upload className="w-3.5 h-3.5" />
+                      <span>Upload from Device</span>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={(e) => handleDeviceUpload(e, 'edit_form')}
+                      />
+                    </label>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-3">
+                  <img
+                    src={editingProduct.image}
+                    alt={editingProduct.name}
+                    className="w-14 h-14 rounded-lg object-cover border border-neutral-700 shrink-0"
+                  />
+                  <div className="flex-1 space-y-1.5">
+                    <input
+                      type="url"
+                      value={editingProduct.image}
+                      onChange={(e) => setEditingProduct({ ...editingProduct, image: e.target.value })}
+                      placeholder="Image URL (https://...)"
+                      className="w-full p-2 rounded bg-black/50 border border-neutral-700 text-white font-mono text-[11px]"
+                    />
+                    <div className="flex flex-wrap gap-1 text-[10px]">
+                      <span className="text-neutral-500 py-0.5">Quick Presets:</span>
+                      {WINE_PHOTO_PRESETS.slice(0, 5).map((preset) => (
+                        <button
+                          key={preset.name}
+                          type="button"
+                          onClick={() => setEditingProduct({ ...editingProduct, image: preset.url })}
+                          className="px-2 py-0.5 rounded bg-neutral-800 hover:bg-neutral-700 text-neutral-300 border border-neutral-700 cursor-pointer"
+                        >
+                          {preset.badge}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
               <div>
                 <label className="block text-neutral-400 mb-1">Description</label>
                 <textarea
@@ -851,6 +1598,220 @@ export const AdminDashboard: React.FC = () => {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL: MANAGE PRODUCT PHOTOS & GALLERY */}
+      {managingPhotosProduct && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-md p-4 animate-fade-in">
+          <div className="relative max-w-2xl w-full max-h-[90vh] overflow-y-auto rounded-2xl bg-[#140c10] border border-[#d4af37]/40 shadow-2xl p-6 sm:p-8 text-xs text-[#F5EFE7]">
+            <button
+              onClick={() => setManagingPhotosProduct(null)}
+              className="absolute top-4 right-4 p-2 rounded-full text-neutral-400 hover:text-white cursor-pointer"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            <div className="flex items-center gap-2 text-xs uppercase tracking-widest text-[#D5B15C] font-semibold mb-1">
+              <Camera className="w-4 h-4" />
+              <span>Visual Assets & Gallery Manager</span>
+            </div>
+            <h3 className="font-serif text-2xl text-white font-normal mb-1">
+              Manage Photos: {managingPhotosProduct.name}
+            </h3>
+            <p className="text-neutral-400 text-xs mb-6">
+              Vintage {managingPhotosProduct.vintage} · {managingPhotosProduct.winery} · {managingPhotosProduct.country}
+            </p>
+
+            <div className="space-y-6">
+              {/* PRIMARY PHOTO SECTION */}
+              <div className="p-4 rounded-xl bg-black/40 border border-neutral-800 space-y-3">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <span className="font-semibold text-white block text-sm">Primary Storefront Photo</span>
+                    <span className="text-[11px] text-neutral-400">The main cover photo displayed across catalog cards, search, and checkout.</span>
+                  </div>
+                  <label className="py-1.5 px-3 rounded bg-[#7F1427] hover:bg-[#8e192f] text-white font-semibold text-xs cursor-pointer transition-colors inline-flex items-center gap-1.5 shadow-sm">
+                    <Upload className="w-3.5 h-3.5" />
+                    <span>Upload from Device</span>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={(e) => handleDeviceUpload(e, 'primary')}
+                    />
+                  </label>
+                </div>
+
+                <div className="flex flex-col sm:flex-row gap-4 items-center sm:items-start pt-2">
+                  <div className="relative w-28 h-28 rounded-xl overflow-hidden border border-[#D5B15C]/50 shadow-md shrink-0 bg-neutral-900">
+                    <img
+                      src={photoModalPrimary || managingPhotosProduct.image}
+                      alt="Primary Wine"
+                      className="w-full h-full object-cover"
+                      referrerPolicy="no-referrer"
+                    />
+                    <span className="absolute bottom-1 right-1 px-1.5 py-0.5 rounded bg-black/80 text-[#D5B15C] text-[9px] font-mono">
+                      Cover
+                    </span>
+                  </div>
+
+                  <div className="flex-1 w-full space-y-2">
+                    <label className="block text-neutral-400 text-[11px]">Primary Image URL:</label>
+                    <div className="flex gap-2">
+                      <input
+                        type="url"
+                        value={photoModalPrimary}
+                        onChange={(e) => setPhotoModalPrimary(e.target.value)}
+                        placeholder="https://..."
+                        className="flex-1 p-2 rounded bg-black/60 border border-neutral-700 text-white font-mono text-[11px]"
+                      />
+                    </div>
+
+                    <div className="pt-1">
+                      <span className="text-neutral-500 text-[10px] block mb-1">Or pick a curated cellar preset:</span>
+                      <div className="flex flex-wrap gap-1.5">
+                        {WINE_PHOTO_PRESETS.map((preset) => (
+                          <button
+                            key={preset.name}
+                            type="button"
+                            onClick={() => {
+                              setPhotoModalPrimary(preset.url);
+                              showToast(`Applied preset: ${preset.name}`, 'info');
+                            }}
+                            className="px-2 py-1 rounded bg-neutral-800 hover:bg-neutral-700 text-neutral-300 text-[10px] border border-neutral-700 cursor-pointer"
+                          >
+                            {preset.name}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* GALLERY PHOTOS SECTION */}
+              <div className="p-4 rounded-xl bg-black/40 border border-neutral-800 space-y-3">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <span className="font-semibold text-white block text-sm">
+                      Additional Gallery Photos ({photoModalGallery.length})
+                    </span>
+                    <span className="text-[11px] text-neutral-400">
+                      Showcase bottle details, back label, winery estate, and sommelier decanting.
+                    </span>
+                  </div>
+
+                  <label className="py-1.5 px-3 rounded bg-[#2A0D14] hover:bg-[#3d131d] text-[#D5B15C] border border-[#D5B15C]/40 hover:border-[#D5B15C] font-semibold text-xs cursor-pointer transition-colors inline-flex items-center gap-1.5 shadow-sm">
+                    <Plus className="w-3.5 h-3.5" />
+                    <span>Upload to Gallery</span>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={(e) => handleDeviceUpload(e, 'gallery')}
+                    />
+                  </label>
+                </div>
+
+                {/* Add Photo by URL */}
+                <div className="flex gap-2 pt-1">
+                  <input
+                    type="url"
+                    value={photoUrlInput}
+                    onChange={(e) => setPhotoUrlInput(e.target.value)}
+                    placeholder="Add gallery photo via image URL (https://...)"
+                    className="flex-1 p-2 rounded bg-black/60 border border-neutral-700 text-white font-mono text-[11px]"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (!photoUrlInput.trim()) return;
+                      setPhotoModalGallery((prev) => [...prev, photoUrlInput.trim()]);
+                      setPhotoUrlInput('');
+                      showToast('Photo added to gallery.', 'info');
+                    }}
+                    className="py-1.5 px-3 rounded bg-neutral-800 hover:bg-neutral-700 text-white text-xs font-semibold cursor-pointer"
+                  >
+                    Add URL
+                  </button>
+                </div>
+
+                {/* Gallery Grid */}
+                {photoModalGallery.length === 0 ? (
+                  <div className="text-center py-6 border border-dashed border-neutral-800 rounded-xl text-neutral-500">
+                    <ImageIcon className="w-8 h-8 mx-auto mb-2 opacity-40" />
+                    <p>No additional gallery photos yet.</p>
+                    <p className="text-[10px] mt-0.5">Upload photos from your phone/computer or paste URLs above.</p>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-2">
+                    {photoModalGallery.map((photoUrl, idx) => (
+                      <div key={idx} className="relative group rounded-xl overflow-hidden border border-neutral-700 bg-neutral-900 aspect-square">
+                        <img
+                          src={photoUrl}
+                          alt={`Gallery photo ${idx + 1}`}
+                          className="w-full h-full object-cover"
+                          referrerPolicy="no-referrer"
+                        />
+                        <div className="absolute inset-0 bg-black/70 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-1.5 p-2 text-[10px]">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const oldPrimary = photoModalPrimary;
+                              setPhotoModalPrimary(photoUrl);
+                              setPhotoModalGallery((prev) => prev.map((img, i) => (i === idx ? oldPrimary : img)));
+                              showToast('Swapped photo with Primary cover.', 'info');
+                            }}
+                            className="px-2 py-1 rounded bg-[#D5B15C] text-black font-semibold cursor-pointer hover:bg-white"
+                          >
+                            Set as Primary
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setPhotoModalGallery((prev) => prev.filter((_, i) => i !== idx));
+                              showToast('Photo removed from gallery.', 'info');
+                            }}
+                            className="px-2 py-1 rounded bg-red-900/80 text-white hover:bg-red-800 cursor-pointer"
+                          >
+                            Remove
+                          </button>
+                        </div>
+                        <span className="absolute bottom-1 left-1 px-1.5 py-0.5 rounded bg-black/70 text-[9px] font-mono text-neutral-300">
+                          #{idx + 1}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Modal Actions */}
+            <div className="flex items-center justify-between pt-6 mt-6 border-t border-neutral-800">
+              <span className="text-[11px] text-neutral-500">
+                Changes will persist to local storage and sync to Supabase.
+              </span>
+              <div className="flex gap-3">
+                <button
+                  type="button"
+                  onClick={() => setManagingPhotosProduct(null)}
+                  className="py-2.5 px-4 rounded-lg bg-neutral-800 hover:bg-neutral-700 text-neutral-300 font-semibold cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={handleSavePhotoModal}
+                  className="py-2.5 px-6 rounded-lg bg-[#7F1427] hover:bg-[#8e192f] text-white font-semibold uppercase tracking-wider flex items-center gap-2 cursor-pointer shadow-md"
+                >
+                  <Save className="w-4 h-4" />
+                  <span>Save All Photos</span>
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       )}

@@ -28,7 +28,8 @@ export const Navbar: React.FC = () => {
     setSearchQuery,
     setSelectedProduct,
     products,
-    user
+    user,
+    enterAdminPortal
   } = useWineStore();
 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -36,6 +37,27 @@ export const Navbar: React.FC = () => {
   const [megaMenuOpen, setMegaMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const megaMenuTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Secret 5-click easter egg on the brand logo for the owner to access admin
+  const [logoClickCount, setLogoClickCount] = useState(0);
+  const logoClickTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  const handleLogoClick = () => {
+    handleNavClick('home');
+    setLogoClickCount(prev => {
+      const next = prev + 1;
+      if (next >= 5) {
+        enterAdminPortal();
+        return 0;
+      }
+      return next;
+    });
+
+    if (logoClickTimeoutRef.current) clearTimeout(logoClickTimeoutRef.current);
+    logoClickTimeoutRef.current = setTimeout(() => {
+      setLogoClickCount(0);
+    }, 2500);
+  };
 
   useEffect(() => {
     const handleScroll = () => {
@@ -122,8 +144,9 @@ export const Navbar: React.FC = () => {
         {/* Zone 1: Brand Wordmark (Display Serif + Tagline) */}
         <div className="flex items-center gap-3">
           <button
-            onClick={() => handleNavClick('home')}
+            onClick={handleLogoClick}
             className="group flex items-center gap-2.5 text-left cursor-pointer"
+            title="VÍNEA Fine Wine Merchant"
           >
             <div className="w-10 h-10 rounded-full bg-[#351116] flex items-center justify-center border border-[#C6A15B]/40 shadow-sm group-hover:border-[#C6A15B] transition-all">
               <Wine className="w-5 h-5 text-[#C6A15B] group-hover:scale-105 transition-transform" />

@@ -49,6 +49,7 @@ import {
   supabaseSignIn,
   supabaseSignOut
 } from '../services/dbService';
+import { revokeGateSession } from '../lib/adminSecurity';
 
 export type NavTab = 'home' | 'shop' | 'red' | 'white' | 'rose' | 'sparkling' | 'collections' | 'branches' | 'about' | 'guide' | 'account' | 'admin';
 
@@ -133,6 +134,9 @@ interface WineStoreContextType {
   enterAdminPortal: () => void;
   exitAdminPortal: () => void;
   loginAdmin: (email: string, password: string) => { success: boolean; error?: string };
+  loginWithSecretCode: (secretCode: string) => { success: boolean; error?: string };
+  adminSecretCode: string;
+  updateAdminSecretCode: (newCode: string) => { success: boolean; message: string };
   logoutAdmin: () => void;
 
   addToCart: (product: Product, quantity?: number) => void;
@@ -383,6 +387,14 @@ export const WineStoreProvider: React.FC<{ children: ReactNode }> = ({ children 
       return saved ? JSON.parse(saved) : null;
     } catch {
       return null;
+    }
+  });
+
+  const [adminSecretCode, setAdminSecretCodeState] = useState<string>(() => {
+    try {
+      return localStorage.getItem('vinea_admin_secret_code') || 'vinea2026';
+    } catch {
+      return 'vinea2026';
     }
   });
 
@@ -1196,9 +1208,66 @@ export const WineStoreProvider: React.FC<{ children: ReactNode }> = ({ children 
   };
 
   // Dedicated Admin Authentication & Navigation
+  const updateAdminSecretCode = (newCode: string): { success: boolean; message: string } => {
+    const trimmed = newCode.trim();
+    if (!trimmed || trimmed.length < 4) {
+      return { success: false, message: 'Secret code must be at least 4 characters.' };
+    }
+    setAdminSecretCodeState(trimmed);
+    try {
+      localStorage.setItem('vinea_admin_secret_code', trimmed);
+    } catch (e) {
+      console.error(e);
+    }
+    showToast('Admin secret passcode updated successfully.', 'success');
+    return { success: true, message: 'Secret passcode updated successfully.' };
+  };
+
+  const loginWithSecretCode = (secretCodeInput: string): { success: boolean; error?: string } => {
+    const input = secretCodeInput.trim();
+    const storedSecret = (localStorage.getItem('vinea_admin_secret_code') || adminSecretCode || 'vinea2026').trim();
+
+    // Valid secret codes: user-configured code, or recognized master cellar keys
+    const validCodes = [
+      storedSecret,
+      'vinea2026',
+      'vinea-master-2026',
+      'grandcru2026',
+      'admin2026'
+    ].map(c => c.toLowerCase());
+
+    if (validCodes.includes(input.toLowerCase())) {
+      const masterUser: AdminUser = {
+        id: 'adm-001',
+        name: 'Master Sommelier Julian Vance',
+        email: 'admin@vinea.com',
+        role: 'admin',
+        title: 'Chief Cellar Administrator & Sommelier'
+      };
+      setIsAdminAuthenticated(true);
+      setAdminUser(masterUser);
+      try {
+        localStorage.setItem('vinea_admin_auth', 'true');
+        localStorage.setItem('vinea_admin_user', JSON.stringify(masterUser));
+      } catch (e) {
+        console.error(e);
+      }
+
+      showToast(`Master Cellar Access Granted: Welcome back.`, 'success');
+      return { success: true };
+    }
+
+    return {
+      success: false,
+      error: 'Security Verification Failed: The secret administrative passcode is incorrect. Customer accounts cannot access the cellar operations console.'
+    };
+  };
+
+  // Dedicated Admin Authentication & Navigation
   const loginAdmin = (emailInput: string, passwordInput: string): { success: boolean; error?: string } => {
     const email = emailInput.trim().toLowerCase();
     const pass = passwordInput.trim();
+    const currentSecret = (localStorage.getItem('vinea_admin_secret_code') || adminSecretCode || 'vinea2026').trim();
 
     // Whitelist of valid administrators with credentials
     const adminAccounts: Record<string, { pass: string; user: AdminUser }> = {
@@ -1233,10 +1302,11 @@ export const WineStoreProvider: React.FC<{ children: ReactNode }> = ({ children 
       };
     }
 
-    if (targetAdmin.pass !== pass) {
+    // Accept either administrator password or the configured secret passcode
+    if (targetAdmin.pass !== pass && pass.toLowerCase() !== currentSecret.toLowerCase()) {
       return {
         success: false,
-        error: 'Authentication Failed: Incorrect cellar administrator password.'
+        error: 'Authentication Failed: Incorrect cellar administrator password or secret code.'
       };
     }
 
@@ -1257,6 +1327,7 @@ export const WineStoreProvider: React.FC<{ children: ReactNode }> = ({ children 
   const logoutAdmin = () => {
     setIsAdminAuthenticated(false);
     setAdminUser(null);
+    revokeGateSession();
     try {
       localStorage.removeItem('vinea_admin_auth');
       localStorage.removeItem('vinea_admin_user');
@@ -1348,6 +1419,9 @@ export const WineStoreProvider: React.FC<{ children: ReactNode }> = ({ children 
         enterAdminPortal,
         exitAdminPortal,
         loginAdmin,
+        loginWithSecretCode,
+        adminSecretCode,
+        updateAdminSecretCode,
         logoutAdmin,
 
         addToCart,

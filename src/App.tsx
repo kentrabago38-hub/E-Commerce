@@ -302,10 +302,6 @@ const AppLayout: React.FC = () => {
       <AccountModal />
       <CustomerAuthModal />
       <FindYourWineQuiz />
-      <SupabaseConfigModal
-        isOpen={isSupabaseConfigOpen}
-        onClose={() => setIsSupabaseConfigOpen(false)}
-      />
       <ToastContainer />
     </div>
   );

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useWineStore } from '../context/WineStoreContext';
 import { formatPeso } from '../utils/formatCurrency';
 import { X, Heart, ShoppingBag, Star, Sparkles, Utensils, Check, ArrowRight } from 'lucide-react';
@@ -16,8 +16,19 @@ export const ProductQuickViewModal: React.FC = () => {
   } = useWineStore();
 
   const [quantity, setQuantity] = useState(1);
+  const [activeModalImg, setActiveModalImg] = useState<string>('');
+
+  useEffect(() => {
+    if (quickViewProduct) {
+      setActiveModalImg(quickViewProduct.image);
+      setQuantity(1);
+    }
+  }, [quickViewProduct?.image, quickViewProduct?.product_id]);
 
   if (!quickViewProduct) return null;
+
+  const currentImg = activeModalImg || quickViewProduct.image;
+  const allPhotos = [quickViewProduct.image, ...(quickViewProduct.images || [])].filter(Boolean);
 
   const isFavorited = isInWishlist(quickViewProduct.product_id);
   const isOutOfStock = quickViewProduct.stock <= 0;
@@ -52,18 +63,45 @@ export const ProductQuickViewModal: React.FC = () => {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
           {/* Left Media Column */}
-          <div className="relative aspect-4/3 rounded-xl overflow-hidden bg-gradient-to-b from-[#48151F]/40 to-[#130B0D] border border-[#48151F]">
-            <img
-              src={quickViewProduct.image}
-              alt={quickViewProduct.name}
-              className="w-full h-full object-cover object-center"
-              referrerPolicy="no-referrer"
-            />
-            <div className="absolute top-3 left-3">
-              <span className="text-xs uppercase tracking-[0.2em] text-[#C6A15B] font-semibold drop-shadow-md">
-                Vintage {quickViewProduct.vintage} · {quickViewProduct.wine_type}
-              </span>
+          <div className="space-y-3">
+            <div className="relative aspect-4/3 rounded-xl overflow-hidden bg-gradient-to-b from-[#48151F]/40 to-[#130B0D] border border-[#48151F]">
+              <img
+                src={activeModalImg || quickViewProduct.image}
+                alt={quickViewProduct.name}
+                className="w-full h-full object-cover object-center transition-all duration-200"
+                referrerPolicy="no-referrer"
+              />
+              <div className="absolute top-3 left-3">
+                <span className="text-xs uppercase tracking-[0.2em] text-[#C6A15B] font-semibold drop-shadow-md">
+                  Vintage {quickViewProduct.vintage} · {quickViewProduct.wine_type}
+                </span>
+              </div>
             </div>
+
+            {/* Gallery Thumbnails */}
+            {allPhotos.length > 1 && (
+              <div className="flex items-center gap-2 overflow-x-auto pb-1">
+                {allPhotos.map((imgUrl, i) => (
+                  <button
+                    key={i}
+                    type="button"
+                    onClick={() => setActiveModalImg(imgUrl)}
+                    className={`relative w-12 h-12 rounded-lg overflow-hidden border-2 transition-all cursor-pointer shrink-0 ${
+                      (activeModalImg || quickViewProduct.image) === imgUrl
+                        ? 'border-[#D5B15C] scale-105'
+                        : 'border-[#48151F] opacity-60 hover:opacity-100'
+                    }`}
+                  >
+                    <img
+                      src={imgUrl}
+                      alt={`View ${i + 1}`}
+                      className="w-full h-full object-cover"
+                      referrerPolicy="no-referrer"
+                    />
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* Right Product Details Column */}

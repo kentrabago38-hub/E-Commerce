@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Product } from '../types/wine';
 import { useWineStore } from '../context/WineStoreContext';
 import { ProductCard } from './ProductCard';
@@ -45,6 +45,13 @@ export const ProductDetailPage: React.FC<ProductDetailPageProps> = ({ product, o
   const [activeDetailTab, setActiveDetailTab] = useState<DetailTab>('vintage');
   const [isZoomed, setIsZoomed] = useState(false);
   const [zoomCoords, setZoomCoords] = useState({ x: 50, y: 50 });
+  const [selectedImage, setSelectedImage] = useState<string>(product.image);
+
+  useEffect(() => {
+    setSelectedImage(product.image);
+  }, [product.image]);
+
+  const allPhotos = [product.image, ...(product.images || [])].filter(Boolean);
 
   // New review form state
   const [newRating, setNewRating] = useState(5);
@@ -124,7 +131,7 @@ export const ProductDetailPage: React.FC<ProductDetailPageProps> = ({ product, o
             onMouseMove={handleMouseMove}
           >
             <img
-              src={product.image}
+              src={selectedImage || product.image}
               alt={product.name}
               className={`w-full h-full object-cover object-center transition-transform duration-200 ${
                 isZoomed ? 'scale-150' : 'scale-100'
@@ -152,6 +159,35 @@ export const ProductDetailPage: React.FC<ProductDetailPageProps> = ({ product, o
               <span>Hover image to inspect label</span>
             </div>
           </div>
+
+          {/* Interactive Multi-Photo Gallery Thumbnails */}
+          {allPhotos.length > 1 && (
+            <div className="flex items-center gap-2.5 mt-3.5 w-full overflow-x-auto pb-1">
+              {allPhotos.map((imgUrl, i) => {
+                const isSelected = (selectedImage || product.image) === imgUrl;
+                return (
+                  <button
+                    key={i}
+                    type="button"
+                    onClick={() => setSelectedImage(imgUrl)}
+                    className={`relative w-16 h-16 rounded-lg overflow-hidden border-2 transition-all cursor-pointer shrink-0 ${
+                      isSelected
+                        ? 'border-[#D5B15C] scale-105 shadow-md shadow-[#D5B15C]/20'
+                        : 'border-[#48151F] hover:border-neutral-400 opacity-60 hover:opacity-100'
+                    }`}
+                    title={`View photo ${i + 1}`}
+                  >
+                    <img
+                      src={imgUrl}
+                      alt={`${product.name} photo ${i + 1}`}
+                      className="w-full h-full object-cover"
+                      referrerPolicy="no-referrer"
+                    />
+                  </button>
+                );
+              })}
+            </div>
+          )}
 
           {/* Provenance & Shipping Badges */}
           <div className="grid grid-cols-3 gap-3 w-full mt-4 text-center">

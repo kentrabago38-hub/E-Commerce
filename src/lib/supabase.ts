@@ -77,8 +77,22 @@ function resolveCredentials() {
     }
   }
 
-  const rawEnvUrl = (import.meta.env.VITE_SUPABASE_URL || '').toString().trim();
-  const rawEnvKey = (import.meta.env.VITE_SUPABASE_ANON_KEY || '').toString().trim();
+  const metaEnv = import.meta.env as Record<string, string | undefined>;
+  const rawEnvUrl = (
+    metaEnv.VITE_SUPABASE_URL ||
+    metaEnv.SUPABASE_URL ||
+    metaEnv.NEXT_PUBLIC_SUPABASE_URL ||
+    ''
+  ).toString().trim();
+
+  const rawEnvKey = (
+    metaEnv.VITE_SUPABASE_ANON_KEY ||
+    metaEnv.SUPABASE_ANON_KEY ||
+    metaEnv.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
+    metaEnv.VITE_SUPABASE_KEY ||
+    metaEnv.SUPABASE_KEY ||
+    ''
+  ).toString().trim();
   const envUrl = sanitizeSupabaseUrl(rawEnvUrl);
   const envKey = rawEnvKey;
 
