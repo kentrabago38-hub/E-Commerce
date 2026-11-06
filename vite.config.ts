@@ -27,6 +27,9 @@ export default defineConfig(() => {
     build: {
       chunkSizeWarningLimit: 2500,
     },
+    optimizeDeps: {
+      include: ['react-is', 'recharts'],
+    },
   };
 });
 
