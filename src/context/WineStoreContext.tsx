@@ -214,9 +214,23 @@ export const WineStoreProvider: React.FC<{ children: ReactNode }> = ({ children 
   const [wishlist, setWishlist] = useState<string[]>(() => {
     try {
       const saved = localStorage.getItem('vinea_wishlist');
-      return saved ? JSON.parse(saved) : ['prod-001', 'prod-005'];
+      if (!saved) return [];
+      const parsed = JSON.parse(saved);
+      // Clean legacy mock favorites so new or unauthenticated users start with 0 favorites
+      if (
+        Array.isArray(parsed) &&
+        parsed.length === 2 &&
+        parsed.includes('prod-001') &&
+        parsed.includes('prod-005')
+      ) {
+        try {
+          localStorage.removeItem('vinea_wishlist');
+        } catch {}
+        return [];
+      }
+      return Array.isArray(parsed) ? parsed : [];
     } catch {
-      return ['prod-001', 'prod-005'];
+      return [];
     }
   });
 
