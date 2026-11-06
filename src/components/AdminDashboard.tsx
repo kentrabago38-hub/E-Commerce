@@ -39,7 +39,7 @@ import {
   Image as ImageIcon
 } from 'lucide-react';
 import { getSupabaseConfigStatus } from '../lib/supabase';
-import schemaSql from '../../supabase-schema.sql?raw';
+import schemaSql from '../data/supabaseSchemaSql';
 
 export const WINE_PHOTO_PRESETS = [
   { name: 'Red Grand Cru', url: 'https://images.unsplash.com/photo-1510812431401-41d2bd2722f3?auto=format&fit=crop&w=800&q=80', badge: 'Red' },

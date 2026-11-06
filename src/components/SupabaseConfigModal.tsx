@@ -32,7 +32,7 @@ import {
   SupabaseTestResult
 } from '../lib/supabase';
 import { useWineStore } from '../context/WineStoreContext';
-import schemaSql from '../../supabase-schema.sql?raw';
+import schemaSql from '../data/supabaseSchemaSql';
 
 interface Props {
   isOpen: boolean;
