@@ -2,24 +2,11 @@ import React, { useState } from 'react';
 import { Product } from '../types/wine';
 import { formatPeso } from '../utils/formatCurrency';
 import {
-  ResponsiveContainer,
-  ComposedChart,
-  Area,
-  Line,
-  XAxis,
-  YAxis,
-  Tooltip,
-  CartesianGrid,
-  Legend
-} from 'recharts';
-import {
   TrendingUp,
-  Award,
   Calendar,
   Sparkles,
   Info,
-  Clock,
-  ArrowUpRight
+  Clock
 } from 'lucide-react';
 
 interface VintageComparisonTabProps {
@@ -40,93 +27,142 @@ interface VintageDataPoint {
 export const VintageComparisonTab: React.FC<VintageComparisonTabProps> = ({ product }) => {
   const [activeMetric, setActiveMetric] = useState<'both' | 'price' | 'rating'>('both');
   const [selectedVintageYear, setSelectedVintageYear] = useState<number>(product.vintage);
+  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
 
   // Generate realistic historical vintage trajectory based on the selected wine's vintage & price
   const baseVintage = product.vintage;
   const basePrice = product.price;
-  const baseRating = product.rating;
 
   const vintageHistory: VintageDataPoint[] = [-3, -2, -1, 0, 1, 2].map((offset) => {
     const yr = baseVintage + offset;
     const isCurrent = offset === 0;
 
     // Older vintages typically appreciate due to scarcity and cellaring maturity
-    // Price multiplier based on age and vintage variation
-    const ageBonus = -offset * 0.08; // older bottles +8% per year
+    const ageBonus = -offset * 0.08;
     const variation = Math.sin(yr * 2.5) * 0.06;
     const computedPrice = Math.round((basePrice * (1 + ageBonus + variation)) / 100) * 100;
 
     // Rating variation (between 4.4 and 5.0)
     const ratingVariation = Math.cos(yr * 1.7) * 0.18;
-    const computedRating = Math.min(5.0, Math.max(4.2, +(baseRating + (isCurrent ? 0 : ratingVariation)).toFixed(1)));
-    const computedScore100 = Math.round(computedRating * 20 - 1 + Math.random() * 2);
+    const computedRating = Math.min(5.0, Math.max(4.2, +(4.7 + ratingVariation).toFixed(1)));
+    const score100 = Math.round(computedRating * 20);
 
     const conditions = [
-      'Exceptional solar exposure; dense anthocyanins & velvety tannins.',
-      'Classic temperate growing season with crystalline acidity.',
-      'Dry autumn harvest; remarkable aromatic depth and purity.',
-      'Generous summer with record harvest concentration.',
-      'Cool spring followed by optimal late maturation.',
-      'Prestige benchmark vintage with exceptional aging endurance.'
+      'Exceptional dry summer with concentrated phenolic maturity; low yields of extraordinary concentration.',
+      'Classic balanced vintage with cool harvest nights; crystalline acid structure and intense aromatics.',
+      'Record warmth yielding voluptuous velvety tannins and deep midnight-garnet fruit extraction.',
+      'Pristine terroir expression with ideal rainfall distribution and seamless cellaring equilibrium.',
+      'Vibrant energetic vintage marked by fresh savory herb nuances, taut minerality, and vibrant acidity.',
+      'Historic benchmark vintage recognized by international cellar masters for 30+ year longevity.'
     ];
 
     const windows = [
-      'Peak Maturity — Ready to Enjoy',
-      'Approaching Prime — Decant 45 mins',
-      'Prime Window — Superb Structure',
-      'Cellar Aging — Peak in 2028–2035',
-      'Youthful & Vibrant — Hold or Aerate',
-      'Long-Term Cellar — Maturing Gracefully'
+      'Ready now · Optimal through 2038',
+      'Peak maturity · Drink through 2035',
+      'Approaching prime window · Best 2026–2040',
+      'Youthful vigor · Decant 1h · Cellar through 2045',
+      'Cellar aging phase · Prime window 2028–2048',
+      'Collector release · Immense structure · 2030–2055'
     ];
+
+    const idx = Math.abs((yr * 3) % conditions.length);
+    const appreciationPct = Math.round((computedPrice / basePrice - 1) * 100);
+    const appreciationStr = appreciationPct >= 0 ? `+${appreciationPct}%` : `${appreciationPct}%`;
 
     return {
       year: yr,
-      price: isCurrent ? basePrice : computedPrice,
-      rating: isCurrent ? baseRating : computedRating,
-      score100: isCurrent ? Math.min(99, Math.round(baseRating * 19.5)) : computedScore100,
-      condition: conditions[Math.abs((yr * 7) % conditions.length)],
-      drinkingWindow: windows[Math.abs((yr * 3) % windows.length)],
+      price: computedPrice,
+      rating: computedRating,
+      score100,
+      condition: conditions[idx],
+      drinkingWindow: windows[idx],
       isCurrent,
-      appreciation: offset < 0 ? `+${Math.round(Math.abs(offset) * 12 + 4)}%` : offset === 0 ? 'Current Base' : `-${Math.round(offset * 6)}%`
+      appreciation: appreciationStr
     };
   });
 
-  const activeVintageData = vintageHistory.find((v) => v.year === selectedVintageYear) || vintageHistory[3];
+  const activeVintageData =
+    vintageHistory.find((v) => v.year === selectedVintageYear) || vintageHistory[3];
+
+  // SVG Chart Geometry
+  const svgWidth = 800;
+  const svgHeight = 320;
+  const padLeft = 70;
+  const padRight = 70;
+  const padTop = 30;
+  const padBottom = 50;
+
+  const chartW = svgWidth - padLeft - padRight;
+  const chartH = svgHeight - padTop - padBottom;
+
+  const minPrice = Math.min(...vintageHistory.map((d) => d.price)) * 0.92;
+  const maxPrice = Math.max(...vintageHistory.map((d) => d.price)) * 1.08;
+
+  const minRating = 4.0;
+  const maxRating = 5.0;
+
+  const points = vintageHistory.map((d, i) => {
+    const x = padLeft + (i / (vintageHistory.length - 1)) * chartW;
+    const yPrice = padTop + (1 - (d.price - minPrice) / (maxPrice - minPrice)) * chartH;
+    const yRating = padTop + (1 - (d.rating - minRating) / (maxRating - minRating)) * chartH;
+    return { ...d, x, yPrice, yRating };
+  });
+
+  // SVG Path Generator for Price
+  const pricePathD = points.reduce((acc, pt, i) => {
+    if (i === 0) return `M ${pt.x} ${pt.yPrice}`;
+    const prev = points[i - 1];
+    const cpX1 = prev.x + (pt.x - prev.x) / 2;
+    const cpX2 = prev.x + (pt.x - prev.x) / 2;
+    return `${acc} C ${cpX1} ${prev.yPrice}, ${cpX2} ${pt.yPrice}, ${pt.x} ${pt.yPrice}`;
+  }, '');
+
+  const priceAreaD = `${pricePathD} L ${points[points.length - 1].x} ${padTop + chartH} L ${points[0].x} ${padTop + chartH} Z`;
+
+  // SVG Path Generator for Rating
+  const ratingPathD = points.reduce((acc, pt, i) => {
+    if (i === 0) return `M ${pt.x} ${pt.yRating}`;
+    const prev = points[i - 1];
+    const cpX1 = prev.x + (pt.x - prev.x) / 2;
+    const cpX2 = prev.x + (pt.x - prev.x) / 2;
+    return `${acc} C ${cpX1} ${prev.yRating}, ${cpX2} ${pt.yRating}, ${pt.x} ${pt.yRating}`;
+  }, '');
+
+  const activePoint = hoveredIndex !== null ? points[hoveredIndex] : null;
 
   return (
-    <div className="space-y-10">
-      {/* Header Explainer */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-[#351116] pb-6">
+    <div className="space-y-8 animate-fade-in">
+      {/* Header & Metric Toggle Controls */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[#351116]">
         <div>
-          <div className="inline-flex items-center gap-2 text-xs uppercase tracking-[0.25em] text-[#C6A15B] font-semibold mb-2">
-            <Sparkles className="w-3.5 h-3.5" />
-            <span>Terroir & Harvest Chronology</span>
-          </div>
-          <h3 className="font-serif text-2xl sm:text-3xl text-[#F5EFE7] font-normal">
-            Multi-Vintage Valuation & Sommelier Score Trends
+          <h3 className="font-serif text-xl sm:text-2xl text-[#F5EFE7] flex items-center gap-2">
+            <span>Vintage Trajectory & Appreciation</span>
+            <span className="text-xs font-sans uppercase tracking-widest px-2.5 py-0.5 rounded bg-[#C6A15B]/15 text-[#C6A15B] border border-[#C6A15B]/30 font-semibold">
+              Terroir Index
+            </span>
           </h3>
-          <p className="text-xs sm:text-sm text-[#B7AAA1] font-light mt-1 max-w-2xl leading-relaxed">
-            Compare harvest conditions, international critic scores, and secondary market valuations across recent vintages for {product.winery}’s {product.name}.
+          <p className="text-xs sm:text-sm text-[#B7AAA1] mt-1 font-light">
+            Historical pricing trajectory and sommelier critic scores across consecutive harvests of {product.name}.
           </p>
         </div>
 
         {/* Metric Selector Buttons */}
-        <div className="flex items-center gap-1.5 p-1 rounded-lg bg-[#130B0D] border border-[#48151F] shrink-0">
+        <div className="flex items-center gap-1.5 p-1 rounded-lg bg-[#14070A] border border-[#351116] self-start sm:self-auto shrink-0">
           <button
             onClick={() => setActiveMetric('both')}
             className={`px-3 py-1.5 text-xs font-semibold tracking-wider uppercase rounded transition-all cursor-pointer ${
               activeMetric === 'both'
-                ? 'bg-[#861F32] text-white shadow-sm'
+                ? 'bg-[#C6A15B] text-[#130B0D] shadow-sm font-bold'
                 : 'text-[#B7AAA1] hover:text-[#F5EFE7]'
             }`}
           >
-            All Metrics
+            All Indices
           </button>
           <button
             onClick={() => setActiveMetric('price')}
             className={`px-3 py-1.5 text-xs font-semibold tracking-wider uppercase rounded transition-all cursor-pointer ${
               activeMetric === 'price'
-                ? 'bg-[#861F32] text-white shadow-sm'
+                ? 'bg-[#C6A15B] text-[#130B0D] shadow-sm font-bold'
                 : 'text-[#B7AAA1] hover:text-[#F5EFE7]'
             }`}
           >
@@ -145,8 +181,8 @@ export const VintageComparisonTab: React.FC<VintageComparisonTabProps> = ({ prod
         </div>
       </div>
 
-      {/* Main Interactive Recharts Graph */}
-      <div className="p-6 sm:p-8 rounded-2xl bg-gradient-to-b from-[#18090C] to-[#12070A] border border-[#351116] shadow-2xl">
+      {/* Main Interactive SVG Graph */}
+      <div className="p-6 sm:p-8 rounded-2xl bg-gradient-to-b from-[#18090C] to-[#12070A] border border-[#351116] shadow-2xl relative">
         <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
           <div className="flex items-center gap-4 text-xs">
             {(activeMetric === 'both' || activeMetric === 'price') && (
@@ -165,144 +201,236 @@ export const VintageComparisonTab: React.FC<VintageComparisonTabProps> = ({ prod
 
           <div className="text-[11px] text-[#B7AAA1] uppercase tracking-wider flex items-center gap-1.5">
             <Info className="w-3.5 h-3.5 text-[#C6A15B]" />
-            <span>Interactive: Click dots to inspect vintage</span>
+            <span>Interactive: Hover or click points to inspect vintage</span>
           </div>
         </div>
 
-        {/* Recharts Container */}
-        <div className="w-full h-72 sm:h-80">
-          <ResponsiveContainer width="100%" height="100%">
-            <ComposedChart
-              data={vintageHistory}
-              margin={{ top: 10, right: 20, left: 10, bottom: 0 }}
-              onClick={(e: any) => {
-                if (e && e.activePayload && e.activePayload[0]) {
-                  const clickedYear = e.activePayload[0].payload.year;
-                  if (typeof clickedYear === 'number') {
-                    setSelectedVintageYear(clickedYear);
-                  }
-                }
+        {/* Pure SVG Responsive Chart Container */}
+        <div className="w-full relative overflow-hidden">
+          <svg
+            viewBox={`0 0 ${svgWidth} ${svgHeight}`}
+            className="w-full h-auto select-none overflow-visible"
+            style={{ minHeight: '260px' }}
+          >
+            <defs>
+              <linearGradient id="vintagePriceGradient" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="#C6A15B" stopOpacity={0.45} />
+                <stop offset="60%" stopColor="#C6A15B" stopOpacity={0.12} />
+                <stop offset="100%" stopColor="#C6A15B" stopOpacity={0.0} />
+              </linearGradient>
+
+              <filter id="goldGlow" x="-20%" y="-20%" width="140%" height="140%">
+                <feDropShadow dx="0" dy="2" stdDeviation="3" floodColor="#C6A15B" floodOpacity="0.6" />
+              </filter>
+            </defs>
+
+            {/* Horizontal Gridlines */}
+            {[0, 0.25, 0.5, 0.75, 1].map((pct, i) => {
+              const y = padTop + pct * chartH;
+              const priceVal = Math.round(maxPrice - pct * (maxPrice - minPrice));
+              const ratingVal = (maxRating - pct * (maxRating - minRating)).toFixed(1);
+              return (
+                <g key={i}>
+                  <line
+                    x1={padLeft}
+                    y1={y}
+                    x2={svgWidth - padRight}
+                    y2={y}
+                    stroke="#351116"
+                    strokeDasharray="4 4"
+                    strokeWidth={1}
+                  />
+                  {(activeMetric === 'both' || activeMetric === 'price') && (
+                    <text
+                      x={padLeft - 10}
+                      y={y + 4}
+                      fill="#C6A15B"
+                      fontSize={10}
+                      textAnchor="end"
+                      fontFamily="monospace"
+                    >
+                      ₱{(priceVal / 1000).toFixed(0)}k
+                    </text>
+                  )}
+                  {(activeMetric === 'both' || activeMetric === 'rating') && (
+                    <text
+                      x={svgWidth - padRight + 10}
+                      y={y + 4}
+                      fill="#E57373"
+                      fontSize={10}
+                      textAnchor="start"
+                      fontFamily="monospace"
+                    >
+                      {ratingVal}★
+                    </text>
+                  )}
+                </g>
+              );
+            })}
+
+            {/* Price Area & Line */}
+            {(activeMetric === 'both' || activeMetric === 'price') && (
+              <>
+                <path d={priceAreaD} fill="url(#vintagePriceGradient)" />
+                <path
+                  d={pricePathD}
+                  fill="none"
+                  stroke="#C6A15B"
+                  strokeWidth={3}
+                  filter="url(#goldGlow)"
+                />
+              </>
+            )}
+
+            {/* Rating Line */}
+            {(activeMetric === 'both' || activeMetric === 'rating') && (
+              <path
+                d={ratingPathD}
+                fill="none"
+                stroke="#E57373"
+                strokeWidth={2}
+                strokeDasharray="5 5"
+              />
+            )}
+
+            {/* Data Points and Column Hit Areas */}
+            {points.map((pt, i) => {
+              const isSelected = selectedVintageYear === pt.year;
+              const isHovered = hoveredIndex === i;
+
+              return (
+                <g
+                  key={pt.year}
+                  className="cursor-pointer"
+                  onClick={() => setSelectedVintageYear(pt.year)}
+                  onMouseEnter={() => setHoveredIndex(i)}
+                  onMouseLeave={() => setHoveredIndex(null)}
+                >
+                  {/* Invisible hit column */}
+                  <rect
+                    x={pt.x - chartW / 12}
+                    y={padTop}
+                    width={chartW / 6}
+                    height={chartH}
+                    fill="transparent"
+                  />
+
+                  {/* Vertical Guideline on hover/selection */}
+                  {(isSelected || isHovered) && (
+                    <line
+                      x1={pt.x}
+                      y1={padTop}
+                      x2={pt.x}
+                      y2={padTop + chartH}
+                      stroke="#C6A15B"
+                      strokeWidth={1.5}
+                      strokeDasharray="2 2"
+                      opacity={0.8}
+                    />
+                  )}
+
+                  {/* Price Circle */}
+                  {(activeMetric === 'both' || activeMetric === 'price') && (
+                    <g>
+                      <circle
+                        cx={pt.x}
+                        cy={pt.yPrice}
+                        r={isSelected ? 7 : isHovered ? 6 : 4.5}
+                        fill={isSelected ? '#F5EFE7' : '#130B0D'}
+                        stroke="#C6A15B"
+                        strokeWidth={isSelected ? 3 : 2}
+                        filter={isSelected ? 'url(#goldGlow)' : undefined}
+                      />
+                    </g>
+                  )}
+
+                  {/* Rating Circle */}
+                  {(activeMetric === 'both' || activeMetric === 'rating') && (
+                    <g>
+                      <circle
+                        cx={pt.x}
+                        cy={pt.yRating}
+                        r={isSelected ? 5.5 : 3.5}
+                        fill="#E57373"
+                        stroke="#130B0D"
+                        strokeWidth={1.5}
+                      />
+                    </g>
+                  )}
+
+                  {/* X Axis Vintage Year Labels */}
+                  <text
+                    x={pt.x}
+                    y={padTop + chartH + 24}
+                    fill={isSelected ? '#C6A15B' : '#B7AAA1'}
+                    fontSize={isSelected ? 13 : 11}
+                    fontWeight={isSelected ? 'bold' : 'normal'}
+                    textAnchor="middle"
+                    fontFamily="serif"
+                  >
+                    {pt.year}
+                  </text>
+
+                  {/* Badge for Current Bottle */}
+                  {pt.isCurrent && (
+                    <text
+                      x={pt.x}
+                      y={padTop + chartH + 40}
+                      fill="#861F32"
+                      fontSize={8}
+                      fontWeight="bold"
+                      textAnchor="middle"
+                      className="uppercase tracking-widest"
+                    >
+                      CURRENT
+                    </text>
+                  )}
+                </g>
+              );
+            })}
+          </svg>
+
+          {/* Interactive Floating Tooltip */}
+          {activePoint && (
+            <div
+              className="absolute pointer-events-none p-3.5 rounded-xl bg-[#0D0709]/95 border border-[#C6A15B]/60 shadow-2xl backdrop-blur-md text-xs min-w-[190px] z-30 transition-all duration-150"
+              style={{
+                left: `clamp(10px, ${(activePoint.x / svgWidth) * 100}%, calc(100% - 210px))`,
+                top: '10px'
               }}
             >
-              <defs>
-                <linearGradient id="priceGradient" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#C6A15B" stopOpacity={0.4} />
-                  <stop offset="95%" stopColor="#C6A15B" stopOpacity={0.0} />
-                </linearGradient>
-              </defs>
-
-              <CartesianGrid stroke="#351116" strokeDasharray="3 3" vertical={false} />
-
-              <XAxis
-                dataKey="year"
-                stroke="#B7AAA1"
-                tick={{ fill: '#B7AAA1', fontSize: 12, fontFamily: 'serif' }}
-                tickLine={{ stroke: '#351116' }}
-              />
-
-              {/* Left Y Axis for Price */}
-              <YAxis
-                yAxisId="priceAxis"
-                orientation="left"
-                stroke="#C6A15B"
-                domain={['dataMin - 3000', 'dataMax + 3000']}
-                tickFormatter={(val: number) => `₱${(val / 1000).toFixed(0)}k`}
-                tick={{ fill: '#C6A15B', fontSize: 11 }}
-                tickLine={{ stroke: '#351116' }}
-                hide={activeMetric === 'rating'}
-              />
-
-              {/* Right Y Axis for Rating */}
-              <YAxis
-                yAxisId="ratingAxis"
-                orientation="right"
-                stroke="#E57373"
-                domain={[3.8, 5.0]}
-                tickFormatter={(val: number) => `${val.toFixed(1)}★`}
-                tick={{ fill: '#E57373', fontSize: 11 }}
-                tickLine={{ stroke: '#351116' }}
-                hide={activeMetric === 'price'}
-              />
-
-              <Tooltip
-                content={({ active, payload }) => {
-                  if (active && payload && payload.length) {
-                    const data = payload[0].payload as VintageDataPoint;
-                    return (
-                      <div className="p-4 rounded-xl bg-[#0D0709]/95 border border-[#C6A15B]/50 shadow-2xl backdrop-blur-md text-xs min-w-[200px]">
-                        <div className="flex items-center justify-between pb-2 mb-2 border-b border-[#351116]">
-                          <span className="font-serif text-base text-[#F5EFE7] font-semibold">
-                            Vintage {data.year}
-                          </span>
-                          {data.isCurrent && (
-                            <span className="px-2 py-0.5 rounded bg-[#861F32] text-white text-[10px] font-bold uppercase tracking-wider">
-                              Current Bottle
-                            </span>
-                          )}
-                        </div>
-
-                        <div className="space-y-1.5 text-neutral-300">
-                          <div className="flex items-center justify-between">
-                            <span className="text-[#B7AAA1]">Est. Valuation:</span>
-                            <span className="font-serif text-sm font-semibold text-[#C6A15B]">
-                              {formatPeso(data.price)}
-                            </span>
-                          </div>
-                          <div className="flex items-center justify-between">
-                            <span className="text-[#B7AAA1]">Sommelier Rating:</span>
-                            <span className="font-semibold text-rose-300">
-                              {data.rating.toFixed(1)} / 5.0 ({data.score100} pts)
-                            </span>
-                          </div>
-                          <div className="flex items-center justify-between">
-                            <span className="text-[#B7AAA1]">Appreciation:</span>
-                            <span className="text-emerald-400 font-medium">
-                              {data.appreciation}
-                            </span>
-                          </div>
-                        </div>
-
-                        <div className="mt-2.5 pt-2 border-t border-[#351116] text-[11px] text-[#B7AAA1] font-serif italic">
-                          "{data.condition}"
-                        </div>
-                      </div>
-                    );
-                  }
-                  return null;
-                }}
-              />
-
-              {/* Price Area & Line */}
-              {(activeMetric === 'both' || activeMetric === 'price') && (
-                <Area
-                  yAxisId="priceAxis"
-                  type="monotone"
-                  dataKey="price"
-                  name="Valuation (₱)"
-                  stroke="#C6A15B"
-                  strokeWidth={2.5}
-                  fillOpacity={1}
-                  fill="url(#priceGradient)"
-                  activeDot={{ r: 6, fill: '#F5EFE7', stroke: '#C6A15B', strokeWidth: 2 }}
-                />
-              )}
-
-              {/* Rating Line */}
-              {(activeMetric === 'both' || activeMetric === 'rating') && (
-                <Line
-                  yAxisId="ratingAxis"
-                  type="monotone"
-                  dataKey="rating"
-                  name="Rating"
-                  stroke="#E57373"
-                  strokeWidth={2}
-                  strokeDasharray="4 4"
-                  dot={{ r: 4, fill: '#E57373' }}
-                  activeDot={{ r: 7, fill: '#861F32', stroke: '#E57373', strokeWidth: 2 }}
-                />
-              )}
-            </ComposedChart>
-          </ResponsiveContainer>
+              <div className="flex items-center justify-between pb-1.5 mb-1.5 border-b border-[#351116]">
+                <span className="font-serif text-sm text-[#F5EFE7] font-semibold">
+                  Vintage {activePoint.year}
+                </span>
+                {activePoint.isCurrent && (
+                  <span className="px-1.5 py-0.5 rounded bg-[#861F32] text-white text-[9px] font-bold uppercase">
+                    Current
+                  </span>
+                )}
+              </div>
+              <div className="space-y-1">
+                <div className="flex justify-between">
+                  <span className="text-[#B7AAA1]">Est. Value:</span>
+                  <span className="font-serif font-semibold text-[#C6A15B]">
+                    {formatPeso(activePoint.price)}
+                  </span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-[#B7AAA1]">Critic Score:</span>
+                  <span className="font-semibold text-rose-300">
+                    {activePoint.rating.toFixed(1)} ★ ({activePoint.score100} pts)
+                  </span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-[#B7AAA1]">Appreciation:</span>
+                  <span className="text-emerald-400 font-medium">
+                    {activePoint.appreciation}
+                  </span>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
