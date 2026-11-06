@@ -12,6 +12,7 @@ import {
   Check,
   ArrowRight
 } from 'lucide-react';
+import { subscribeNewsletterInSupabase } from '../services/dbService';
 
 export const NewsletterSubscriptionSection: React.FC = () => {
   const { showToast, setActiveTab, setSelectedProduct } = useWineStore();
@@ -83,12 +84,16 @@ export const NewsletterSubscriptionSection: React.FC = () => {
 
     setIsSubmitting(true);
 
-    // Simulate luxury dispatch registration
+    const cleanEmail = email.trim().toLowerCase();
+    // Persist to Supabase newsletter_subscribers table
+    subscribeNewsletterInSupabase(cleanEmail, 'storefront_footer').catch(() => {});
+
+    // Save to local storage as fallback
     setTimeout(() => {
       try {
         const existing = JSON.parse(localStorage.getItem('vinea_newsletter_subscribers') || '[]');
-        if (!existing.includes(email.trim().toLowerCase())) {
-          existing.push(email.trim().toLowerCase());
+        if (!existing.includes(cleanEmail)) {
+          existing.push(cleanEmail);
           localStorage.setItem('vinea_newsletter_subscribers', JSON.stringify(existing));
         }
       } catch {

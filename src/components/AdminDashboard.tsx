@@ -40,6 +40,7 @@ import {
 } from 'lucide-react';
 import { getSupabaseConfigStatus } from '../lib/supabase';
 import schemaSql from '../data/supabaseSchemaSql';
+import { VineaLogoIcon } from './VineaLogo';
 
 export const WINE_PHOTO_PRESETS = [
   { name: 'Red Grand Cru', url: 'https://images.unsplash.com/photo-1510812431401-41d2bd2722f3?auto=format&fit=crop&w=800&q=80', badge: 'Red' },
@@ -322,28 +323,31 @@ export const AdminDashboard: React.FC = () => {
     <div className="min-h-screen bg-[#100809] text-[#F5EFE7] py-8 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
       {/* Top Banner & Administrative Profile */}
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-8 pb-6 border-b border-[#392126]">
-        <div>
-          <div className="inline-flex items-center gap-2 text-xs uppercase tracking-widest text-[#D5B15C] font-semibold mb-1">
-            <LayoutDashboard className="w-3.5 h-3.5" />
-            <span>Cellar Administration Portal (Restricted)</span>
-          </div>
-          <h1 className="font-serif text-3xl sm:text-4xl text-[#F5EFE7] font-normal mb-1">
-            VÍNEA Operations Console
-          </h1>
-          <div className="flex flex-wrap items-center gap-2 text-xs text-[#C1B7B4]">
-            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-            <span>
-              Authenticated: <strong className="text-white">{adminUser?.name || 'Master Sommelier Julian Vance'}</strong> ({adminUser?.email || 'admin@vinea.com'}) · <span className="text-[#D5B15C]">{adminUser?.title || 'Master Sommelier'}</span>
-            </span>
-            <span className="text-[#392126]">·</span>
-            <button
-              onClick={() => setActiveTab('database')}
-              className="px-2.5 py-0.5 rounded text-[10px] bg-emerald-950/80 hover:bg-emerald-900 text-emerald-300 border border-emerald-800/60 font-mono flex items-center gap-1.5 cursor-pointer transition-colors"
-              title="Click to view Database & Supabase Management Console"
-            >
-              <span className={`w-1.5 h-1.5 rounded-full ${isSupabaseConnected ? 'bg-emerald-400 animate-pulse' : 'bg-amber-400'}`}></span>
-              <span>{isSupabaseConnected ? 'Supabase & Postgres: Connected' : 'Supabase: Ready (Click to Configure)'}</span>
-            </button>
+        <div className="flex items-center gap-4">
+          <VineaLogoIcon sizePx={52} />
+          <div>
+            <div className="inline-flex items-center gap-2 text-xs uppercase tracking-widest text-[#D5B15C] font-semibold mb-1">
+              <LayoutDashboard className="w-3.5 h-3.5" />
+              <span>Cellar Administration Portal (Restricted)</span>
+            </div>
+            <h1 className="font-serif text-3xl sm:text-4xl text-[#F5EFE7] font-normal mb-1">
+              VÍNEA Operations Console
+            </h1>
+            <div className="flex flex-wrap items-center gap-2 text-xs text-[#C1B7B4]">
+              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+              <span>
+                Authenticated: <strong className="text-white">{adminUser?.name || 'Master Sommelier Julian Vance'}</strong> ({adminUser?.email || 'admin@vinea.com'}) · <span className="text-[#D5B15C]">{adminUser?.title || 'Master Sommelier'}</span>
+              </span>
+              <span className="text-[#392126]">·</span>
+              <button
+                onClick={() => setActiveTab('database')}
+                className="px-2.5 py-0.5 rounded text-[10px] bg-emerald-950/80 hover:bg-emerald-900 text-emerald-300 border border-emerald-800/60 font-mono flex items-center gap-1.5 cursor-pointer transition-colors"
+                title="Click to view Database & Supabase Management Console"
+              >
+                <span className={`w-1.5 h-1.5 rounded-full ${isSupabaseConnected ? 'bg-emerald-400 animate-pulse' : 'bg-amber-400'}`}></span>
+                <span>{isSupabaseConnected ? 'Supabase & Postgres: Connected' : 'Supabase: Ready (Click to Configure)'}</span>
+              </button>
+            </div>
           </div>
         </div>
 
@@ -1048,6 +1052,54 @@ export const AdminDashboard: React.FC = () => {
                       </span>
                     </td>
                     <td className="py-3 px-4 text-right text-[#918481] font-mono text-[11px]">RLS: Public Read / Anon Write</td>
+                  </tr>
+
+                  <tr>
+                    <td className="py-3 px-4 font-mono font-semibold text-[#D5B15C]">public.newsletter_subscribers</td>
+                    <td className="py-3 px-4 text-[#C1B7B4]">VIP cellar dispatch subscribers, welcome voucher recipients, marketing signups</td>
+                    <td className="py-3 px-4 text-center font-mono text-white">Active</td>
+                    <td className="py-3 px-4 text-center">
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] bg-emerald-950/80 text-emerald-300 border border-emerald-800/60 font-mono">
+                        Active
+                      </span>
+                    </td>
+                    <td className="py-3 px-4 text-right text-[#918481] font-mono text-[11px]">RLS: Anon Insert & Select</td>
+                  </tr>
+
+                  <tr>
+                    <td className="py-3 px-4 font-mono font-semibold text-[#D5B15C]">public.sommelier_inquiries</td>
+                    <td className="py-3 px-4 text-[#C1B7B4]">Private tasting bookings, cellar master flight reservations, Davao locker inquiries</td>
+                    <td className="py-3 px-4 text-center font-mono text-white">Active</td>
+                    <td className="py-3 px-4 text-center">
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] bg-emerald-950/80 text-emerald-300 border border-emerald-800/60 font-mono">
+                        Active
+                      </span>
+                    </td>
+                    <td className="py-3 px-4 text-right text-[#918481] font-mono text-[11px]">RLS: Anon Insert & Select</td>
+                  </tr>
+
+                  <tr>
+                    <td className="py-3 px-4 font-mono font-semibold text-[#D5B15C]">public.wishlists</td>
+                    <td className="py-3 px-4 text-[#C1B7B4]">Cross-device client favorites sync, saved bottle allocations per customer ID</td>
+                    <td className="py-3 px-4 text-center font-mono text-white">Active</td>
+                    <td className="py-3 px-4 text-center">
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] bg-emerald-950/80 text-emerald-300 border border-emerald-800/60 font-mono">
+                        Active
+                      </span>
+                    </td>
+                    <td className="py-3 px-4 text-right text-[#918481] font-mono text-[11px]">RLS: Anon Insert & Select</td>
+                  </tr>
+
+                  <tr>
+                    <td className="py-3 px-4 font-mono font-semibold text-[#D5B15C]">public.branches</td>
+                    <td className="py-3 px-4 text-[#C1B7B4]">Davao City brick-and-mortar cellar locations, coordinates, opening hours, contact hotlines</td>
+                    <td className="py-3 px-4 text-center font-mono text-white">5 Locations</td>
+                    <td className="py-3 px-4 text-center">
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] bg-emerald-950/80 text-emerald-300 border border-emerald-800/60 font-mono">
+                        Active
+                      </span>
+                    </td>
+                    <td className="py-3 px-4 text-right text-[#918481] font-mono text-[11px]">RLS: Public Read / Admin All</td>
                   </tr>
                 </tbody>
               </table>

@@ -14,6 +14,7 @@ import {
   Wine,
   ArrowRight
 } from 'lucide-react';
+import { VineaLogoIcon } from './VineaLogo';
 
 export const Navbar: React.FC = () => {
   const {
@@ -145,12 +146,10 @@ export const Navbar: React.FC = () => {
         <div className="flex items-center gap-3">
           <button
             onClick={handleLogoClick}
-            className="group flex items-center gap-2.5 text-left cursor-pointer"
+            className="group flex items-center gap-3 text-left cursor-pointer"
             title="VÍNEA Fine Wine Merchant"
           >
-            <div className="w-10 h-10 rounded-full bg-[#351116] flex items-center justify-center border border-[#C6A15B]/40 shadow-sm group-hover:border-[#C6A15B] transition-all">
-              <Wine className="w-5 h-5 text-[#C6A15B] group-hover:scale-105 transition-transform" />
-            </div>
+            <VineaLogoIcon sizePx={42} className="group-hover:scale-105 transition-transform" />
             <div>
               <span className="font-serif text-2xl sm:text-3xl tracking-wider text-[#F5EFE7] font-normal leading-none block">
                 VÍNEA

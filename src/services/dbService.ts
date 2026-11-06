@@ -13,6 +13,10 @@ export const CATEGORIES_TABLE = 'categories';
 export const ORDERS_TABLE = 'orders';
 export const REVIEWS_TABLE = 'reviews';
 export const USERS_TABLE = 'users';
+export const NEWSLETTER_TABLE = 'newsletter_subscribers';
+export const INQUIRIES_TABLE = 'sommelier_inquiries';
+export const WISHLISTS_TABLE = 'wishlists';
+export const BRANCHES_TABLE = 'branches';
 
 export enum OperationType {
   CREATE = 'create',
@@ -971,6 +975,112 @@ export async function getSupabaseCurrentUser() {
   if (!isSupabaseConfigured) return null;
   const { data: { user } } = await supabase.auth.getUser();
   return user;
+}
+
+/**
+ * 6. NEWSLETTER SUBSCRIBERS
+ */
+export async function subscribeNewsletterInSupabase(email: string, source = 'storefront_footer'): Promise<{ success: boolean; error?: string }> {
+  if (!isSupabaseConfigured) return { success: true };
+  try {
+    const { error } = await supabase
+      .from(NEWSLETTER_TABLE)
+      .upsert({
+        email: email.trim().toLowerCase(),
+        source,
+        status: 'active'
+      }, { onConflict: 'email' });
+    if (error) throw error;
+    return { success: true };
+  } catch (error: any) {
+    handleDatabaseError(error, OperationType.WRITE, NEWSLETTER_TABLE);
+    return { success: false, error: error?.message || 'Failed to save subscription.' };
+  }
+}
+
+export async function fetchNewsletterSubscribersFromSupabase(): Promise<{ email: string; source: string; created_at: string }[]> {
+  if (!isSupabaseConfigured) return [];
+  try {
+    const { data, error } = await supabase
+      .from(NEWSLETTER_TABLE)
+      .select('*')
+      .order('created_at', { ascending: false });
+    if (error) throw error;
+    return data || [];
+  } catch (error) {
+    handleDatabaseError(error, OperationType.LIST, NEWSLETTER_TABLE);
+    return [];
+  }
+}
+
+/**
+ * 7. SOMMELIER INQUIRIES & TASTING RESERVATIONS
+ */
+export interface SommelierInquiry {
+  inquiry_id?: string;
+  customer_name: string;
+  email: string;
+  phone?: string;
+  inquiry_type?: string;
+  preferred_date?: string;
+  preferred_branch?: string;
+  guest_count?: number;
+  notes?: string;
+  status?: string;
+}
+
+export async function saveSommelierInquiryToSupabase(inquiry: SommelierInquiry): Promise<{ success: boolean; error?: string }> {
+  if (!isSupabaseConfigured) return { success: true };
+  try {
+    const id = inquiry.inquiry_id || `inq-${Date.now()}`;
+    const { error } = await supabase
+      .from(INQUIRIES_TABLE)
+      .upsert({
+        ...inquiry,
+        inquiry_id: id,
+        status: inquiry.status || 'Pending'
+      }, { onConflict: 'inquiry_id' });
+    if (error) throw error;
+    return { success: true };
+  } catch (error: any) {
+    handleDatabaseError(error, OperationType.WRITE, INQUIRIES_TABLE);
+    return { success: false, error: error?.message || 'Failed to save inquiry.' };
+  }
+}
+
+/**
+ * 8. WISHLIST CLOUD SYNC
+ */
+export async function saveWishlistToSupabase(userId: string, productIds: string[]): Promise<void> {
+  if (!isSupabaseConfigured || !userId) return;
+  try {
+    const { error } = await supabase
+      .from(WISHLISTS_TABLE)
+      .upsert({
+        user_id: userId,
+        items: productIds,
+        updated_at: new Date().toISOString()
+      }, { onConflict: 'user_id' });
+    if (error) throw error;
+  } catch (error) {
+    handleDatabaseError(error, OperationType.WRITE, WISHLISTS_TABLE);
+  }
+}
+
+export async function fetchWishlistFromSupabase(userId: string): Promise<string[] | null> {
+  if (!isSupabaseConfigured || !userId) return null;
+  try {
+    const { data, error } = await supabase
+      .from(WISHLISTS_TABLE)
+      .select('items')
+      .eq('user_id', userId)
+      .maybeSingle();
+    if (error) throw error;
+    return data && Array.isArray(data.items) ? data.items : [];
+  } catch (error) {
+    handleDatabaseError(error, OperationType.GET, WISHLISTS_TABLE);
+    return null;
+  }
 }
 
 // --------------------------------------------------------------------------

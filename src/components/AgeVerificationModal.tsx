@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useWineStore } from '../context/WineStoreContext';
-import { ShieldCheck, AlertOctagon, Wine } from 'lucide-react';
+import { ShieldCheck, AlertOctagon } from 'lucide-react';
+import { VineaLogoIcon } from './VineaLogo';
 
 export const AgeVerificationModal: React.FC = () => {
   const { ageVerified, underageBlocked, verifyAge, rejectAge, resetAgeGate } = useWineStore();
@@ -38,8 +39,8 @@ export const AgeVerificationModal: React.FC = () => {
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#130B0D]/95 backdrop-blur-md p-4 animate-fade-in text-[#F5EFE7]">
       <div className="relative max-w-lg w-full p-8 md:p-10 rounded-3xl bg-[#130B0D] border border-[#48151F] text-center shadow-2xl">
         {/* Subtle decorative gold crest */}
-        <div className="w-16 h-16 mx-auto mb-6 rounded-full bg-[#210D12] flex items-center justify-center border border-[#C6A15B]/40 shadow-inner">
-          <Wine className="w-8 h-8 text-[#C6A15B]" />
+        <div className="flex justify-center mb-6">
+          <VineaLogoIcon sizePx={72} />
         </div>
 
         <p className="text-xs uppercase tracking-[0.3em] text-[#C6A15B] font-semibold mb-2">Age Verification</p>

@@ -11,6 +11,7 @@ import {
   ShieldCheck,
   Heart
 } from 'lucide-react';
+import { VineaLogoIcon } from './VineaLogo';
 
 export const Footer: React.FC = () => {
   const {
@@ -42,10 +43,8 @@ export const Footer: React.FC = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-10 pb-12 border-b border-[#48151F]">
           {/* Brand Info */}
           <div className="lg:col-span-2 space-y-4">
-            <div className="flex items-center gap-2.5">
-              <div className="w-9 h-9 rounded-full bg-[#48151F] flex items-center justify-center border border-[#C6A15B]/40 shadow-sm">
-                <Wine className="w-5 h-5 text-[#C6A15B]" />
-              </div>
+            <div className="flex items-center gap-3">
+              <VineaLogoIcon sizePx={40} />
               <div>
                 <span className="font-serif text-2xl tracking-wider text-[#F5EFE7]">VÍNEA</span>
                 <span className="text-[9px] tracking-[0.25em] text-[#C6A15B] uppercase block">

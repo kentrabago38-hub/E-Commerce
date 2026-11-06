@@ -183,6 +183,59 @@ ALTER TABLE public.users ADD COLUMN IF NOT EXISTS lifetime_points INTEGER DEFAUL
 ALTER TABLE public.users ADD COLUMN IF NOT EXISTS redeemed_perks JSONB DEFAULT '[]'::jsonb;
 ALTER TABLE public.users ADD COLUMN IF NOT EXISTS rewards_history JSONB DEFAULT '[]'::jsonb;
 ALTER TABLE public.users ADD COLUMN IF NOT EXISTS bio TEXT;
+ALTER TABLE public.users ADD COLUMN IF NOT EXISTS wishlist JSONB DEFAULT '[]'::jsonb;
+
+-- 6. Newsletter Subscribers Table
+CREATE TABLE IF NOT EXISTS public.newsletter_subscribers (
+  email TEXT PRIMARY KEY,
+  source TEXT DEFAULT 'storefront_footer',
+  status TEXT DEFAULT 'active',
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
+-- 7. Sommelier Inquiries & Tasting Reservations Table
+CREATE TABLE IF NOT EXISTS public.sommelier_inquiries (
+  inquiry_id TEXT PRIMARY KEY,
+  customer_name TEXT NOT NULL,
+  email TEXT NOT NULL,
+  phone TEXT,
+  inquiry_type TEXT DEFAULT 'Sommelier Tasting Flight',
+  preferred_date TEXT,
+  preferred_branch TEXT DEFAULT 'Azuela Cove Flagship (Davao)',
+  guest_count INTEGER DEFAULT 2,
+  notes TEXT,
+  status TEXT DEFAULT 'Pending',
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
+-- 8. Customer Wishlists Table (Cross-Device Cloud Sync)
+CREATE TABLE IF NOT EXISTS public.wishlists (
+  user_id TEXT PRIMARY KEY,
+  items JSONB DEFAULT '[]'::jsonb NOT NULL,
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
+-- 9. Davao City Physical Cellar Branches Table
+CREATE TABLE IF NOT EXISTS public.branches (
+  branch_id TEXT PRIMARY KEY,
+  name TEXT NOT NULL,
+  district TEXT NOT NULL,
+  address TEXT NOT NULL,
+  landmark TEXT,
+  phone TEXT,
+  operating_hours TEXT,
+  features JSONB DEFAULT '[]'::jsonb,
+  image TEXT,
+  is_flagship BOOLEAN DEFAULT false,
+  map_coordinates TEXT,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
+-- Safe migrations for branches
+ALTER TABLE public.branches ADD COLUMN IF NOT EXISTS landmark TEXT;
+ALTER TABLE public.branches ADD COLUMN IF NOT EXISTS features JSONB DEFAULT '[]'::jsonb;
+ALTER TABLE public.branches ADD COLUMN IF NOT EXISTS is_flagship BOOLEAN DEFAULT false;
+ALTER TABLE public.branches ADD COLUMN IF NOT EXISTS map_coordinates TEXT;
 
 -- ==============================================================================
 -- Row-Level Security (RLS) Policies
@@ -236,6 +289,38 @@ CREATE POLICY "Allow anon insert users" ON public.users FOR INSERT WITH CHECK (t
 DROP POLICY IF EXISTS "Allow anon update users" ON public.users;
 CREATE POLICY "Allow anon update users" ON public.users FOR UPDATE USING (true);
 
+-- Newsletter Subscribers
+ALTER TABLE public.newsletter_subscribers ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Allow anon select newsletter" ON public.newsletter_subscribers;
+CREATE POLICY "Allow anon select newsletter" ON public.newsletter_subscribers FOR SELECT USING (true);
+DROP POLICY IF EXISTS "Allow anon insert newsletter" ON public.newsletter_subscribers;
+CREATE POLICY "Allow anon insert newsletter" ON public.newsletter_subscribers FOR INSERT WITH CHECK (true);
+
+-- Sommelier Inquiries
+ALTER TABLE public.sommelier_inquiries ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Allow anon select inquiries" ON public.sommelier_inquiries;
+CREATE POLICY "Allow anon select inquiries" ON public.sommelier_inquiries FOR SELECT USING (true);
+DROP POLICY IF EXISTS "Allow anon insert inquiries" ON public.sommelier_inquiries;
+CREATE POLICY "Allow anon insert inquiries" ON public.sommelier_inquiries FOR INSERT WITH CHECK (true);
+DROP POLICY IF EXISTS "Allow anon update inquiries" ON public.sommelier_inquiries;
+CREATE POLICY "Allow anon update inquiries" ON public.sommelier_inquiries FOR UPDATE USING (true);
+
+-- Wishlists
+ALTER TABLE public.wishlists ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Allow anon select wishlists" ON public.wishlists;
+CREATE POLICY "Allow anon select wishlists" ON public.wishlists FOR SELECT USING (true);
+DROP POLICY IF EXISTS "Allow anon insert wishlists" ON public.wishlists;
+CREATE POLICY "Allow anon insert wishlists" ON public.wishlists FOR INSERT WITH CHECK (true);
+DROP POLICY IF EXISTS "Allow anon update wishlists" ON public.wishlists;
+CREATE POLICY "Allow anon update wishlists" ON public.wishlists FOR UPDATE USING (true);
+
+-- Davao Branches
+ALTER TABLE public.branches ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Public branches viewable by everyone" ON public.branches;
+CREATE POLICY "Public branches viewable by everyone" ON public.branches FOR SELECT USING (true);
+DROP POLICY IF EXISTS "Allow all modifications on branches" ON public.branches;
+CREATE POLICY "Allow all modifications on branches" ON public.branches FOR ALL USING (true) WITH CHECK (true);
+
 -- ==============================================================================
 -- INITIAL SEED DATA: Categories
 -- ==============================================================================
@@ -253,6 +338,90 @@ ON CONFLICT (category_id) DO UPDATE SET
   description = EXCLUDED.description,
   image = EXCLUDED.image,
   item_count = EXCLUDED.item_count;
+
+-- ==============================================================================
+-- INITIAL SEED DATA: 5 Davao City Physical Cellar Branches
+-- ==============================================================================
+INSERT INTO public.branches (
+  branch_id, name, district, address, landmark, phone, operating_hours,
+  features, image, is_flagship, map_coordinates
+) VALUES
+(
+  'branch-lanang-flagship',
+  'VÍNEA Flagship Cellar & Tasting Lounge',
+  'Lanang / North Davao',
+  'G/F Premier Wing, J.P. Laurel Avenue, Lanang, Davao City, 8000',
+  'Across from Lanang Business Park, beside Grand Regal',
+  '(082) 238-8921 / +63 917 842 1920',
+  'Monday – Sunday: 10:00 AM – 11:30 PM',
+  '["Walk-In Subterranean Vault (13°C)", "Master Sommelier Private Tasting Room", "Artisan Charcuterie & Cheese Pairing Bar", "Temperature-Controlled Bottle Storage Lockers", "Curated Corporate & VIP Gift Concierge"]'::jsonb,
+  '/src/assets/images/davao_wine_cellar_1793457420629.jpg',
+  true,
+  '7.1032, 125.6421'
+),
+(
+  'branch-abreeza',
+  'VÍNEA Cellar & Wine Bar — Abreeza',
+  'Bajada / Central District',
+  'Level 2, Restaurant Row, Abreeza Mall, J.P. Laurel Ave, Bajada, Davao City, 8000',
+  'Near the Garden Walk & Open-Air Courtyard',
+  '(082) 321-4560 / +63 917 520 8831',
+  'Monday – Sunday: 11:00 AM – 10:00 PM',
+  '["Italian Enomatic Wine Tasting Dispensers", "Coravin Preserved Rare By-The-Glass Program", "Spanish Tapas & Jamón Ibérico Pairing", "Express Chilled Pick-Up for Online Orders"]'::jsonb,
+  '/src/assets/images/category_red_wine_1791213197300.jpg',
+  false,
+  '7.0911, 125.6178'
+),
+(
+  'branch-matina',
+  'VÍNEA Reserve Vault & Cellar — Matina',
+  'Matina / South Davao',
+  'Unit 104, The Veranda Complex, McArthur Highway, Matina, Davao City, 8000',
+  'Near Ateneo de Davao Matina Campus & Tulip Drive',
+  '(082) 297-6411 / +63 917 312 9044',
+  'Tuesday – Sunday: 1:00 PM – 11:00 PM',
+  '["Collector Cellar Advisory Consultation", "Private Bordeaux & Burgundy Locker Storage", "South Davao Chilled Van Dispatch Hub", "Boutique Artisan Glassware & Decanter Shop"]'::jsonb,
+  '/src/assets/images/category_white_wine_1791213207550.jpg',
+  false,
+  '7.0544, 125.5862'
+),
+(
+  'branch-azuela',
+  'VÍNEA Waterfront Cellar & Terrace — Azuela Cove',
+  'Azuela Cove / Lanang Seaside',
+  'The Boardwalk at Azuela Cove, R. Castillo St, Lanang, Davao City, 8000',
+  'Overlooking the Davao Gulf & Samal Island horizon',
+  '(082) 285-1900 / +63 917 609 4322',
+  'Wednesday – Monday: 3:00 PM – 12:00 MN',
+  '["Seaside Sunset Rosé & Champagne Flights", "Al Fresco Oceanfront Wine Deck", "Live Acoustic Jazz & Sommelier Salons", "Yacht & Island Cruise Provisioning Service"]'::jsonb,
+  '/src/assets/images/category_sparkling_wine_1791213218531.jpg',
+  false,
+  '7.1089, 125.6543'
+),
+(
+  'branch-ecoland',
+  'VÍNEA Boutique Tasting Cellar — Ecoland',
+  'Ecoland / Quimpo Boulevard',
+  'G/F The Annex, Quimpo Boulevard, Ecoland, Davao City, 8000',
+  'Adjacent to SM City Davao Annex & John Paul College',
+  '(082) 299-8833 / +63 917 441 7719',
+  'Monday – Saturday: 12:00 NN – 10:30 PM',
+  '["Everyday Fine Wine Selections under ₱3,000", "Express 60-Minute Delivery Dispatch for South Davao", "Gift Packaging & Hand-Engraved Wooden Boxes", "Weekly Free Public Cellar Tasting Flights"]'::jsonb,
+  '/src/assets/images/hero_wine_cellar_1791213186963.jpg',
+  false,
+  '7.0498, 125.5912'
+)
+ON CONFLICT (branch_id) DO UPDATE SET
+  name = EXCLUDED.name,
+  district = EXCLUDED.district,
+  address = EXCLUDED.address,
+  landmark = EXCLUDED.landmark,
+  phone = EXCLUDED.phone,
+  operating_hours = EXCLUDED.operating_hours,
+  features = EXCLUDED.features,
+  image = EXCLUDED.image,
+  is_flagship = EXCLUDED.is_flagship,
+  map_coordinates = EXCLUDED.map_coordinates;
 
 -- ==============================================================================
 -- INITIAL SEED DATA: All 12 Luxury Wine Products
@@ -685,6 +854,22 @@ BEGIN
   END;
   BEGIN
     ALTER PUBLICATION supabase_realtime ADD TABLE public.users;
+  EXCEPTION WHEN others THEN NULL;
+  END;
+  BEGIN
+    ALTER PUBLICATION supabase_realtime ADD TABLE public.newsletter_subscribers;
+  EXCEPTION WHEN others THEN NULL;
+  END;
+  BEGIN
+    ALTER PUBLICATION supabase_realtime ADD TABLE public.sommelier_inquiries;
+  EXCEPTION WHEN others THEN NULL;
+  END;
+  BEGIN
+    ALTER PUBLICATION supabase_realtime ADD TABLE public.wishlists;
+  EXCEPTION WHEN others THEN NULL;
+  END;
+  BEGIN
+    ALTER PUBLICATION supabase_realtime ADD TABLE public.branches;
   EXCEPTION WHEN others THEN NULL;
   END;
 END $$;
