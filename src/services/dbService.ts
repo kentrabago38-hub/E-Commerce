@@ -362,6 +362,7 @@ export function normalizeProductFromSupabase(raw: Record<string, unknown>): Prod
     original_price: raw.original_price ? Number(raw.original_price) : undefined,
     stock: Number(raw.stock ?? 10),
     image: String(raw.image || '/src/assets/images/category_red_wine_1791213197300.jpg'),
+    images: Array.isArray(raw.images) ? (raw.images as string[]) : undefined,
     bottle_color: String(raw.bottle_color || '#440e18'),
     accent_color: String(raw.accent_color || '#d4af37'),
     description: String(raw.description || ''),

@@ -26,6 +26,7 @@ CREATE TABLE IF NOT EXISTS public.products (
   tasting_notes JSONB,
   bottle_size TEXT DEFAULT '750ml',
   image TEXT,
+  images JSONB DEFAULT '[]'::jsonb,
   bottle_color TEXT,
   accent_color TEXT,
   rating NUMERIC(3, 1) DEFAULT 5.0,
@@ -57,6 +58,7 @@ ALTER TABLE public.products ADD COLUMN IF NOT EXISTS description TEXT;
 ALTER TABLE public.products ADD COLUMN IF NOT EXISTS tasting_notes JSONB;
 ALTER TABLE public.products ADD COLUMN IF NOT EXISTS bottle_size TEXT DEFAULT '750ml';
 ALTER TABLE public.products ADD COLUMN IF NOT EXISTS image TEXT;
+ALTER TABLE public.products ADD COLUMN IF NOT EXISTS images JSONB DEFAULT '[]'::jsonb;
 ALTER TABLE public.products ADD COLUMN IF NOT EXISTS bottle_color TEXT;
 ALTER TABLE public.products ADD COLUMN IF NOT EXISTS accent_color TEXT;
 ALTER TABLE public.products ADD COLUMN IF NOT EXISTS rating NUMERIC(3, 1) DEFAULT 5.0;
