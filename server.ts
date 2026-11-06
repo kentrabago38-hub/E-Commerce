@@ -18,15 +18,15 @@ import {
   upsertUserRecord,
   getAllReviews,
   insertReviewRecord
-} from './src/db/queries.ts';
-import { seedPostgresIfEmpty } from './src/db/seedPostgres.ts';
+} from './src/db/queries';
+import { seedPostgresIfEmpty } from './src/db/seedPostgres';
 import {
   INITIAL_PRODUCTS,
   INITIAL_CATEGORIES,
   INITIAL_ORDERS,
   INITIAL_REVIEWS,
   INITIAL_REGISTERED_USERS
-} from './src/data/mockData.ts';
+} from './src/data/mockData';
 
 dotenv.config();
 

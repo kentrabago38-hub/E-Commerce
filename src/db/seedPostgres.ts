@@ -9,14 +9,14 @@ import {
   insertOrder,
   getAllReviews,
   insertReviewRecord
-} from './queries.ts';
+} from './queries';
 import {
   INITIAL_PRODUCTS,
   INITIAL_CATEGORIES,
   INITIAL_ORDERS,
   INITIAL_REVIEWS,
   INITIAL_REGISTERED_USERS
-} from '../data/mockData.ts';
+} from '../data/mockData';
 
 export async function seedPostgresIfEmpty(): Promise<void> {
   if (!process.env.SQL_HOST) {

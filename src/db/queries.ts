@@ -1,5 +1,5 @@
-import { db } from './index.ts';
-import { products, categories, orders, reviews, users } from './schema.ts';
+import { db } from './index';
+import { products, categories, orders, reviews, users } from './schema';
 import { eq, desc } from 'drizzle-orm';
 import { Product, Category, Order, Review, User } from '../types/wine';
 
