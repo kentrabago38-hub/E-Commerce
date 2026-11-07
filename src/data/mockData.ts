@@ -6,7 +6,7 @@ export const INITIAL_CATEGORIES: Category[] = [
     category_name: 'Red Wine',
     slug: 'red',
     description: 'Full-bodied Cabernets, velvety Pinot Noirs, and bold historic terroirs with complex aromatics.',
-    image: '/src/assets/images/category_red_wine_curated.jpg',
+    image: '/images/category_red_wine_curated.jpg',
     item_count: 5
   },
   {
@@ -14,7 +14,7 @@ export const INITIAL_CATEGORIES: Category[] = [
     category_name: 'White Wine',
     slug: 'white',
     description: 'Crisp Chardonnays, vibrant Sauvignon Blancs, and mineral-driven Rieslings from cool climate vineyards.',
-    image: '/src/assets/images/category_white_wine_curated.jpg',
+    image: '/images/category_white_wine_curated.jpg',
     item_count: 3
   },
   {
@@ -22,7 +22,7 @@ export const INITIAL_CATEGORIES: Category[] = [
     category_name: 'Rosé',
     slug: 'rose',
     description: 'Sun-drenched Mediterranean pale pinks offering fresh red berries, delicate minerality, and crisp acidity.',
-    image: '/src/assets/images/category_rose_wine_curated.jpg',
+    image: '/images/category_rose_wine_curated.jpg',
     item_count: 2
   },
   {
@@ -30,7 +30,7 @@ export const INITIAL_CATEGORIES: Category[] = [
     category_name: 'Sparkling Wine',
     slug: 'sparkling',
     description: 'Traditional method Champagne, artisanal Prosecco, and sparkling vintages with persistent fine mousse.',
-    image: '/src/assets/images/category_sparkling_wine_curated.jpg',
+    image: '/images/category_sparkling_wine_curated.jpg',
     item_count: 2
   },
   {
@@ -38,7 +38,7 @@ export const INITIAL_CATEGORIES: Category[] = [
     category_name: 'Premium Collections',
     slug: 'collections',
     description: 'Curated cellared selections, library vintages, and rare single-vineyard allocations.',
-    image: '/src/assets/images/category_collections_vault_curated.jpg',
+    image: '/images/category_collections_vault_curated.jpg',
     item_count: 2
   },
   {
@@ -46,7 +46,7 @@ export const INITIAL_CATEGORIES: Category[] = [
     category_name: 'Gift Sets',
     slug: 'gift-sets',
     description: 'Artisan handcrafted wooden cases, sommelier glassware sets, and celebratory presentation sets.',
-    image: '/src/assets/images/category_gift_sets_curated.jpg',
+    image: '/images/category_gift_sets_curated.jpg',
     item_count: 2
   }
 ];
@@ -67,11 +67,11 @@ export const INITIAL_PRODUCTS: Product[] = [
     price: 7950,
     original_price: 8950,
     stock: 24,
-    image: '/src/assets/images/product_chateau_lumiere_cabernet.jpg',
+    image: '/images/product_chateau_lumiere_cabernet.jpg',
     images: [
-      '/src/assets/images/region_bordeaux_chateau.jpg',
-      '/src/assets/images/wine_pouring_crystal_glass_1793460097087.jpg',
-      '/src/assets/images/pairing_prime_ribeye_steak.jpg'
+      '/images/region_bordeaux_chateau.jpg',
+      '/images/wine_pouring_crystal_glass_1793460097087.jpg',
+      '/images/pairing_prime_ribeye_steak.jpg'
     ],
     bottle_color: '#440e18',
     accent_color: '#d4af37',
@@ -103,10 +103,10 @@ export const INITIAL_PRODUCTS: Product[] = [
     body: 'Light',
     price: 2650,
     stock: 42,
-    image: '/src/assets/images/product_villa_rose_provencal.jpg',
+    image: '/images/product_villa_rose_provencal.jpg',
     images: [
-      '/src/assets/images/category_rose_wine_curated.jpg',
-      '/src/assets/images/pairing_oysters_and_caviar.jpg'
+      '/images/category_rose_wine_curated.jpg',
+      '/images/pairing_oysters_and_caviar.jpg'
     ],
     bottle_color: '#9e3f52',
     accent_color: '#f5c6cb',
@@ -138,10 +138,10 @@ export const INITIAL_PRODUCTS: Product[] = [
     body: 'Medium',
     price: 4850,
     stock: 18,
-    image: '/src/assets/images/product_monteverde_pinot_noir.jpg',
+    image: '/images/product_monteverde_pinot_noir.jpg',
     images: [
-      '/src/assets/images/region_burgundy_slopes.jpg',
-      '/src/assets/images/wine_pouring_crystal_glass_1793460097087.jpg'
+      '/images/region_burgundy_slopes.jpg',
+      '/images/wine_pouring_crystal_glass_1793460097087.jpg'
     ],
     bottle_color: '#5e1927',
     accent_color: '#dfbe76',
@@ -173,10 +173,10 @@ export const INITIAL_PRODUCTS: Product[] = [
     body: 'Medium',
     price: 6050,
     stock: 15,
-    image: '/src/assets/images/product_maison_etoile_chardonnay.jpg',
+    image: '/images/product_maison_etoile_chardonnay.jpg',
     images: [
-      '/src/assets/images/pairing_seared_scallops_lobster.jpg',
-      '/src/assets/images/category_white_wine_curated.jpg'
+      '/images/pairing_seared_scallops_lobster.jpg',
+      '/images/category_white_wine_curated.jpg'
     ],
     bottle_color: '#82652b',
     accent_color: '#e6ca65',
@@ -208,10 +208,10 @@ export const INITIAL_PRODUCTS: Product[] = [
     body: 'Medium',
     price: 10200,
     stock: 9,
-    image: '/src/assets/images/product_domaine_reine_champagne.jpg',
+    image: '/images/product_domaine_reine_champagne.jpg',
     images: [
-      '/src/assets/images/region_champagne_france.jpg',
-      '/src/assets/images/pairing_oysters_and_caviar.jpg'
+      '/images/region_champagne_france.jpg',
+      '/images/pairing_oysters_and_caviar.jpg'
     ],
     bottle_color: '#324a29',
     accent_color: '#f0d27c',
@@ -243,10 +243,10 @@ export const INITIAL_PRODUCTS: Product[] = [
     body: 'Full',
     price: 7450,
     stock: 12,
-    image: '/src/assets/images/product_san_pietro_brunello.jpg',
+    image: '/images/product_san_pietro_brunello.jpg',
     images: [
-      '/src/assets/images/region_tuscany_hills.jpg',
-      '/src/assets/images/pairing_prime_ribeye_steak.jpg'
+      '/images/region_tuscany_hills.jpg',
+      '/images/pairing_prime_ribeye_steak.jpg'
     ],
     bottle_color: '#420b13',
     accent_color: '#c5a059',
@@ -278,10 +278,10 @@ export const INITIAL_PRODUCTS: Product[] = [
     body: 'Light',
     price: 2350,
     stock: 35,
-    image: '/src/assets/images/product_cloud_valley_sauvignon.jpg',
+    image: '/images/product_cloud_valley_sauvignon.jpg',
     images: [
-      '/src/assets/images/region_marlborough_nz.jpg',
-      '/src/assets/images/pairing_oysters_and_caviar.jpg'
+      '/images/region_marlborough_nz.jpg',
+      '/images/pairing_oysters_and_caviar.jpg'
     ],
     bottle_color: '#55694a',
     accent_color: '#7bc991',
@@ -313,10 +313,10 @@ export const INITIAL_PRODUCTS: Product[] = [
     body: 'Full',
     price: 5250,
     stock: 20,
-    image: '/src/assets/images/product_bodega_solaria_rioja.jpg',
+    image: '/images/product_bodega_solaria_rioja.jpg',
     images: [
-      '/src/assets/images/region_rioja_spain.jpg',
-      '/src/assets/images/pairing_artisanal_charcuterie.jpg'
+      '/images/region_rioja_spain.jpg',
+      '/images/pairing_artisanal_charcuterie.jpg'
     ],
     bottle_color: '#3d0a11',
     accent_color: '#e0a96d',
@@ -348,10 +348,10 @@ export const INITIAL_PRODUCTS: Product[] = [
     body: 'Full',
     price: 11550,
     stock: 8,
-    image: '/src/assets/images/product_st_helena_napa_cabernet.jpg',
+    image: '/images/product_st_helena_napa_cabernet.jpg',
     images: [
-      '/src/assets/images/region_napa_valley.jpg',
-      '/src/assets/images/pairing_prime_ribeye_steak.jpg'
+      '/images/region_napa_valley.jpg',
+      '/images/pairing_prime_ribeye_steak.jpg'
     ],
     bottle_color: '#2e080e',
     accent_color: '#c5a059',
@@ -383,10 +383,10 @@ export const INITIAL_PRODUCTS: Product[] = [
     body: 'Light',
     price: 3550,
     stock: 16,
-    image: '/src/assets/images/product_schloss_johannisberg_riesling.jpg',
+    image: '/images/product_schloss_johannisberg_riesling.jpg',
     images: [
-      '/src/assets/images/pairing_artisanal_charcuterie.jpg',
-      '/src/assets/images/category_white_wine_curated.jpg'
+      '/images/pairing_artisanal_charcuterie.jpg',
+      '/images/category_white_wine_curated.jpg'
     ],
     bottle_color: '#495a32',
     accent_color: '#d4af37',
@@ -418,10 +418,10 @@ export const INITIAL_PRODUCTS: Product[] = [
     body: 'Light',
     price: 1980,
     stock: 30,
-    image: '/src/assets/images/product_valdobbiadene_prosecco.jpg',
+    image: '/images/product_valdobbiadene_prosecco.jpg',
     images: [
-      '/src/assets/images/category_sparkling_wine_curated.jpg',
-      '/src/assets/images/pairing_artisanal_charcuterie.jpg'
+      '/images/category_sparkling_wine_curated.jpg',
+      '/images/pairing_artisanal_charcuterie.jpg'
     ],
     bottle_color: '#28402b',
     accent_color: '#c5a059',
@@ -454,10 +454,10 @@ export const INITIAL_PRODUCTS: Product[] = [
     price: 21750,
     original_price: 24200,
     stock: 7,
-    image: '/src/assets/images/product_grand_terroirs_gift_box.jpg',
+    image: '/images/product_grand_terroirs_gift_box.jpg',
     images: [
-      '/src/assets/images/category_collections_vault_curated.jpg',
-      '/src/assets/images/category_gift_sets_curated.jpg'
+      '/images/category_collections_vault_curated.jpg',
+      '/images/category_gift_sets_curated.jpg'
     ],
     bottle_color: '#260a10',
     accent_color: '#dfbe76',
@@ -493,7 +493,7 @@ export const DAVAO_BRANCHES: DavaoBranch[] = [
       'Temperature-Controlled Bottle Storage Lockers',
       'Curated Corporate & VIP Gift Concierge'
     ],
-    image: '/src/assets/images/branch_lanang_flagship.jpg',
+    image: '/images/branch_lanang_flagship.jpg',
     isFlagship: true,
     mapCoordinates: '7.1032, 125.6421'
   },
@@ -511,7 +511,7 @@ export const DAVAO_BRANCHES: DavaoBranch[] = [
       'Spanish Tapas & Jamón Ibérico Pairing',
       'Express Chilled Pick-Up for Online Orders'
     ],
-    image: '/src/assets/images/branch_abreeza_wine_bar.jpg',
+    image: '/images/branch_abreeza_wine_bar.jpg',
     mapCoordinates: '7.0911, 125.6178'
   },
   {
@@ -528,7 +528,7 @@ export const DAVAO_BRANCHES: DavaoBranch[] = [
       'Rare Bordeaux Grand Cru & Super Tuscan Library',
       'One-on-One Sommelier Cellar Consultations'
     ],
-    image: '/src/assets/images/branch_matina_reserve.jpg',
+    image: '/images/branch_matina_reserve.jpg',
     mapCoordinates: '7.0583, 125.5924'
   },
   {
@@ -545,7 +545,7 @@ export const DAVAO_BRANCHES: DavaoBranch[] = [
       'Fresh Oysters, Davao Sea Salt Ceviche Pairings',
       'Chilled Provençal Rosé Garden'
     ],
-    image: '/src/assets/images/branch_azuela_waterfront.jpg',
+    image: '/images/branch_azuela_waterfront.jpg',
     mapCoordinates: '7.1124, 125.6541'
   },
   {
@@ -562,7 +562,7 @@ export const DAVAO_BRANCHES: DavaoBranch[] = [
       'Riedel Sommelier Glassware & Decanters',
       'Daily Free Featured Tasting Samples'
     ],
-    image: '/src/assets/images/branch_sm_lanang_boutique.jpg',
+    image: '/images/branch_sm_lanang_boutique.jpg',
     mapCoordinates: '7.0988, 125.6327'
   }
 ];
@@ -619,7 +619,7 @@ export const GUIDE_ARTICLES: GuideArticle[] = [
     subtitle: 'Navigating terroirs, vintages, and palates with quiet confidence.',
     readTime: '6 min read',
     category: 'Fundamentals',
-    image: '/src/assets/images/guide_choosing_wine.jpg',
+    image: '/images/guide_choosing_wine.jpg',
     excerpt: 'Selecting the perfect bottle is neither an art reserved for sommeliers nor a game of chance. Learn the 4 pillars of wine selection.',
     content: [
       'When standing before an extensive wine list or curated marketplace, the key is understanding context. Begin with the gathering: is this an energetic celebratory gathering, an intimate five-course dinner, or a reflective evening glass?',
@@ -639,7 +639,7 @@ export const GUIDE_ARTICLES: GuideArticle[] = [
     subtitle: 'Beyond grape skins: acidity, tannin extraction, and barrel aging.',
     readTime: '5 min read',
     category: 'Cellar Science',
-    image: '/src/assets/images/guide_red_vs_white.jpg',
+    image: '/images/guide_red_vs_white.jpg',
     excerpt: 'Explore why red and white wines evoke completely different physical sensations on the palate, from skin contact to oak maturation.',
     content: [
       'The foundational distinction between red and white winemaking is skin contact during fermentation. Red wine derives its color, structure, and preservative tannins from weeks of maceration with grape skins and seeds.',
@@ -659,7 +659,7 @@ export const GUIDE_ARTICLES: GuideArticle[] = [
     subtitle: 'De-coding Old World appellations vs. New World varietal labelling.',
     readTime: '7 min read',
     category: 'Connoisseurship',
-    image: '/src/assets/images/guide_wine_labels.jpg',
+    image: '/images/guide_wine_labels.jpg',
     excerpt: 'Why does French wine show the village while Californian wine shows the grape? Master the language of wine labels.',
     content: [
       'Old World wine labels (France, Italy, Spain, Germany) prioritize Appellation d’Origine Contrôlée (AOC/DOC). The label tells you where the grapes grew (e.g., Margaux or Barolo), assuming you know the traditional grapes codified for that terroir for centuries.',
@@ -679,7 +679,7 @@ export const GUIDE_ARTICLES: GuideArticle[] = [
     subtitle: 'The golden balance: harmonizing acid, fat, tannin, and sweetness.',
     readTime: '6 min read',
     category: 'Gastronomy',
-    image: '/src/assets/images/guide_food_wine_pairing.jpg',
+    image: '/images/guide_food_wine_pairing.jpg',
     excerpt: 'Classic sommelier rules that will elevate every meal: acidity cuts richness, tannin softens with protein, and sweetness demands company.',
     content: [
       'The primary rule of gastronomic pairing is balance. High-fat dishes (like marbled steaks or duck confit) coat the tongue; a wine with firm tannins or sharp acidity cleanses the palate with every sip, making each bite feel as fresh as the first.',
@@ -699,7 +699,7 @@ export const GUIDE_ARTICLES: GuideArticle[] = [
     subtitle: 'Protecting your bottles in Davao: heat, humidity, vibration, and light.',
     readTime: '5 min read',
     category: 'Collector Guide',
-    image: '/src/assets/images/guide_tropical_cellaring.jpg',
+    image: '/images/guide_tropical_cellaring.jpg',
     excerpt: 'In Davao City’s tropical heat, room temperature will quickly spoil fine wine. Learn the vital conditions for tropical cellaring.',
     content: [
       'Wine is an organic, living substance that evolves slowly through micro-oxygenation. In tropical climates like Davao where ambient temperatures exceed 30°C, wine will cook and lose fruit freshness within weeks without climate control.',
@@ -719,7 +719,7 @@ export const GUIDE_ARTICLES: GuideArticle[] = [
     subtitle: 'From Sight and Swirl to the Finish: decoding the 5 S method.',
     readTime: '6 min read',
     category: 'Sensory Skills',
-    image: '/src/assets/images/guide_tasting_notes.jpg',
+    image: '/images/guide_tasting_notes.jpg',
     excerpt: 'See, Swirl, Sniff, Sip, Savor. Transform vague impressions into evocative, precise tasting notes.',
     content: [
       'Tasting begins with the eyes. Tilt your glass against a white background: a deep purple rim suggests youth; an amber or brick rim signals graceful aging and tertiary complexity.',

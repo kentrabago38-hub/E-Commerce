@@ -41,21 +41,22 @@ import {
 import { getSupabaseConfigStatus } from '../lib/supabase';
 import schemaSql from '../data/supabaseSchemaSql';
 import { VineaLogoIcon } from './VineaLogo';
+import { getWineImageUrl, handleImageError } from '../utils/imageUtils';
 
 export const WINE_PHOTO_PRESETS = [
-  { name: 'Bordeaux Cabernet', url: '/src/assets/images/product_chateau_lumiere_cabernet.jpg', badge: 'Red' },
-  { name: 'Burgundy Pinot Noir', url: '/src/assets/images/product_monteverde_pinot_noir.jpg', badge: 'Red' },
-  { name: 'Brunello di Montalcino', url: '/src/assets/images/product_san_pietro_brunello.jpg', badge: 'Red' },
-  { name: 'Rioja Gran Reserva', url: '/src/assets/images/product_bodega_solaria_rioja.jpg', badge: 'Red' },
-  { name: 'Napa Valley Cabernet', url: '/src/assets/images/product_st_helena_napa_cabernet.jpg', badge: 'Red' },
-  { name: 'Burgundy Chardonnay', url: '/src/assets/images/product_maison_etoile_chardonnay.jpg', badge: 'White' },
-  { name: 'Marlborough Sauvignon', url: '/src/assets/images/product_cloud_valley_sauvignon.jpg', badge: 'White' },
-  { name: 'Rheingau Riesling', url: '/src/assets/images/product_schloss_johannisberg_riesling.jpg', badge: 'White' },
-  { name: 'Provence Rosé', url: '/src/assets/images/product_villa_rose_provencal.jpg', badge: 'Rosé' },
-  { name: 'Vintage Champagne', url: '/src/assets/images/product_domaine_reine_champagne.jpg', badge: 'Sparkling' },
-  { name: 'Valdobbiadene Prosecco', url: '/src/assets/images/product_valdobbiadene_prosecco.jpg', badge: 'Sparkling' },
-  { name: 'Wooden Prestige Case', url: '/src/assets/images/product_grand_terroirs_gift_box.jpg', badge: 'Collection' },
-  { name: 'Cellar Vault', url: '/src/assets/images/category_collections_vault_curated.jpg', badge: 'Estate' }
+  { name: 'Bordeaux Cabernet', url: '/images/product_chateau_lumiere_cabernet.jpg', badge: 'Red' },
+  { name: 'Burgundy Pinot Noir', url: '/images/product_monteverde_pinot_noir.jpg', badge: 'Red' },
+  { name: 'Brunello di Montalcino', url: '/images/product_san_pietro_brunello.jpg', badge: 'Red' },
+  { name: 'Rioja Gran Reserva', url: '/images/product_bodega_solaria_rioja.jpg', badge: 'Red' },
+  { name: 'Napa Valley Cabernet', url: '/images/product_st_helena_napa_cabernet.jpg', badge: 'Red' },
+  { name: 'Burgundy Chardonnay', url: '/images/product_maison_etoile_chardonnay.jpg', badge: 'White' },
+  { name: 'Marlborough Sauvignon', url: '/images/product_cloud_valley_sauvignon.jpg', badge: 'White' },
+  { name: 'Rheingau Riesling', url: '/images/product_schloss_johannisberg_riesling.jpg', badge: 'White' },
+  { name: 'Provence Rosé', url: '/images/product_villa_rose_provencal.jpg', badge: 'Rosé' },
+  { name: 'Vintage Champagne', url: '/images/product_domaine_reine_champagne.jpg', badge: 'Sparkling' },
+  { name: 'Valdobbiadene Prosecco', url: '/images/product_valdobbiadene_prosecco.jpg', badge: 'Sparkling' },
+  { name: 'Wooden Prestige Case', url: '/images/product_grand_terroirs_gift_box.jpg', badge: 'Collection' },
+  { name: 'Cellar Vault', url: '/images/category_collections_vault_curated.jpg', badge: 'Estate' }
 ];
 
 export const AdminDashboard: React.FC = () => {
@@ -281,12 +282,12 @@ export const AdminDashboard: React.FC = () => {
       stock: Number(prodStock),
       image: prodImage || (
         prodType === 'White'
-          ? '/src/assets/images/category_white_wine_curated.jpg'
+          ? '/images/category_white_wine_curated.jpg'
           : prodType === 'Sparkling'
-          ? '/src/assets/images/category_sparkling_wine_curated.jpg'
+          ? '/images/category_sparkling_wine_curated.jpg'
           : prodType === 'Rosé'
-          ? '/src/assets/images/category_rose_wine_curated.jpg'
-          : '/src/assets/images/category_red_wine_curated.jpg'
+          ? '/images/category_rose_wine_curated.jpg'
+          : '/images/category_red_wine_curated.jpg'
       ),
       description: prodDesc || 'Hand-harvested estate bottled vintage with remarkable balance and longevity.',
       category_id: prodType === 'Red' ? 'cat-red' : prodType === 'White' ? 'cat-white' : 'cat-sparkling',
@@ -320,7 +321,7 @@ export const AdminDashboard: React.FC = () => {
       category_name: newCatName,
       slug: newCatSlug || newCatName.toLowerCase().replace(/\s+/g, '-'),
       description: newCatDesc || 'Curated estate collections.',
-      image: '/src/assets/images/category_red_wine_1791213197300.jpg'
+      image: '/images/category_red_wine_1791213197300.jpg'
     });
     setNewCatName('');
     setNewCatSlug('');
@@ -479,8 +480,9 @@ export const AdminDashboard: React.FC = () => {
                         title="Click to view & add photos for this wine"
                       >
                         <img
-                          src={p.image}
+                          src={getWineImageUrl(p.image)}
                           alt={p.name}
+                          onError={handleImageError}
                           className="w-11 h-11 rounded-lg object-cover border border-[#392126] group-hover/thumb:border-[#D5B15C] transition-all"
                           referrerPolicy="no-referrer"
                         />
@@ -727,8 +729,9 @@ export const AdminDashboard: React.FC = () => {
                 >
                   <div className="flex items-center gap-3">
                     <img
-                      src={cat.image}
+                      src={getWineImageUrl(cat.image)}
                       alt={cat.category_name}
+                      onError={handleImageError}
                       className="w-12 h-12 rounded object-cover"
                       referrerPolicy="no-referrer"
                     />
@@ -1433,17 +1436,18 @@ export const AdminDashboard: React.FC = () => {
 
                 <div className="flex items-center gap-3">
                   <img
-                    src={
+                    src={getWineImageUrl(
                       prodImage ||
                       (prodType === 'White'
-                        ? '/src/assets/images/category_white_wine_curated.jpg'
+                        ? '/images/category_white_wine_curated.jpg'
                         : prodType === 'Sparkling'
-                        ? '/src/assets/images/category_sparkling_wine_curated.jpg'
+                        ? '/images/category_sparkling_wine_curated.jpg'
                         : prodType === 'Rosé'
-                        ? '/src/assets/images/category_rose_wine_curated.jpg'
-                        : '/src/assets/images/category_red_wine_curated.jpg')
-                    }
+                        ? '/images/category_rose_wine_curated.jpg'
+                        : '/images/category_red_wine_curated.jpg')
+                    )}
                     alt="Preview"
+                    onError={handleImageError}
                     className="w-14 h-14 rounded-lg object-cover border border-neutral-700 shrink-0"
                   />
                   <div className="flex-1 space-y-1.5">
@@ -1605,8 +1609,9 @@ export const AdminDashboard: React.FC = () => {
 
                 <div className="flex items-center gap-3">
                   <img
-                    src={editingProduct.image}
+                    src={getWineImageUrl(editingProduct.image)}
                     alt={editingProduct.name}
+                    onError={handleImageError}
                     className="w-14 h-14 rounded-lg object-cover border border-neutral-700 shrink-0"
                   />
                   <div className="flex-1 space-y-1.5">
@@ -1709,8 +1714,9 @@ export const AdminDashboard: React.FC = () => {
                 <div className="flex flex-col sm:flex-row gap-4 items-center sm:items-start pt-2">
                   <div className="relative w-28 h-28 rounded-xl overflow-hidden border border-[#D5B15C]/50 shadow-md shrink-0 bg-neutral-900">
                     <img
-                      src={photoModalPrimary || managingPhotosProduct.image}
+                      src={getWineImageUrl(photoModalPrimary || managingPhotosProduct.image)}
                       alt="Primary Wine"
+                      onError={handleImageError}
                       className="w-full h-full object-cover"
                       referrerPolicy="no-referrer"
                     />
@@ -1812,8 +1818,9 @@ export const AdminDashboard: React.FC = () => {
                     {photoModalGallery.map((photoUrl, idx) => (
                       <div key={idx} className="relative group rounded-xl overflow-hidden border border-neutral-700 bg-neutral-900 aspect-square">
                         <img
-                          src={photoUrl}
+                          src={getWineImageUrl(photoUrl)}
                           alt={`Gallery photo ${idx + 1}`}
+                          onError={handleImageError}
                           className="w-full h-full object-cover"
                           referrerPolicy="no-referrer"
                         />

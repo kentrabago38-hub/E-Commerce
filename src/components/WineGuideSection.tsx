@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { GUIDE_ARTICLES } from '../data/mockData';
 import { GuideArticle } from '../types/wine';
 import { BookOpen, Clock, ArrowRight, X, Quote, CheckCircle2 } from 'lucide-react';
+import { getWineImageUrl, handleImageError } from '../utils/imageUtils';
 
 export const WineGuideSection: React.FC = () => {
   const [selectedArticle, setSelectedArticle] = useState<GuideArticle | null>(null);
@@ -32,8 +33,9 @@ export const WineGuideSection: React.FC = () => {
         <div className="grid grid-cols-1 lg:grid-cols-12 items-center">
           <div className="lg:col-span-7 h-80 lg:h-96 relative overflow-hidden bg-[#210D12]">
             <img
-              src={GUIDE_ARTICLES[0].image}
+              src={getWineImageUrl(GUIDE_ARTICLES[0].image)}
               alt={GUIDE_ARTICLES[0].title}
+              onError={handleImageError}
               className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
               referrerPolicy="no-referrer"
             />
@@ -74,8 +76,9 @@ export const WineGuideSection: React.FC = () => {
           >
             <div className="h-52 relative overflow-hidden bg-[#210D12]">
               <img
-                src={article.image}
+                src={getWineImageUrl(article.image)}
                 alt={article.title}
+                onError={handleImageError}
                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
                 referrerPolicy="no-referrer"
               />

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useWineStore } from '../context/WineStoreContext';
 import { formatPeso } from '../utils/formatCurrency';
 import { X, Heart, ShoppingBag, Star, Sparkles, Utensils, Check, ArrowRight } from 'lucide-react';
+import { getWineImageUrl, handleImageError } from '../utils/imageUtils';
 
 export const ProductQuickViewModal: React.FC = () => {
   const {
@@ -66,8 +67,9 @@ export const ProductQuickViewModal: React.FC = () => {
           <div className="space-y-3">
             <div className="relative aspect-4/3 rounded-xl overflow-hidden bg-gradient-to-b from-[#48151F]/40 to-[#130B0D] border border-[#48151F]">
               <img
-                src={activeModalImg || quickViewProduct.image}
+                src={getWineImageUrl(activeModalImg || quickViewProduct.image)}
                 alt={quickViewProduct.name}
+                onError={handleImageError}
                 className="w-full h-full object-cover object-center transition-all duration-200"
                 referrerPolicy="no-referrer"
               />
@@ -93,8 +95,9 @@ export const ProductQuickViewModal: React.FC = () => {
                     }`}
                   >
                     <img
-                      src={imgUrl}
+                      src={getWineImageUrl(imgUrl)}
                       alt={`View ${i + 1}`}
+                      onError={handleImageError}
                       className="w-full h-full object-cover"
                       referrerPolicy="no-referrer"
                     />

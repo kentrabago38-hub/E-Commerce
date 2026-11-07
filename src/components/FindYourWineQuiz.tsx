@@ -16,6 +16,7 @@ import {
   PartyPopper,
   Compass
 } from 'lucide-react';
+import { getWineImageUrl, handleImageError } from '../utils/imageUtils';
 
 interface QuizOption {
   id: string;
@@ -312,8 +313,9 @@ export const FindYourWineQuiz: React.FC = () => {
                 >
                   <div className="flex items-center gap-4 w-full sm:w-auto">
                     <img
-                      src={wine.image}
+                      src={getWineImageUrl(wine.image)}
                       alt={wine.name}
+                      onError={handleImageError}
                       className="w-16 h-16 rounded-lg object-cover bg-black/40 border border-[#48151F]"
                       referrerPolicy="no-referrer"
                     />

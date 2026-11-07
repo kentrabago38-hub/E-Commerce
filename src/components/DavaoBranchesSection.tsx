@@ -14,6 +14,7 @@ import {
   ShieldCheck,
   Navigation
 } from 'lucide-react';
+import { getWineImageUrl, handleImageError } from '../utils/imageUtils';
 import { useWineStore } from '../context/WineStoreContext';
 import { BranchDirectionsModal } from './BranchDirectionsModal';
 
@@ -171,8 +172,9 @@ export const DavaoBranchesSection: React.FC = () => {
             {/* Right Media Card with Interactive Map Pin Badge */}
             <div className="lg:col-span-5 h-72 lg:h-84 rounded-2xl overflow-hidden relative border border-[#48151F] group">
               <img
-                src={DAVAO_BRANCHES[0].image}
+                src={getWineImageUrl(DAVAO_BRANCHES[0].image)}
                 alt={DAVAO_BRANCHES[0].name}
+                onError={handleImageError}
                 className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-700 ease-out"
                 referrerPolicy="no-referrer"
               />
@@ -213,8 +215,9 @@ export const DavaoBranchesSection: React.FC = () => {
             {/* Image Header with Interactive Map Pin Badge */}
             <div className="h-56 relative overflow-hidden bg-[#210D12]">
               <img
-                src={branch.image}
+                src={getWineImageUrl(branch.image)}
                 alt={branch.name}
+                onError={handleImageError}
                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
                 referrerPolicy="no-referrer"
               />

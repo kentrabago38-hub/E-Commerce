@@ -20,6 +20,7 @@ import {
   TrendingUp
 } from 'lucide-react';
 import { VintageComparisonTab } from './VintageComparisonTab';
+import { getWineImageUrl, handleImageError } from '../utils/imageUtils';
 
 type DetailTab = 'vintage' | 'tasting' | 'reviews';
 
@@ -131,8 +132,9 @@ export const ProductDetailPage: React.FC<ProductDetailPageProps> = ({ product, o
             onMouseMove={handleMouseMove}
           >
             <img
-              src={selectedImage || product.image}
+              src={getWineImageUrl(selectedImage || product.image)}
               alt={product.name}
+              onError={handleImageError}
               className={`w-full h-full object-cover object-center transition-transform duration-200 ${
                 isZoomed ? 'scale-150' : 'scale-100'
               }`}
@@ -178,8 +180,9 @@ export const ProductDetailPage: React.FC<ProductDetailPageProps> = ({ product, o
                     title={`View photo ${i + 1}`}
                   >
                     <img
-                      src={imgUrl}
+                      src={getWineImageUrl(imgUrl)}
                       alt={`${product.name} photo ${i + 1}`}
+                      onError={handleImageError}
                       className="w-full h-full object-cover"
                       referrerPolicy="no-referrer"
                     />

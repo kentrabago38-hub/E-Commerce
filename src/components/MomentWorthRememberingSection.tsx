@@ -1,6 +1,7 @@
 import React from 'react';
 import { useWineStore } from '../context/WineStoreContext';
 import { Sparkles, ArrowRight, Heart, Calendar } from 'lucide-react';
+import { getWineImageUrl, handleImageError } from '../utils/imageUtils';
 
 export const MomentWorthRememberingSection: React.FC = () => {
   const { setActiveTab, setIsQuizOpen, setSelectedProduct } = useWineStore();
@@ -16,8 +17,9 @@ export const MomentWorthRememberingSection: React.FC = () => {
       {/* Background with Ambient Candlelight Lifestyle Photography */}
       <div className="absolute inset-0 z-0">
         <img
-          src="/src/assets/images/lifestyle_dinner_wine_moment_1793460098663.jpg"
+          src={getWineImageUrl('/images/lifestyle_dinner_wine_moment_1793460098663.jpg')}
           alt="Intimate candlelit European terrace dinner with crystal wine stemware"
+          onError={handleImageError}
           className="w-full h-full object-cover object-center brightness-[0.35] scale-100 hover:scale-103 transition-transform duration-1000 ease-out"
           referrerPolicy="no-referrer"
         />

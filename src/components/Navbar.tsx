@@ -15,6 +15,7 @@ import {
   ArrowRight
 } from 'lucide-react';
 import { VineaLogoIcon } from './VineaLogo';
+import { getWineImageUrl, handleImageError } from '../utils/imageUtils';
 
 export const Navbar: React.FC = () => {
   const {
@@ -396,7 +397,12 @@ export const Navbar: React.FC = () => {
                     className="p-3 rounded-xl bg-[#210D12] hover:bg-[#351116] border border-[#351116] hover:border-[#C6A15B]/50 transition-all cursor-pointer flex items-center gap-3"
                   >
                     <div className="w-12 h-12 rounded-lg overflow-hidden bg-black/40 shrink-0">
-                      <img src={p.image} alt={p.name} className="w-full h-full object-cover" />
+                      <img
+                        src={getWineImageUrl(p.image)}
+                        alt={p.name}
+                        onError={handleImageError}
+                        className="w-full h-full object-cover"
+                      />
                     </div>
                     <div className="truncate">
                       <h5 className="font-serif text-sm text-[#F5EFE7] truncate">{p.name}</h5>

@@ -43,6 +43,7 @@ import {
   FileText,
   CheckCheck
 } from 'lucide-react';
+import { getWineImageUrl, handleImageError } from '../utils/imageUtils';
 
 const AVATAR_PRESETS = [
   {
@@ -1216,8 +1217,9 @@ export const UserDashboard: React.FC = () => {
                               <div className="flex items-center gap-3 min-w-0">
                                 {item.image ? (
                                   <img
-                                    src={item.image}
+                                    src={getWineImageUrl(item.image)}
                                     alt={item.name}
+                                    onError={handleImageError}
                                     className="w-12 h-14 object-cover rounded-lg bg-[#210D12] border border-[#48151F]"
                                   />
                                 ) : (
@@ -1864,8 +1866,9 @@ export const UserDashboard: React.FC = () => {
                       >
                         <div className="flex items-center gap-3 mb-3">
                           <img
-                            src={p.image}
+                            src={getWineImageUrl(p.image)}
                             alt={p.name}
+                            onError={handleImageError}
                             className="w-12 h-16 object-cover rounded bg-[#190D10]"
                           />
                           <div className="min-w-0 flex-1">

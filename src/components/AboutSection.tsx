@@ -15,6 +15,7 @@ import {
   CheckCircle2,
   Users
 } from 'lucide-react';
+import { getWineImageUrl, handleImageError } from '../utils/imageUtils';
 
 export const AboutSection: React.FC = () => {
   const { setActiveTab, showToast } = useWineStore();
@@ -91,8 +92,9 @@ export const AboutSection: React.FC = () => {
             >
               <div className="h-48 relative overflow-hidden bg-[#210D12]">
                 <img
-                  src={b.image}
+                  src={getWineImageUrl(b.image)}
                   alt={b.name}
+                  onError={handleImageError}
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
                   referrerPolicy="no-referrer"
                 />

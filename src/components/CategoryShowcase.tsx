@@ -1,6 +1,7 @@
 import React from 'react';
 import { useWineStore } from '../context/WineStoreContext';
 import { ArrowUpRight, Wine, Sparkles, Award } from 'lucide-react';
+import { getWineImageUrl, handleImageError } from '../utils/imageUtils';
 
 interface CuratedCollection {
   id: string;
@@ -19,7 +20,7 @@ const COLLECTIONS_LIST: CuratedCollection[] = [
     title: 'The Red Collection',
     subtitle: 'Grand Crus & Age-Worthy Bordeaux Blends',
     description: 'Structured Left Bank Cabernets, velvety Pomerol Merlots, and noble Barolo Nebbiolos crafted for profound longevity.',
-    image: '/src/assets/images/category_red_wine_curated.jpg',
+    image: '/images/category_red_wine_curated.jpg',
     slug: 'red',
     colSpan: 'lg:col-span-8',
     minHeight: 'min-h-[460px]'
@@ -29,7 +30,7 @@ const COLLECTIONS_LIST: CuratedCollection[] = [
     title: 'White Wine Essentials',
     subtitle: 'Chablis, Sancerre & Montrachet',
     description: 'Steely mineral precision, vibrant salinity, and barrel-fermented Burgundy Chardonnays with crystalline purity.',
-    image: '/src/assets/images/category_white_wine_curated.jpg',
+    image: '/images/category_white_wine_curated.jpg',
     slug: 'white',
     colSpan: 'lg:col-span-4',
     minHeight: 'min-h-[460px]'
@@ -39,7 +40,7 @@ const COLLECTIONS_LIST: CuratedCollection[] = [
     title: 'Sparkling Elegance',
     subtitle: 'Vintage Champagne & Prestige Cuvées',
     description: 'Traditional method Grand Cru effervescence with microscopic beads, toasted brioche, and hazelnut autolysis.',
-    image: '/src/assets/images/category_sparkling_wine_curated.jpg',
+    image: '/images/category_sparkling_wine_curated.jpg',
     slug: 'sparkling',
     colSpan: 'lg:col-span-4',
     minHeight: 'min-h-[420px]'
@@ -49,7 +50,7 @@ const COLLECTIONS_LIST: CuratedCollection[] = [
     title: 'Rosé Selection',
     subtitle: 'Pale Provençal Terroirs',
     description: 'Bone-dry estate bottlings from Bandol and Côtes de Provence capturing lavender, wild strawberry, and crushed sea shell.',
-    image: '/src/assets/images/category_rose_wine_curated.jpg',
+    image: '/images/category_rose_wine_curated.jpg',
     slug: 'rose',
     colSpan: 'lg:col-span-4',
     minHeight: 'min-h-[420px]'
@@ -59,7 +60,7 @@ const COLLECTIONS_LIST: CuratedCollection[] = [
     title: "Collector's Reserve",
     subtitle: 'Subterranean Vault Allocations',
     description: 'Museum-release library vintages, numbered single-barrel lots, and provenance-certified allocations.',
-    image: '/src/assets/images/category_collections_vault_curated.jpg',
+    image: '/images/category_collections_vault_curated.jpg',
     slug: 'collections',
     colSpan: 'lg:col-span-4',
     minHeight: 'min-h-[420px]'
@@ -109,8 +110,9 @@ export const CategoryShowcase: React.FC = () => {
             >
               {/* Media Layer */}
               <img
-                src={col.image}
+                src={getWineImageUrl(col.image)}
                 alt={col.title}
+                onError={handleImageError}
                 className="absolute inset-0 w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-700 ease-out"
                 referrerPolicy="no-referrer"
               />

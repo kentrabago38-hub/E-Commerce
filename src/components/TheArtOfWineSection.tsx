@@ -1,6 +1,7 @@
 import React from 'react';
 import { useWineStore } from '../context/WineStoreContext';
 import { ArrowRight, Sparkles, Compass } from 'lucide-react';
+import { getWineImageUrl, handleImageError } from '../utils/imageUtils';
 
 export const TheArtOfWineSection: React.FC = () => {
   const { setActiveTab, setSelectedProduct } = useWineStore();
@@ -26,8 +27,9 @@ export const TheArtOfWineSection: React.FC = () => {
 
             <div className="relative rounded-xl overflow-hidden shadow-2xl group border border-[#48151F]/60">
               <img
-                src="/src/assets/images/wine_pouring_crystal_glass_1793460097087.jpg"
+                src={getWineImageUrl('/images/wine_pouring_crystal_glass_1793460097087.jpg')}
                 alt="Decanting aged Grand Cru into hand-blown crystal stemware under candlelight"
+                onError={handleImageError}
                 className="w-full h-[460px] sm:h-[540px] object-cover object-center group-hover:scale-105 transition-transform duration-1000 ease-out"
                 referrerPolicy="no-referrer"
               />

@@ -3,6 +3,7 @@ import { Product } from '../types/wine';
 import { useWineStore } from '../context/WineStoreContext';
 import { formatPeso } from '../utils/formatCurrency';
 import { Heart, Eye, ShoppingBag, Star, Check } from 'lucide-react';
+import { getWineImageUrl, handleImageError } from '../utils/imageUtils';
 
 export type ProductCardStyle = 'boutique' | 'editorial' | 'collector';
 
@@ -56,8 +57,9 @@ export const ProductCard: React.FC<ProductCardProps> = ({
           onClick={handleCardClick}
         >
           <img
-            src={product.image}
+            src={getWineImageUrl(product.image)}
             alt={product.name}
+            onError={handleImageError}
             className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-700 ease-out"
             referrerPolicy="no-referrer"
           />
@@ -144,8 +146,9 @@ export const ProductCard: React.FC<ProductCardProps> = ({
           onClick={handleCardClick}
         >
           <img
-            src={product.image}
+            src={getWineImageUrl(product.image)}
             alt={product.name}
+            onError={handleImageError}
             className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-700 ease-out"
             referrerPolicy="no-referrer"
           />
@@ -224,8 +227,9 @@ export const ProductCard: React.FC<ProductCardProps> = ({
         onClick={handleCardClick}
       >
         <img
-          src={product.image}
+          src={getWineImageUrl(product.image)}
           alt={product.name}
+          onError={handleImageError}
           className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-700 ease-out"
           referrerPolicy="no-referrer"
         />

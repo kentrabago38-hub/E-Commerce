@@ -11,6 +11,7 @@ import {
   Check,
   ShieldCheck
 } from 'lucide-react';
+import { getWineImageUrl, handleImageError } from '../utils/imageUtils';
 
 export const CartDrawer: React.FC = () => {
   const {
@@ -134,8 +135,9 @@ export const CartDrawer: React.FC = () => {
                   className="p-3.5 rounded-xl bg-[#210D12] border border-[#48151F] flex items-center gap-3.5"
                 >
                   <img
-                    src={item.product.image}
+                    src={getWineImageUrl(item.product.image)}
                     alt={item.product.name}
+                    onError={handleImageError}
                     className="w-16 h-20 rounded-lg object-cover bg-black/30 border border-[#48151F] shrink-0"
                     referrerPolicy="no-referrer"
                   />

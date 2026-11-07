@@ -2,6 +2,7 @@ import React from 'react';
 import { useWineStore } from '../context/WineStoreContext';
 import { formatPeso } from '../utils/formatCurrency';
 import { Award, ArrowRight, ShieldCheck, Lock, Eye, ShoppingBag } from 'lucide-react';
+import { getWineImageUrl, handleImageError } from '../utils/imageUtils';
 
 export const CollectorsRoomSection: React.FC = () => {
   const { products, setSelectedProduct, setQuickViewProduct, addToCart, setActiveTab } = useWineStore();
@@ -21,8 +22,9 @@ export const CollectorsRoomSection: React.FC = () => {
       {/* Background vault texture & spotlight lighting */}
       <div className="absolute inset-0 z-0">
         <img
-          src="/src/assets/images/collectors_room_vault_1793460098223.jpg"
+          src={getWineImageUrl('/images/collectors_room_vault_1793460098223.jpg')}
           alt="The VÍNEA Private Collector Vault with rare aged vintage library"
+          onError={handleImageError}
           className="w-full h-full object-cover object-center brightness-[0.22] scale-100 hover:scale-102 transition-transform duration-1000 ease-out"
           referrerPolicy="no-referrer"
         />
@@ -74,8 +76,9 @@ export const CollectorsRoomSection: React.FC = () => {
                 onClick={() => handleOpenWine(wine)}
               >
                 <img
-                  src={wine.image}
+                  src={getWineImageUrl(wine.image)}
                   alt={wine.name}
+                  onError={handleImageError}
                   className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-700 ease-out"
                   referrerPolicy="no-referrer"
                 />

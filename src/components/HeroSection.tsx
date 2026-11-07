@@ -1,6 +1,7 @@
 import React from 'react';
 import { useWineStore } from '../context/WineStoreContext';
 import { Sparkles, ArrowRight, ShieldCheck, Thermometer, Award, Wine, ChevronDown, Eye } from 'lucide-react';
+import { getWineImageUrl, handleImageError } from '../utils/imageUtils';
 
 export const HeroSection: React.FC = () => {
   const { setActiveTab, setIsQuizOpen, setSelectedProduct, products, setQuickViewProduct } = useWineStore();
@@ -25,8 +26,9 @@ export const HeroSection: React.FC = () => {
       {/* Background Image with Cinematic Scrims */}
       <div className="absolute inset-0 z-0">
         <img
-          src="/src/assets/images/hero_editorial_vineyard_1793457418592.jpg"
+          src={getWineImageUrl('/images/hero_editorial_vineyard_1793457418592.jpg')}
           alt="Historic French Burgundy vineyard at golden hour dusk"
+          onError={handleImageError}
           className="w-full h-full object-cover object-center brightness-[0.38] scale-100 hover:scale-103 transition-transform duration-1000 ease-out"
           referrerPolicy="no-referrer"
         />
@@ -99,8 +101,9 @@ export const HeroSection: React.FC = () => {
               <div className="relative rounded-2xl overflow-hidden bg-gradient-to-b from-[#210D12] via-[#130B0D] to-[#130B0D] border border-[#48151F] shadow-2xl p-4 sm:p-5">
                 <div className="relative aspect-3/4 rounded-xl overflow-hidden bg-[#18090C]">
                   <img
-                    src="/src/assets/images/hero_luxury_wine_bottle_1793460098064.jpg"
+                    src={getWineImageUrl('/images/hero_luxury_wine_bottle_1793460098064.jpg')}
                     alt="Prestige Grand Cru reserve wine bottle with wax seal on aged French barrel"
+                    onError={handleImageError}
                     className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-700 ease-out"
                     referrerPolicy="no-referrer"
                   />

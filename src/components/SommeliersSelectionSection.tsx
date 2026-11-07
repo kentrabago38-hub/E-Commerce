@@ -2,6 +2,7 @@ import React from 'react';
 import { useWineStore } from '../context/WineStoreContext';
 import { formatPeso } from '../utils/formatCurrency';
 import { Award, ShoppingBag, Eye, Heart, CheckCircle2, Sparkles, ArrowRight } from 'lucide-react';
+import { getWineImageUrl, handleImageError } from '../utils/imageUtils';
 
 export const SommeliersSelectionSection: React.FC = () => {
   const {
@@ -43,8 +44,9 @@ export const SommeliersSelectionSection: React.FC = () => {
           <div className="lg:col-span-5 relative group">
             <div className="relative aspect-4/3 lg:aspect-3/4 rounded-xl overflow-hidden bg-[#211D1C] shadow-2xl flex items-center justify-center">
               <img
-                src="/src/assets/images/sommelier_reserve_bottle_1793457418720.jpg"
+                src={getWineImageUrl('/images/sommelier_reserve_bottle_1793457418720.jpg')}
                 alt="Sommelier Reserve Vintage Bottle and Burgundy crystal glass"
+                onError={handleImageError}
                 className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-700 ease-out"
                 referrerPolicy="no-referrer"
               />
