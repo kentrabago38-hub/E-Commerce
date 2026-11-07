@@ -23,7 +23,7 @@ const WINE_REGIONS: WineRegion[] = [
     description: 'The global benchmark for age-worthy, structured red blends. Gravelly Left Bank soils yield noble Cabernet Sauvignon, while Right Bank clay nurtures supple Merlot.',
     signatureGrapes: ['Cabernet Sauvignon', 'Merlot', 'Cabernet Franc'],
     climate: 'Maritime with temperate Atlantic breezes',
-    image: '/src/assets/images/wine_region_terroir_1793457418686.jpg',
+    image: '/src/assets/images/region_bordeaux_chateau.jpg',
     searchFilter: 'Bordeaux'
   },
   {
@@ -34,7 +34,7 @@ const WINE_REGIONS: WineRegion[] = [
     description: 'The pinnacle of terroir expression. Pure, unadorned expressions of Pinot Noir and Chardonnay shaped by jurassic limestone soils and centuries of monastic parcel classification.',
     signatureGrapes: ['Pinot Noir', 'Chardonnay'],
     climate: 'Semi-continental with brisk crisp autumns',
-    image: '/src/assets/images/hero_editorial_vineyard_1793457418592.jpg',
+    image: '/src/assets/images/region_burgundy_slopes.jpg',
     searchFilter: 'Burgundy'
   },
   {
@@ -45,7 +45,7 @@ const WINE_REGIONS: WineRegion[] = [
     description: 'Sun-drenched hills of galestro and alberese soils yielding Sangiovese with savory dried cherry, violet, leather, and tobacco complexity, flanked by revolutionary Super Tuscans.',
     signatureGrapes: ['Sangiovese', 'Cabernet Sauvignon', 'Merlot'],
     climate: 'Warm Mediterranean with cool Apennine night breezes',
-    image: '/src/assets/images/wine_region_terroir_1793457418686.jpg',
+    image: '/src/assets/images/region_tuscany_hills.jpg',
     searchFilter: 'Tuscany'
   },
   {
@@ -56,7 +56,7 @@ const WINE_REGIONS: WineRegion[] = [
     description: 'The royal domain of the Nebbiolo grape nestled beneath the misty Alps. Celebrated for translucent garnet hues, assertive tannins, and ethereal aromas of tar and roses.',
     signatureGrapes: ['Nebbiolo', 'Barbera', 'Dolcetto'],
     climate: 'Continental with famous autumnal Langhe fogs (Nebbia)',
-    image: '/src/assets/images/hero_wine_cellar_1791213186963.jpg',
+    image: '/src/assets/images/wine_region_terroir_1793457418686.jpg',
     searchFilter: 'Piedmont'
   },
   {
@@ -67,7 +67,7 @@ const WINE_REGIONS: WineRegion[] = [
     description: 'Spain’s premier wine region where Tempranillo is traditionally matured in American and French oak casks to produce velvety Reservas and Gran Reservas with vanilla and cedar spice.',
     signatureGrapes: ['Tempranillo', 'Garnacha', 'Graciano'],
     climate: 'Continental-Atlantic transition',
-    image: '/src/assets/images/category_red_wine_1791213197300.jpg',
+    image: '/src/assets/images/region_rioja_spain.jpg',
     searchFilter: 'Rioja'
   },
   {
@@ -78,7 +78,7 @@ const WINE_REGIONS: WineRegion[] = [
     description: 'World-renowned volcanic and alluvial soils producing bold, plush Cabernets with cassis, dark cocoa, and supple fine-grained tannins beneath radiant California sunshine.',
     signatureGrapes: ['Cabernet Sauvignon', 'Chardonnay', 'Merlot'],
     climate: 'Mediterranean with morning marine fogs from San Pablo Bay',
-    image: '/src/assets/images/category_white_wine_1791213207550.jpg',
+    image: '/src/assets/images/region_napa_valley.jpg',
     searchFilter: 'Napa'
   },
   {
@@ -89,7 +89,7 @@ const WINE_REGIONS: WineRegion[] = [
     description: 'Crisp, electrifying Sauvignon Blancs and vibrant cool-climate Pinot Noirs framed by stony alluvial river terraces, intense UV clarity, and crisp Pacific maritime breezes.',
     signatureGrapes: ['Sauvignon Blanc', 'Pinot Noir'],
     climate: 'Cool maritime with high sunshine hours and cold nights',
-    image: '/src/assets/images/category_sparkling_wine_1791213218531.jpg',
+    image: '/src/assets/images/region_marlborough_nz.jpg',
     searchFilter: 'Marlborough'
   }
 ];

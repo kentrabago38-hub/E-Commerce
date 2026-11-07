@@ -43,13 +43,19 @@ import schemaSql from '../data/supabaseSchemaSql';
 import { VineaLogoIcon } from './VineaLogo';
 
 export const WINE_PHOTO_PRESETS = [
-  { name: 'Red Grand Cru', url: 'https://images.unsplash.com/photo-1510812431401-41d2bd2722f3?auto=format&fit=crop&w=800&q=80', badge: 'Red' },
-  { name: 'Burgundy Pinot', url: 'https://images.unsplash.com/photo-1558001373-a8ef32b507d4?auto=format&fit=crop&w=800&q=80', badge: 'Red' },
-  { name: 'Champagne Cuvée', url: 'https://images.unsplash.com/photo-1569919659476-f0852f6834b7?auto=format&fit=crop&w=800&q=80', badge: 'Sparkling' },
-  { name: 'Chardonnay White', url: 'https://images.unsplash.com/photo-1584916201218-f4242ceb4809?auto=format&fit=crop&w=800&q=80', badge: 'White' },
-  { name: 'Provence Rosé', url: 'https://images.unsplash.com/photo-1557682250-33bd709cbe85?auto=format&fit=crop&w=800&q=80', badge: 'Rosé' },
-  { name: 'Cellar Vault', url: 'https://images.unsplash.com/photo-1506377247377-2a5b3b417ebb?auto=format&fit=crop&w=800&q=80', badge: 'Estate' },
-  { name: 'Wooden Prestige Box', url: 'https://images.unsplash.com/photo-1528823872057-9c018a7a7553?auto=format&fit=crop&w=800&q=80', badge: 'Collection' }
+  { name: 'Bordeaux Cabernet', url: '/src/assets/images/product_chateau_lumiere_cabernet.jpg', badge: 'Red' },
+  { name: 'Burgundy Pinot Noir', url: '/src/assets/images/product_monteverde_pinot_noir.jpg', badge: 'Red' },
+  { name: 'Brunello di Montalcino', url: '/src/assets/images/product_san_pietro_brunello.jpg', badge: 'Red' },
+  { name: 'Rioja Gran Reserva', url: '/src/assets/images/product_bodega_solaria_rioja.jpg', badge: 'Red' },
+  { name: 'Napa Valley Cabernet', url: '/src/assets/images/product_st_helena_napa_cabernet.jpg', badge: 'Red' },
+  { name: 'Burgundy Chardonnay', url: '/src/assets/images/product_maison_etoile_chardonnay.jpg', badge: 'White' },
+  { name: 'Marlborough Sauvignon', url: '/src/assets/images/product_cloud_valley_sauvignon.jpg', badge: 'White' },
+  { name: 'Rheingau Riesling', url: '/src/assets/images/product_schloss_johannisberg_riesling.jpg', badge: 'White' },
+  { name: 'Provence Rosé', url: '/src/assets/images/product_villa_rose_provencal.jpg', badge: 'Rosé' },
+  { name: 'Vintage Champagne', url: '/src/assets/images/product_domaine_reine_champagne.jpg', badge: 'Sparkling' },
+  { name: 'Valdobbiadene Prosecco', url: '/src/assets/images/product_valdobbiadene_prosecco.jpg', badge: 'Sparkling' },
+  { name: 'Wooden Prestige Case', url: '/src/assets/images/product_grand_terroirs_gift_box.jpg', badge: 'Collection' },
+  { name: 'Cellar Vault', url: '/src/assets/images/category_collections_vault_curated.jpg', badge: 'Estate' }
 ];
 
 export const AdminDashboard: React.FC = () => {
@@ -275,10 +281,12 @@ export const AdminDashboard: React.FC = () => {
       stock: Number(prodStock),
       image: prodImage || (
         prodType === 'White'
-          ? '/src/assets/images/category_white_wine_1791213207550.jpg'
+          ? '/src/assets/images/category_white_wine_curated.jpg'
           : prodType === 'Sparkling'
-          ? '/src/assets/images/category_sparkling_wine_1791213218531.jpg'
-          : '/src/assets/images/category_red_wine_1791213197300.jpg'
+          ? '/src/assets/images/category_sparkling_wine_curated.jpg'
+          : prodType === 'Rosé'
+          ? '/src/assets/images/category_rose_wine_curated.jpg'
+          : '/src/assets/images/category_red_wine_curated.jpg'
       ),
       description: prodDesc || 'Hand-harvested estate bottled vintage with remarkable balance and longevity.',
       category_id: prodType === 'Red' ? 'cat-red' : prodType === 'White' ? 'cat-white' : 'cat-sparkling',
@@ -1428,10 +1436,12 @@ export const AdminDashboard: React.FC = () => {
                     src={
                       prodImage ||
                       (prodType === 'White'
-                        ? '/src/assets/images/category_white_wine_1791213207550.jpg'
+                        ? '/src/assets/images/category_white_wine_curated.jpg'
                         : prodType === 'Sparkling'
-                        ? '/src/assets/images/category_sparkling_wine_1791213218531.jpg'
-                        : '/src/assets/images/category_red_wine_1791213197300.jpg')
+                        ? '/src/assets/images/category_sparkling_wine_curated.jpg'
+                        : prodType === 'Rosé'
+                        ? '/src/assets/images/category_rose_wine_curated.jpg'
+                        : '/src/assets/images/category_red_wine_curated.jpg')
                     }
                     alt="Preview"
                     className="w-14 h-14 rounded-lg object-cover border border-neutral-700 shrink-0"

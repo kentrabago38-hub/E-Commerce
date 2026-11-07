@@ -31,7 +31,7 @@ const FOOD_PAIRINGS: FoodPairingCategory[] = [
     winery: 'Château Margaux',
     vintage: 2015,
     price: 36500,
-    image: '/src/assets/images/luxury_food_pairing_1793457420570.jpg',
+    image: '/src/assets/images/pairing_prime_ribeye_steak.jpg',
     pairingRule: 'Tannic Harmony',
     flavorTastingWhy: 'The intense, structured tannins of aged Cabernet Sauvignon bind with the protein and rendered fat of the beef, softening the palate while unlocking blackcurrant and graphite aromatics.'
   },
@@ -46,7 +46,7 @@ const FOOD_PAIRINGS: FoodPairingCategory[] = [
     winery: 'Domaine Leflaive',
     vintage: 2020,
     price: 18500,
-    image: '/src/assets/images/category_white_wine_1791213207550.jpg',
+    image: '/src/assets/images/pairing_seared_scallops_lobster.jpg',
     pairingRule: 'Acid & Brine Complement',
     flavorTastingWhy: 'Vibrant citrus minerality and steely acidity cut through rich seafood butter sauces, elevating sweet maritime brininess with lemon curd and crushed limestone notes.'
   },
@@ -61,7 +61,7 @@ const FOOD_PAIRINGS: FoodPairingCategory[] = [
     winery: 'Domaines Ott',
     vintage: 2022,
     price: 4950,
-    image: '/src/assets/images/category_red_wine_1791213197300.jpg',
+    image: '/src/assets/images/pairing_artisanal_charcuterie.jpg',
     pairingRule: 'Fresh Herbaceous Lift',
     flavorTastingWhy: 'A bone-dry, pale rosé with wild strawberry and garrigue thyme lifts cured meats without overwhelming subtle delicate olive and herb seasonings.'
   },
@@ -76,7 +76,7 @@ const FOOD_PAIRINGS: FoodPairingCategory[] = [
     winery: 'Moët & Chandon',
     vintage: 2013,
     price: 19800,
-    image: '/src/assets/images/category_sparkling_wine_1791213218531.jpg',
+    image: '/src/assets/images/pairing_oysters_and_caviar.jpg',
     pairingRule: 'Effervescent Elegance',
     flavorTastingWhy: 'Microscopic effervescence scrubs the palate clean of rich caviar fats, while years of autolytic lees aging deliver brioche and hazelnut depth.'
   }
