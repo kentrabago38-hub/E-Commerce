@@ -4,6 +4,7 @@ import { WineType, DeliveryAddress, OrderStatus } from '../types/wine';
 import { formatPeso } from '../utils/formatCurrency';
 import { DAVAO_BRANCHES } from '../data/mockData';
 import { VineaRewardsSection } from './VineaRewardsSection';
+import { uploadImageApi } from '../services/apiClient';
 import {
   User as UserIcon,
   Package,
@@ -241,22 +242,22 @@ export const UserDashboard: React.FC = () => {
     updateUserProfile({ avatar: selectedAvatarUrl });
   };
 
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      if (file.size > 2 * 1024 * 1024) {
-        showToast('Image file size must be less than 2MB.', 'error');
+      if (file.size > 15 * 1024 * 1024) {
+        showToast('Image file size must be less than 15MB.', 'error');
         return;
       }
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        if (event.target?.result) {
-          const base64 = event.target.result as string;
-          setSelectedAvatarUrl(base64);
-          showToast('Image uploaded! Click "Save Profile Picture" to apply.', 'info');
-        }
-      };
-      reader.readAsDataURL(file);
+      try {
+        showToast('Uploading profile image...', 'info');
+        const permanentUrl = await uploadImageApi(file, file.name);
+        setSelectedAvatarUrl(permanentUrl);
+        showToast('Image uploaded! Click "Save Profile Picture" to apply.', 'success');
+      } catch (err) {
+        console.error('Avatar upload failed:', err);
+        showToast('Failed to upload image. Please try another.', 'error');
+      }
     }
   };
 

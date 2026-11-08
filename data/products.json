@@ -1,0 +1,529 @@
+[
+  {
+    "product_id": "prod-001",
+    "name": "Château Lumière Grand Cru",
+    "winery": "Château Lumière Estate",
+    "country": "France",
+    "region": "Bordeaux",
+    "vintage": 2018,
+    "wine_type": "Red",
+    "grape_variety": "Cabernet Sauvignon, Merlot",
+    "alcohol_percentage": 14,
+    "sweetness": "Bone Dry",
+    "body": "Full",
+    "price": 4850,
+    "stock": 18,
+    "rating": 4.9,
+    "reviews_count": 28,
+    "image": "/images/product_chateau_lumiere_cabernet.jpg",
+    "description": "Flagship Pauillac Premier Cru Classé.",
+    "bottle_color": "#440e18",
+    "accent_color": "#d4af37",
+    "featured": true,
+    "category_id": "cat-red",
+    "tasting_notes": {
+      "aroma": [
+        "Blackberry",
+        "Vanilla",
+        "Dark Plum"
+      ],
+      "palate": "Velvety tannins and structured berry compote",
+      "finish": "Long, nuanced oak finish"
+    }
+  },
+  {
+    "product_id": "prod-002",
+    "name": "Villa Rosé Provençal",
+    "winery": "Villa Rosé Estates",
+    "country": "France",
+    "region": "Provence",
+    "vintage": 2024,
+    "wine_type": "Rosé",
+    "grape_variety": "Grenache & Cinsault",
+    "alcohol_percentage": 12.5,
+    "sweetness": "Bone Dry",
+    "body": "Light",
+    "price": 2650,
+    "stock": 42,
+    "image": "/images/product_villa_rose_provencal.jpg",
+    "images": [
+      "/images/category_rose_wine_curated.jpg",
+      "/images/pairing_oysters_and_caviar.jpg"
+    ],
+    "bottle_color": "#9e3f52",
+    "accent_color": "#f5c6cb",
+    "description": "Pale salmon hue hailing from coastal Saint-Tropez limestone soils. Expressive wild strawberries, white peach, hints of lavender, and a crisp saline breeze finish.",
+    "rating": 4.8,
+    "reviews_count": 24,
+    "featured": true,
+    "category_id": "cat-rose",
+    "tasting_notes": {
+      "aroma": [
+        "Wild Strawberry",
+        "Crushed Melon",
+        "White Peach",
+        "Provence Herbs"
+      ],
+      "palate": "Crisp, bone-dry palate with citrus zest brightness, pink grapefruit, and wet stone minerality.",
+      "finish": "Clean, refreshing saline lift with a delicate floral blossom tail."
+    },
+    "food_pairings": [
+      "Grilled Sea Bass",
+      "Heirloom Tomato Tart",
+      "Fresh Oysters",
+      "Goat Cheese Crostini"
+    ],
+    "serving_temp": "8–10°C (46–50°F)",
+    "decanting": "Serve chilled, no decanting needed"
+  },
+  {
+    "product_id": "prod-003",
+    "name": "Monteverde Pinot Noir",
+    "winery": "Tenuta Monteverde",
+    "country": "Italy",
+    "region": "Veneto",
+    "vintage": 2022,
+    "wine_type": "Red",
+    "grape_variety": "Pinot Noir",
+    "alcohol_percentage": 13.5,
+    "sweetness": "Dry",
+    "body": "Medium",
+    "price": 4850,
+    "stock": 18,
+    "image": "/images/product_monteverde_pinot_noir.jpg",
+    "images": [
+      "/images/region_burgundy_slopes.jpg",
+      "/images/wine_pouring_crystal_glass_1793460097087.jpg"
+    ],
+    "bottle_color": "#5e1927",
+    "accent_color": "#dfbe76",
+    "description": "Crafted on the high-elevation volcanic hillside terraces of Veneto. Translucent ruby with seductive notes of wild cherries, forest floor, clove, and ethereal violet petals.",
+    "rating": 4.7,
+    "reviews_count": 19,
+    "featured": true,
+    "category_id": "cat-red",
+    "tasting_notes": {
+      "aroma": [
+        "Red Cherry",
+        "Raspberry Coulis",
+        "Forest Floor",
+        "Violet Blossom"
+      ],
+      "palate": "Silky, medium-bodied texture with lively red fruit acidity, tea leaf tannins, and subtle spice.",
+      "finish": "Harmonious and graceful with savory dried herbs and lingering wild cherry."
+    },
+    "food_pairings": [
+      "Roast Quail",
+      "Wild Mushroom Risotto",
+      "Herb-Crusted Salmon",
+      "Peking Duck"
+    ],
+    "serving_temp": "14–16°C (57–61°F)",
+    "decanting": "Decant for 30 minutes"
+  },
+  {
+    "product_id": "prod-004",
+    "name": "Maison Étoile Chardonnay",
+    "winery": "Maison Étoile",
+    "country": "France",
+    "region": "Burgundy",
+    "vintage": 2023,
+    "wine_type": "White",
+    "grape_variety": "Chardonnay",
+    "alcohol_percentage": 13,
+    "sweetness": "Dry",
+    "body": "Medium",
+    "price": 6050,
+    "stock": 15,
+    "image": "/images/product_maison_etoile_chardonnay.jpg",
+    "images": [
+      "/images/pairing_seared_scallops_lobster.jpg",
+      "/images/category_white_wine_curated.jpg"
+    ],
+    "bottle_color": "#82652b",
+    "accent_color": "#e6ca65",
+    "description": "Classic Côte de Beaune poise. Glistening pale gold exhibiting ripe lemon curd, toasted brioche, flinty chalk minerality, and an unctuous creamy texture balanced by taut acidity.",
+    "rating": 4.9,
+    "reviews_count": 31,
+    "featured": true,
+    "category_id": "cat-white",
+    "tasting_notes": {
+      "aroma": [
+        "Meyer Lemon",
+        "Brioche",
+        "White Blossom",
+        "Crushed Flint"
+      ],
+      "palate": "Elegant creamy richness framed by crystalline citrus acidity, hazelnut, and salted butter notes.",
+      "finish": "Long, vibrating chalky mineral finish with gentle smoky undertones."
+    },
+    "food_pairings": [
+      "Lobster Thermidor",
+      "Pan-Seared Scallops",
+      "Roasted Turbot",
+      "Poulet de Bresse"
+    ],
+    "serving_temp": "10–12°C (50–54°F)",
+    "decanting": "Aerator or 15 minutes aeration"
+  },
+  {
+    "product_id": "prod-005",
+    "name": "Domaine de la Reine Brut Grand Cru",
+    "winery": "Domaine de la Reine",
+    "country": "France",
+    "region": "Champagne",
+    "vintage": 2018,
+    "wine_type": "Sparkling",
+    "grape_variety": "Chardonnay & Pinot Noir",
+    "alcohol_percentage": 12,
+    "sweetness": "Dry",
+    "body": "Medium",
+    "price": 10200,
+    "stock": 9,
+    "image": "/images/product_domaine_reine_champagne.jpg",
+    "images": [
+      "/images/region_champagne_france.jpg",
+      "/images/pairing_oysters_and_caviar.jpg"
+    ],
+    "bottle_color": "#324a29",
+    "accent_color": "#f0d27c",
+    "description": "A prestige cuvée aged 6 years on the lees in ancient Gallo-Roman chalk cellars. Tiny persistent bead with pastry aromas, golden apple, roasted almond, and saline precision.",
+    "rating": 5,
+    "reviews_count": 44,
+    "featured": true,
+    "category_id": "cat-sparkling",
+    "tasting_notes": {
+      "aroma": [
+        "Brioche",
+        "Golden Reinette Apple",
+        "Toasted Almond",
+        "Chalk Smoke"
+      ],
+      "palate": "Silky, fine mousse with exhilarating tension, yellow mirabelle plum, and candied citrus peel.",
+      "finish": "Expansive, mineral-drenched, deeply satisfying celebratory finish."
+    },
+    "food_pairings": [
+      "Caviar on Blinis",
+      "Langoustines",
+      "Black Truffle Pasta",
+      "Aged Parmigiano Reggiano"
+    ],
+    "serving_temp": "8–10°C (46–50°F)",
+    "decanting": "Serve immediately in tulip flutes"
+  },
+  {
+    "product_id": "prod-006",
+    "name": "Tenuta di San Pietro Brunello di Montalcino",
+    "winery": "Tenuta di San Pietro",
+    "country": "Italy",
+    "region": "Tuscany",
+    "vintage": 2019,
+    "wine_type": "Red",
+    "grape_variety": "Sangiovese Grosso",
+    "alcohol_percentage": 14.5,
+    "sweetness": "Dry",
+    "body": "Full",
+    "price": 7450,
+    "stock": 12,
+    "image": "/images/product_san_pietro_brunello.jpg",
+    "images": [
+      "/images/region_tuscany_hills.jpg",
+      "/images/pairing_prime_ribeye_steak.jpg"
+    ],
+    "bottle_color": "#420b13",
+    "accent_color": "#c5a059",
+    "description": "Grown on sun-drenched Tuscan slopes 450 meters above sea level. Matured 36 months in Slavonian oak casks. Deep garnet with dried oregano, leather, macerated cherries, and balsamic lift.",
+    "rating": 4.8,
+    "reviews_count": 27,
+    "featured": false,
+    "category_id": "cat-red",
+    "tasting_notes": {
+      "aroma": [
+        "Macerated Cherry",
+        "Tuscan Leather",
+        "Dried Rosemary",
+        "Tobacco Leaf"
+      ],
+      "palate": "Firm, muscular structure with ripe gripping tannins, blood orange zest, and spiced plum.",
+      "finish": "Remarkably persistent finish carried by savory earth and noble wood."
+    },
+    "food_pairings": [
+      "Bistecca alla Fiorentina",
+      "Slow-Braised Osso Buco",
+      "Wild Boar Ragù",
+      "Pecorino Toscano"
+    ],
+    "serving_temp": "18°C (64°F)",
+    "decanting": "Decant for 90 minutes"
+  },
+  {
+    "product_id": "prod-007",
+    "name": "Cloud Valley Sauvignon Blanc",
+    "winery": "Cloud Valley Vintners",
+    "country": "New Zealand",
+    "region": "Marlborough",
+    "vintage": 2023,
+    "wine_type": "White",
+    "grape_variety": "Sauvignon Blanc",
+    "alcohol_percentage": 13,
+    "sweetness": "Dry",
+    "body": "Light",
+    "price": 2350,
+    "stock": 35,
+    "image": "/images/product_cloud_valley_sauvignon.jpg",
+    "images": [
+      "/images/region_marlborough_nz.jpg",
+      "/images/pairing_oysters_and_caviar.jpg"
+    ],
+    "bottle_color": "#55694a",
+    "accent_color": "#7bc991",
+    "description": "Intensely aromatic Marlborough benchmark. Passionfruit, crushed lemongrass, lime cordial, and wet river stones with a thrilling, mouth-watering zesty acidity.",
+    "rating": 4.6,
+    "reviews_count": 22,
+    "featured": false,
+    "category_id": "cat-white",
+    "tasting_notes": {
+      "aroma": [
+        "Passionfruit",
+        "Lemongrass",
+        "Crushed Basil",
+        "Grapefruit"
+      ],
+      "palate": "Vibrant, electric palate with explosive tropical citrus flavors and crunchy green apple.",
+      "finish": "Taut, mouthwatering lime and sea salt finish."
+    },
+    "food_pairings": [
+      "Goat Cheese Salad",
+      "Green Lip Mussels",
+      "Ceviche",
+      "Thai Spiced Prawns"
+    ],
+    "serving_temp": "7–9°C (45–48°F)",
+    "decanting": "Chill thoroughly, no decanting needed"
+  },
+  {
+    "product_id": "prod-008",
+    "name": "Bodega Solaria Gran Reserva",
+    "winery": "Bodega Solaria",
+    "country": "Spain",
+    "region": "Rioja",
+    "vintage": 2018,
+    "wine_type": "Red",
+    "grape_variety": "Tempranillo & Graciano",
+    "alcohol_percentage": 14,
+    "sweetness": "Dry",
+    "body": "Full",
+    "price": 5250,
+    "stock": 20,
+    "image": "/images/product_bodega_solaria_rioja.jpg",
+    "images": [
+      "/images/region_rioja_spain.jpg",
+      "/images/pairing_artisanal_charcuterie.jpg"
+    ],
+    "bottle_color": "#3d0a11",
+    "accent_color": "#e0a96d",
+    "description": "A traditional masterpiece aged 24 months in American oak followed by 36 months in bottle. Sweet dill, dried fig, cloves, coconut husk, and velvety softened tannins.",
+    "rating": 4.8,
+    "reviews_count": 35,
+    "featured": false,
+    "category_id": "cat-red",
+    "tasting_notes": {
+      "aroma": [
+        "Dried Fig",
+        "American Vanilla",
+        "Clove",
+        "Leather Saddle"
+      ],
+      "palate": "Silky, rounded mouthfeel with resolved tertiary fruit, roasted spices, and dark cherry liqueur.",
+      "finish": "Warm, comforting finish with lingering cocoa and sweet tobacco."
+    },
+    "food_pairings": [
+      "Roast Suckling Lamb",
+      "Jamón Ibérico de Bellota",
+      "Manchego Cheese",
+      "Braised Beef Cheeks"
+    ],
+    "serving_temp": "17–19°C (62–66°F)",
+    "decanting": "Decant for 45 minutes"
+  },
+  {
+    "product_id": "prod-009",
+    "name": "St. Helena Reserve Cabernet",
+    "winery": "St. Helena Cellars",
+    "country": "USA",
+    "region": "Napa Valley",
+    "vintage": 2020,
+    "wine_type": "Red",
+    "grape_variety": "Cabernet Sauvignon",
+    "alcohol_percentage": 14.8,
+    "sweetness": "Dry",
+    "body": "Full",
+    "price": 11550,
+    "stock": 8,
+    "image": "/images/product_st_helena_napa_cabernet.jpg",
+    "images": [
+      "/images/region_napa_valley.jpg",
+      "/images/pairing_prime_ribeye_steak.jpg"
+    ],
+    "bottle_color": "#2e080e",
+    "accent_color": "#c5a059",
+    "description": "Iconic valley floor and benchland fruit. Deep impenetrable ink-purple. Saturated blackberry compote, mocha, French oak spice, and plush, seamless velvet tannins.",
+    "rating": 4.9,
+    "reviews_count": 52,
+    "featured": true,
+    "category_id": "cat-red",
+    "tasting_notes": {
+      "aroma": [
+        "Blackberry Compote",
+        "Espresso Bean",
+        "Cassis",
+        "Cinnamon Bark"
+      ],
+      "palate": "Monumental weight and richness with layers of decadent blue fruits, melted dark chocolate, and sweet cedar.",
+      "finish": "Monumental 60-second finish with cashmere tannins and warm berry core."
+    },
+    "food_pairings": [
+      "Prime Tomahawk Steak",
+      "Smoked Beef Short Ribs",
+      "Charred Lamb Chops",
+      "Truffle Macaroni"
+    ],
+    "serving_temp": "18°C (64°F)",
+    "decanting": "Decant for 75 minutes"
+  },
+  {
+    "product_id": "prod-010",
+    "name": "Schloss Johannisberg Riesling Feinherb",
+    "winery": "Schloss Johannisberg",
+    "country": "Germany",
+    "region": "Rheingau",
+    "vintage": 2022,
+    "wine_type": "White",
+    "grape_variety": "Riesling",
+    "alcohol_percentage": 11.5,
+    "sweetness": "Semi-Dry",
+    "body": "Light",
+    "price": 3550,
+    "stock": 16,
+    "image": "/images/product_schloss_johannisberg_riesling.jpg",
+    "images": [
+      "/images/pairing_artisanal_charcuterie.jpg",
+      "/images/category_white_wine_curated.jpg"
+    ],
+    "bottle_color": "#495a32",
+    "accent_color": "#d4af37",
+    "description": "Steep slate slopes overlooking the Rhine river. Ethereal tension between natural sweetness and electric racy acidity. White peach, petrol nuances, and wet slate stone.",
+    "rating": 4.7,
+    "reviews_count": 18,
+    "featured": false,
+    "category_id": "cat-white",
+    "tasting_notes": {
+      "aroma": [
+        "White Peach",
+        "Jasmine Flower",
+        "Flint Slate",
+        "Lime Blossom"
+      ],
+      "palate": "Dancing interplay of juicy apricot, honeysuckle sweetness, and cutting mineral acidity.",
+      "finish": "Vibrant, crystal-clear finish that stimulates every tastebud."
+    },
+    "food_pairings": [
+      "Spicy Szechuan Pork",
+      "Duck Liver Pâté",
+      "Crab Cakes with Remoulade",
+      "Roast Goose"
+    ],
+    "serving_temp": "8–10°C (46–50°F)",
+    "decanting": "Serve chilled"
+  },
+  {
+    "product_id": "prod-011",
+    "name": "Valdobbiadene Prosecco Superiore DOCG",
+    "winery": "Boutique Perla",
+    "country": "Italy",
+    "region": "Veneto",
+    "vintage": 2023,
+    "wine_type": "Sparkling",
+    "grape_variety": "Glera",
+    "alcohol_percentage": 11,
+    "sweetness": "Dry",
+    "body": "Light",
+    "price": 1980,
+    "stock": 30,
+    "image": "/images/product_valdobbiadene_prosecco.jpg",
+    "images": [
+      "/images/category_sparkling_wine_curated.jpg",
+      "/images/pairing_artisanal_charcuterie.jpg"
+    ],
+    "bottle_color": "#28402b",
+    "accent_color": "#c5a059",
+    "description": "Hand-picked from the UNESCO World Heritage steep hills of Valdobbiadene. Fresh green apple, acacia honey aromas, and an uplifting creamy foam.",
+    "rating": 4.6,
+    "reviews_count": 28,
+    "featured": false,
+    "category_id": "cat-sparkling",
+    "tasting_notes": {
+      "aroma": [
+        "Golden Delicious Apple",
+        "Acacia Flowers",
+        "Williams Pear",
+        "Lemon Verbena"
+      ],
+      "palate": "Delicate, froth-like effervescence with succulent pear and refreshing citrus balance.",
+      "finish": "Crisp, appetizing, and celebratory."
+    },
+    "food_pairings": [
+      "Prosciutto di San Daniele",
+      "Arancini",
+      "Light Canapés",
+      "Seafood Antipasti"
+    ],
+    "serving_temp": "6–8°C (42–46°F)",
+    "decanting": "Serve cold in sparkling flutes"
+  },
+  {
+    "product_id": "prod-012",
+    "name": "Grand Terroirs of France Trio (Gift Box)",
+    "winery": "VÍNEA Sommelier Curation",
+    "country": "France",
+    "region": "Bordeaux, Burgundy, Champagne",
+    "vintage": 2021,
+    "wine_type": "Red",
+    "grape_variety": "Cabernet, Chardonnay, Pinot Noir",
+    "alcohol_percentage": 13.5,
+    "sweetness": "Dry",
+    "body": "Full",
+    "price": 21750,
+    "original_price": 24200,
+    "stock": 7,
+    "image": "/images/product_grand_terroirs_gift_box.jpg",
+    "images": [
+      "/images/category_collections_vault_curated.jpg",
+      "/images/category_gift_sets_curated.jpg"
+    ],
+    "bottle_color": "#260a10",
+    "accent_color": "#dfbe76",
+    "description": "A prestige handcrafted wooden collector case housing 3 iconic expressions: Left Bank Bordeaux, Côte d’Or Premier Cru Chardonnay, and Vintage Grand Cru Champagne.",
+    "rating": 5,
+    "reviews_count": 14,
+    "featured": true,
+    "category_id": "cat-collections",
+    "tasting_notes": {
+      "aroma": [
+        "Truffle",
+        "Cassis",
+        "Brioche",
+        "White Peach"
+      ],
+      "palate": "A curated journey across the three greatest wine terroirs of France in pristine cellar condition.",
+      "finish": "Unforgettable cellar-worthy experience."
+    },
+    "food_pairings": [
+      "Multi-Course Tasting Menu",
+      "Holiday Celebrations",
+      "Executive Gifting"
+    ],
+    "serving_temp": "Assorted (see enclosed sommelier cards)",
+    "decanting": "Individual instructions enclosed"
+  }
+]

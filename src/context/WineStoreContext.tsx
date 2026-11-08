@@ -187,7 +187,22 @@ export const WineStoreProvider: React.FC<{ children: ReactNode }> = ({ children 
   const [products, setProducts] = useState<Product[]>(() => {
     try {
       const saved = localStorage.getItem('vinea_products');
-      return saved ? JSON.parse(saved) : INITIAL_PRODUCTS;
+      let base: Product[] = saved ? JSON.parse(saved) : INITIAL_PRODUCTS;
+      const customImages = localStorage.getItem('vinea_product_custom_images');
+      if (customImages) {
+        const customMap = JSON.parse(customImages);
+        base = base.map((p: Product) => {
+          if (customMap[p.product_id]) {
+            return {
+              ...p,
+              image: customMap[p.product_id].image || p.image,
+              images: customMap[p.product_id].images || p.images
+            };
+          }
+          return p;
+        });
+      }
+      return base;
     } catch {
       return INITIAL_PRODUCTS;
     }
@@ -459,7 +474,52 @@ export const WineStoreProvider: React.FC<{ children: ReactNode }> = ({ children 
 
         if (isMounted) {
           if (pgProducts && pgProducts.length > 0) {
-            setProducts(pgProducts);
+            let customMap: Record<string, { image?: string; images?: string[] }> = {};
+            try {
+              const savedMap = localStorage.getItem('vinea_product_custom_images');
+              if (savedMap) customMap = JSON.parse(savedMap);
+            } catch {}
+
+            let localProds: Product[] = [];
+            try {
+              const savedProds = localStorage.getItem('vinea_products');
+              if (savedProds) localProds = JSON.parse(savedProds);
+            } catch {}
+
+            const mergedProducts = pgProducts.map((p) => {
+              const customInfo = customMap[p.product_id];
+              const localMatch = localProds.find(lp => lp.product_id === p.product_id);
+
+              // If backend already has uploaded photo, keep it
+              if (p.image && p.image.includes('/images/uploads/')) {
+                return p;
+              }
+
+              const customImage = customInfo?.image || (localMatch?.image && localMatch.image !== p.image ? localMatch.image : undefined);
+              const customGallery = customInfo?.images || (localMatch?.images && localMatch.images.length > 0 ? localMatch.images : undefined);
+
+              if (customImage || customGallery) {
+                const updated = {
+                  ...p,
+                  image: customImage || p.image,
+                  images: customGallery || p.images
+                };
+                // Ensure backend also receives this custom image
+                updateProductApi(updated).catch(() => {});
+                return updated;
+              }
+              return p;
+            });
+
+            // Also preserve any custom products created locally
+            const pgProductIds = new Set(pgProducts.map(p => p.product_id));
+            const extraLocalProds = localProds.filter(lp => !pgProductIds.has(lp.product_id));
+            if (extraLocalProds.length > 0) {
+              mergedProducts.unshift(...extraLocalProds);
+              extraLocalProds.forEach(ep => createProductApi(ep).catch(() => {}));
+            }
+
+            setProducts(mergedProducts);
           }
           if (pgCategories && pgCategories.length > 0) {
             setCategories(pgCategories);
@@ -872,6 +932,18 @@ export const WineStoreProvider: React.FC<{ children: ReactNode }> = ({ children 
       rating: 5.0,
       reviews_count: 1
     };
+
+    try {
+      let customMap: Record<string, { image?: string; images?: string[] }> = {};
+      const saved = localStorage.getItem('vinea_product_custom_images');
+      if (saved) customMap = JSON.parse(saved);
+      customMap[newId] = {
+        image: newProduct.image,
+        images: newProduct.images || []
+      };
+      localStorage.setItem('vinea_product_custom_images', JSON.stringify(customMap));
+    } catch {}
+
     setProducts(prev => [newProduct, ...prev]);
     saveProductToSupabase(newProduct).catch(() => {});
     createProductApi(newProduct).catch((e: unknown) => console.warn('Product add note:', e));
@@ -879,6 +951,17 @@ export const WineStoreProvider: React.FC<{ children: ReactNode }> = ({ children 
   };
 
   const updateProduct = (updated: Product) => {
+    try {
+      let customMap: Record<string, { image?: string; images?: string[] }> = {};
+      const saved = localStorage.getItem('vinea_product_custom_images');
+      if (saved) customMap = JSON.parse(saved);
+      customMap[updated.product_id] = {
+        image: updated.image,
+        images: updated.images || []
+      };
+      localStorage.setItem('vinea_product_custom_images', JSON.stringify(customMap));
+    } catch {}
+
     setProducts(prev => prev.map(p => (p.product_id === updated.product_id ? updated : p)));
     saveProductToSupabase(updated).catch(() => {});
     updateProductApi(updated).catch((e: unknown) => console.warn('Product update note:', e));
@@ -886,6 +969,15 @@ export const WineStoreProvider: React.FC<{ children: ReactNode }> = ({ children 
   };
 
   const deleteProduct = (productId: string) => {
+    try {
+      const saved = localStorage.getItem('vinea_product_custom_images');
+      if (saved) {
+        const customMap = JSON.parse(saved);
+        delete customMap[productId];
+        localStorage.setItem('vinea_product_custom_images', JSON.stringify(customMap));
+      }
+    } catch {}
+
     const prod = products.find(p => p.product_id === productId);
     setProducts(prev => prev.filter(p => p.product_id !== productId));
     deleteProductFromSupabase(productId).catch(() => {});

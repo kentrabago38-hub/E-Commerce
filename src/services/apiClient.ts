@@ -126,3 +126,54 @@ export async function createReviewApi(review: Review): Promise<void> {
   });
   if (!res.ok) throw new Error('Failed to save review in PostgreSQL');
 }
+
+/**
+ * Upload an image (File or Base64 data URL) to the backend server.
+ * Returns the permanent public image URL (e.g. /images/uploads/wine_...).
+ */
+export async function uploadImageApi(
+  fileOrDataUrl: File | string,
+  filename?: string
+): Promise<string> {
+  let base64String = '';
+  let fname = filename || 'wine_photo';
+
+  if (typeof fileOrDataUrl === 'string') {
+    base64String = fileOrDataUrl;
+  } else if (fileOrDataUrl instanceof File) {
+    fname = fileOrDataUrl.name;
+    base64String = await new Promise<string>((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = () => reject(new Error('Failed to read file from disk'));
+      reader.readAsDataURL(fileOrDataUrl);
+    });
+  }
+
+  // If already a static URL (e.g. /images/...), return as is
+  if (base64String.startsWith('/images/')) {
+    return base64String;
+  }
+
+  try {
+    const res = await fetch('/api/upload', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ image: base64String, filename: fname }),
+    });
+
+    if (!res.ok) {
+      throw new Error(`Upload server responded with HTTP ${res.status}`);
+    }
+
+    const data = await res.json();
+    if (data.url && typeof data.url === 'string') {
+      return data.url;
+    }
+    throw new Error('Upload server did not return a valid file URL');
+  } catch (err) {
+    console.warn('Backend image upload notice (using fallback):', err);
+    return base64String;
+  }
+}
+

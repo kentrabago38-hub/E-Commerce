@@ -13,6 +13,7 @@ import {
   Clock,
   Compass
 } from 'lucide-react';
+import { getWineImageUrl, handleImageError } from '../utils/imageUtils';
 
 export const OrderConfirmationModal: React.FC = () => {
   const {
@@ -106,8 +107,9 @@ export const OrderConfirmationModal: React.FC = () => {
                     <div key={item.order_item_id} className="flex items-center justify-between text-xs py-1">
                       <div className="flex items-center gap-2">
                         <img
-                          src={item.image}
+                          src={getWineImageUrl(item.image)}
                           alt={item.name}
+                          onError={handleImageError}
                           className="w-8 h-8 rounded object-cover"
                           referrerPolicy="no-referrer"
                         />

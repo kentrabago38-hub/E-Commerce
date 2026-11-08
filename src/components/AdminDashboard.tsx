@@ -42,6 +42,7 @@ import { getSupabaseConfigStatus } from '../lib/supabase';
 import schemaSql from '../data/supabaseSchemaSql';
 import { VineaLogoIcon } from './VineaLogo';
 import { getWineImageUrl, handleImageError } from '../utils/imageUtils';
+import { uploadImageApi } from '../services/apiClient';
 
 export const WINE_PHOTO_PRESETS = [
   { name: 'Bordeaux Cabernet', url: '/images/product_chateau_lumiere_cabernet.jpg', badge: 'Red' },
@@ -188,7 +189,7 @@ export const AdminDashboard: React.FC = () => {
     setPhotoUrlInput('');
   };
 
-  const handleDeviceUpload = (
+  const handleDeviceUpload = async (
     e: React.ChangeEvent<HTMLInputElement>,
     destination: 'primary' | 'gallery' | 'add_form' | 'edit_form'
   ) => {
@@ -201,30 +202,31 @@ export const AdminDashboard: React.FC = () => {
     }
 
     setIsPhotoUploading(true);
-    const reader = new FileReader();
-    reader.onload = () => {
-      const result = reader.result as string;
+    showToast('Uploading photo to cellar storage...', 'info');
+
+    try {
+      const permanentUrl = await uploadImageApi(file, file.name);
+
       if (destination === 'primary') {
-        setPhotoModalPrimary(result);
-        showToast('Primary photo updated from device upload.', 'info');
+        setPhotoModalPrimary(permanentUrl);
+        showToast('Primary photo uploaded & ready to save.', 'success');
       } else if (destination === 'gallery') {
-        setPhotoModalGallery((prev) => [...prev, result]);
-        showToast('Photo added to product gallery.', 'info');
+        setPhotoModalGallery((prev) => [...prev, permanentUrl]);
+        showToast('Photo uploaded and added to product gallery.', 'success');
       } else if (destination === 'add_form') {
-        setProdImage(result);
-        showToast('Product photo uploaded.', 'info');
+        setProdImage(permanentUrl);
+        showToast('Product photo uploaded successfully.', 'success');
       } else if (destination === 'edit_form' && editingProduct) {
-        setEditingProduct({ ...editingProduct, image: result });
-        showToast('Product photo updated.', 'info');
+        setEditingProduct({ ...editingProduct, image: permanentUrl });
+        showToast('Product photo updated successfully.', 'success');
       }
+    } catch (err: any) {
+      console.error('Failed to upload image file:', err);
+      showToast('Failed to upload image. Please try again.', 'error');
+    } finally {
       setIsPhotoUploading(false);
-    };
-    reader.onerror = () => {
-      showToast('Error reading image file from device.', 'error');
-      setIsPhotoUploading(false);
-    };
-    reader.readAsDataURL(file);
-    e.target.value = '';
+      e.target.value = '';
+    }
   };
 
   const handleSavePhotoModal = () => {

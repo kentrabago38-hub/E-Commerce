@@ -23,6 +23,7 @@ import {
   EyeOff,
   Sparkles
 } from 'lucide-react';
+import { getWineImageUrl, handleImageError } from '../utils/imageUtils';
 import { DAVAO_BRANCHES } from '../data/mockData';
 
 export const CheckoutModal: React.FC = () => {
@@ -764,8 +765,9 @@ export const CheckoutModal: React.FC = () => {
                     >
                       <div className="flex items-center gap-3">
                         <img
-                          src={item.product.image}
+                          src={getWineImageUrl(item.product.image)}
                           alt={item.product.name}
+                          onError={handleImageError}
                           className="w-9 h-9 rounded object-cover"
                           referrerPolicy="no-referrer"
                         />

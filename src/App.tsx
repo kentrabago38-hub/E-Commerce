@@ -32,6 +32,7 @@ import { FindYourWineQuiz } from './components/FindYourWineQuiz';
 import { SupabaseConfigModal } from './components/SupabaseConfigModal';
 import { ToastContainer } from './components/Toast';
 import { Sparkles, ArrowRight, Award, Wine } from 'lucide-react';
+import { getWineImageUrl, handleImageError } from './utils/imageUtils';
 
 const MainStoreContent: React.FC = () => {
   const {
@@ -239,8 +240,19 @@ const MainStoreContent: React.FC = () => {
               </button>
             </div>
 
-            <div className="w-32 h-32 rounded-xl bg-[#130B0D] border border-[#48151F] flex items-center justify-center text-[#C6A15B] shrink-0 shadow-inner">
-              <Wine className="w-14 h-14" />
+            <div className="relative w-48 sm:w-56 h-40 sm:h-44 rounded-xl overflow-hidden border border-[#C6A15B]/40 shrink-0 shadow-2xl group">
+              <img
+                src={getWineImageUrl('/images/quiz_sommelier_banner.jpg')}
+                alt="Personal Sommelier Guidance"
+                onError={handleImageError}
+                className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-700 ease-out"
+                referrerPolicy="no-referrer"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-[#130B0D]/85 via-transparent to-transparent" />
+              <div className="absolute bottom-2.5 left-2.5 right-2.5 flex items-center justify-between text-[10px] text-[#C6A15B] font-serif uppercase tracking-widest bg-black/70 backdrop-blur-sm px-2.5 py-1.5 rounded border border-[#C6A15B]/30">
+                <span>Davao Cellar Master</span>
+                <span>60s Quiz</span>
+              </div>
             </div>
           </div>
         </section>
