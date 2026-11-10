@@ -170,6 +170,17 @@ export interface GuideArticle {
   sommelierQuote: string;
 }
 
+export interface BranchFeaturedWine {
+  productId: string;
+  name: string;
+  winery: string;
+  vintage: number;
+  wineType: string;
+  price: number;
+  image: string;
+  tagline: string;
+}
+
 export interface DavaoBranch {
   id: string;
   name: string;
@@ -182,5 +193,7 @@ export interface DavaoBranch {
   image: string;
   isFlagship?: boolean;
   mapCoordinates?: string;
+  featuredWine?: BranchFeaturedWine;
 }
+
 

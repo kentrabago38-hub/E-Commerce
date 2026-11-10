@@ -495,7 +495,17 @@ export const DAVAO_BRANCHES: DavaoBranch[] = [
     ],
     image: '/images/branch_lanang_flagship.jpg',
     isFlagship: true,
-    mapCoordinates: '7.1032, 125.6421'
+    mapCoordinates: '7.1032, 125.6421',
+    featuredWine: {
+      productId: 'prod-001',
+      name: 'Château Lumière Grand Cru',
+      winery: 'Château Lumière',
+      vintage: 2021,
+      wineType: 'Red',
+      price: 8450,
+      image: '/images/product_chateau_lumiere_grand_cru.jpg',
+      tagline: 'Flagship Cellar Reserve Allocation'
+    }
   },
   {
     id: 'branch-abreeza',
@@ -512,7 +522,17 @@ export const DAVAO_BRANCHES: DavaoBranch[] = [
       'Express Chilled Pick-Up for Online Orders'
     ],
     image: '/images/branch_abreeza_wine_bar.jpg',
-    mapCoordinates: '7.0911, 125.6178'
+    mapCoordinates: '7.0911, 125.6178',
+    featuredWine: {
+      productId: 'prod-005',
+      name: 'Domaine de la Reine Brut Grand Cru',
+      winery: 'Domaine de la Reine',
+      vintage: 2018,
+      wineType: 'Sparkling',
+      price: 10200,
+      image: '/images/product_domaine_reine_champagne.jpg',
+      tagline: 'Featured by the Glass & Enomatic Flights'
+    }
   },
   {
     id: 'branch-matina',
@@ -529,7 +549,17 @@ export const DAVAO_BRANCHES: DavaoBranch[] = [
       'One-on-One Sommelier Cellar Consultations'
     ],
     image: '/images/branch_matina_reserve.jpg',
-    mapCoordinates: '7.0583, 125.5924'
+    mapCoordinates: '7.0583, 125.5924',
+    featuredWine: {
+      productId: 'prod-006',
+      name: 'Tenuta di San Pietro Brunello di Montalcino',
+      winery: 'Tenuta di San Pietro',
+      vintage: 2019,
+      wineType: 'Red',
+      price: 7450,
+      image: '/images/product_san_pietro_brunello.jpg',
+      tagline: 'Collector Vault Private Allocation'
+    }
   },
   {
     id: 'branch-azuela',
@@ -546,7 +576,17 @@ export const DAVAO_BRANCHES: DavaoBranch[] = [
       'Chilled Provençal Rosé Garden'
     ],
     image: '/images/branch_azuela_waterfront.jpg',
-    mapCoordinates: '7.1124, 125.6541'
+    mapCoordinates: '7.1124, 125.6541',
+    featuredWine: {
+      productId: 'prod-003',
+      name: 'Villa Solaria Côtes de Provence Rosé',
+      winery: 'Villa Solaria',
+      vintage: 2022,
+      wineType: 'Rosé',
+      price: 3850,
+      image: '/images/product_villa_solaria_rose.jpg',
+      tagline: 'Sunset Veranda & Oyster Chilled Pairing'
+    }
   },
   {
     id: 'branch-sm-lanang',
@@ -563,7 +603,17 @@ export const DAVAO_BRANCHES: DavaoBranch[] = [
       'Daily Free Featured Tasting Samples'
     ],
     image: '/images/branch_sm_lanang_boutique.jpg',
-    mapCoordinates: '7.0988, 125.6327'
+    mapCoordinates: '7.0988, 125.6327',
+    featuredWine: {
+      productId: 'prod-004',
+      name: 'Maison Étoile Meursault Premier Cru',
+      winery: 'Maison Étoile',
+      vintage: 2020,
+      wineType: 'White',
+      price: 6050,
+      image: '/images/product_maison_etoile_chardonnay.jpg',
+      tagline: 'Daily Cellar Sommelier Showcase'
+    }
   }
 ];
 

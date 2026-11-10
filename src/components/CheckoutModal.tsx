@@ -25,8 +25,16 @@ import {
 } from 'lucide-react';
 import { getWineImageUrl, handleImageError } from '../utils/imageUtils';
 import { DAVAO_BRANCHES } from '../data/mockData';
+import {
+  validateGmail,
+  validatePhone11Digit,
+  validateAddress,
+  validateFullName,
+  validatePassword
+} from '../utils/validation';
 
 export const CheckoutModal: React.FC = () => {
+
   const {
     isCheckoutOpen,
     setIsCheckoutOpen,
@@ -57,10 +65,15 @@ export const CheckoutModal: React.FC = () => {
   const [regStreet, setRegStreet] = useState('');
   const [regError, setRegError] = useState('');
 
+  // Validation Error States
+  const [contactErrors, setContactErrors] = useState<{ fullName?: string; email?: string; phone?: string }>({});
+  const [addressErrors, setAddressErrors] = useState<{ street?: string; city?: string; state?: string; postalCode?: string }>({});
+  const [regFieldErrors, setRegFieldErrors] = useState<{ name?: string; email?: string; phone?: string; street?: string; password?: string }>({});
+
   // Checkout Form State
   const [fullName, setFullName] = useState(user?.name || '');
   const [email, setEmail] = useState(user?.email || '');
-  const [phone, setPhone] = useState(user?.phone || '+63 ');
+  const [phone, setPhone] = useState(user?.phone || '0917');
 
   // Step 2 Address State
   const defaultAddr = user?.saved_addresses?.[0] || {
@@ -107,6 +120,13 @@ export const CheckoutModal: React.FC = () => {
   const handleAuthLogin = (e: React.FormEvent) => {
     e.preventDefault();
     setLoginError('');
+
+    const emailCheck = validateGmail(loginEmail);
+    if (!emailCheck.isValid) {
+      setLoginError(emailCheck.error || 'Please enter your registered @gmail.com address.');
+      return;
+    }
+
     const res = loginCustomer(loginEmail, loginPassword);
     if (!res.success) {
       setLoginError(res.error || 'Authentication failed. Please verify credentials.');
@@ -116,6 +136,38 @@ export const CheckoutModal: React.FC = () => {
   const handleAuthRegister = (e: React.FormEvent) => {
     e.preventDefault();
     setRegError('');
+    const errors: { name?: string; email?: string; phone?: string; street?: string; password?: string } = {};
+
+    const nameRes = validateFullName(regName);
+    if (!nameRes.isValid) errors.name = nameRes.error;
+
+    const emailRes = validateGmail(regEmail);
+    if (!emailRes.isValid) errors.email = emailRes.error;
+
+    const phoneRes = validatePhone11Digit(regPhone);
+    if (!phoneRes.isValid) errors.phone = phoneRes.error;
+
+    if (regPassword.length < 6) errors.password = 'Password must be at least 6 characters.';
+
+    if (regStreet.trim()) {
+      const addrRes = validateAddress({
+        street: regStreet.trim(),
+        city: 'Davao City',
+        state: 'Davao del Sur',
+        postalCode: '8000'
+      });
+      if (!addrRes.isValid && addrRes.errors.street) {
+        errors.street = addrRes.errors.street;
+      }
+    }
+
+    setRegFieldErrors(errors);
+
+    if (Object.keys(errors).length > 0) {
+      setRegError(Object.values(errors)[0] || 'Please correct the highlighted fields.');
+      return;
+    }
+
     const res = registerCustomer({
       name: regName,
       email: regEmail,
@@ -138,8 +190,71 @@ export const CheckoutModal: React.FC = () => {
     }
   };
 
+  const handleContinueToDelivery = () => {
+    const errors: { fullName?: string; email?: string; phone?: string } = {};
+
+    const nameRes = validateFullName(fullName);
+    if (!nameRes.isValid) errors.fullName = nameRes.error;
+
+    const emailRes = validateGmail(email);
+    if (!emailRes.isValid) errors.email = emailRes.error;
+
+    const phoneRes = validatePhone11Digit(phone);
+    if (!phoneRes.isValid) errors.phone = phoneRes.error;
+
+    setContactErrors(errors);
+
+    if (Object.keys(errors).length > 0) {
+      return;
+    }
+
+    if (emailRes.normalized) setEmail(emailRes.normalized);
+    if (phoneRes.normalized) setPhone(phoneRes.normalized);
+
+    setStep(2);
+  };
+
+  const handleContinueToPayment = () => {
+    const addrRes = validateAddress({
+      street,
+      city,
+      state: stateProv,
+      postalCode,
+      country
+    });
+
+    setAddressErrors(addrRes.errors);
+
+    if (!addrRes.isValid) {
+      return;
+    }
+
+    setStep(3);
+  };
+
   const handlePlaceOrder = () => {
     if (!user) return;
+
+    // Verify contact info
+    const emailRes = validateGmail(email);
+    const phoneRes = validatePhone11Digit(phone);
+    if (!emailRes.isValid || !phoneRes.isValid) {
+      setStep(1);
+      return;
+    }
+
+    // Verify address
+    const addrRes = validateAddress({
+      street,
+      city,
+      state: stateProv,
+      postalCode,
+      country
+    });
+    if (!addrRes.isValid) {
+      setStep(2);
+      return;
+    }
 
     const orderItems: OrderItem[] = cart.map((item) => ({
       order_item_id: `oi-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
@@ -154,10 +269,10 @@ export const CheckoutModal: React.FC = () => {
     }));
 
     const deliveryAddress: DeliveryAddress = {
-      street,
-      city,
-      state: stateProv,
-      postalCode,
+      street: street.trim(),
+      city: city.trim(),
+      state: stateProv.trim(),
+      postalCode: postalCode.trim(),
       country
     };
 
@@ -167,22 +282,25 @@ export const CheckoutModal: React.FC = () => {
       year: 'numeric'
     });
 
-    placeOrder({
-      user_id: user.user_id,
-      customer_name: fullName,
-      email,
-      phone,
-      subtotal: cartSubtotal,
-      shipping: shippingCost,
-      discount: 0,
-      total_amount: totalAmount,
-      payment_method: paymentMethod,
-      delivery_address: deliveryAddress,
-      items: orderItems,
-      estimated_delivery: estimatedDelivery
-    });
-
-    setIsCheckoutOpen(false);
+    try {
+      placeOrder({
+        user_id: user.user_id,
+        customer_name: fullName.trim(),
+        email: emailRes.normalized || email.trim(),
+        phone: phoneRes.normalized || phone.trim(),
+        subtotal: cartSubtotal,
+        shipping: shippingCost,
+        discount: 0,
+        total_amount: totalAmount,
+        payment_method: paymentMethod,
+        delivery_address: deliveryAddress,
+        items: orderItems,
+        estimated_delivery: estimatedDelivery
+      });
+      setIsCheckoutOpen(false);
+    } catch (e: any) {
+      console.warn('Checkout error:', e);
+    }
   };
 
   return (
@@ -324,24 +442,45 @@ export const CheckoutModal: React.FC = () => {
                     type="text"
                     required
                     value={regName}
-                    onChange={(e) => setRegName(e.target.value)}
+                    onChange={(e) => {
+                      setRegName(e.target.value);
+                      if (regFieldErrors.name) setRegFieldErrors(prev => ({ ...prev, name: undefined }));
+                    }}
                     placeholder="e.g. Maria Clara Santos"
-                    className="w-full p-2.5 rounded-lg bg-black/50 border border-neutral-700 text-sm text-white focus:outline-none focus:border-[#d4af37]"
+                    className={`w-full p-2.5 rounded-lg bg-black/50 border text-sm text-white focus:outline-none transition-colors ${
+                      regFieldErrors.name ? 'border-rose-500 focus:border-rose-400' : 'border-neutral-700 focus:border-[#d4af37]'
+                    }`}
                   />
+                  {regFieldErrors.name && (
+                    <p className="mt-1 text-[11px] text-rose-400">{regFieldErrors.name}</p>
+                  )}
                 </div>
 
                 <div>
-                  <label className="block text-neutral-300 uppercase tracking-wider text-[10px] font-semibold mb-1">
-                    Email Address *
-                  </label>
+                  <div className="flex items-center justify-between mb-1">
+                    <label className="block text-neutral-300 uppercase tracking-wider text-[10px] font-semibold">
+                      Email Address *
+                    </label>
+                    <span className="text-[10px] text-[#C6A15B] font-mono">@gmail.com</span>
+                  </div>
                   <input
                     type="email"
                     required
                     value={regEmail}
-                    onChange={(e) => setRegEmail(e.target.value)}
-                    placeholder="maria.clara@example.ph"
-                    className="w-full p-2.5 rounded-lg bg-black/50 border border-neutral-700 text-sm text-white focus:outline-none focus:border-[#d4af37]"
+                    onChange={(e) => {
+                      setRegEmail(e.target.value);
+                      if (regFieldErrors.email) setRegFieldErrors(prev => ({ ...prev, email: undefined }));
+                    }}
+                    placeholder="maria.clara@gmail.com"
+                    className={`w-full p-2.5 rounded-lg bg-black/50 border text-sm text-white focus:outline-none transition-colors ${
+                      regFieldErrors.email ? 'border-rose-500 focus:border-rose-400' : 'border-neutral-700 focus:border-[#d4af37]'
+                    }`}
                   />
+                  {regFieldErrors.email ? (
+                    <p className="mt-1 text-[11px] text-rose-400">{regFieldErrors.email}</p>
+                  ) : (
+                    <p className="mt-1 text-[10px] text-neutral-400">Must be a valid @gmail.com address</p>
+                  )}
                 </div>
 
                 <div className="grid grid-cols-2 gap-3">
@@ -353,23 +492,45 @@ export const CheckoutModal: React.FC = () => {
                       type="password"
                       required
                       value={regPassword}
-                      onChange={(e) => setRegPassword(e.target.value)}
+                      onChange={(e) => {
+                        setRegPassword(e.target.value);
+                        if (regFieldErrors.password) setRegFieldErrors(prev => ({ ...prev, password: undefined }));
+                      }}
                       placeholder="Create password"
-                      className="w-full p-2.5 rounded-lg bg-black/50 border border-neutral-700 text-xs text-white focus:outline-none focus:border-[#d4af37]"
+                      className={`w-full p-2.5 rounded-lg bg-black/50 border text-xs text-white focus:outline-none transition-colors ${
+                        regFieldErrors.password ? 'border-rose-500 focus:border-rose-400' : 'border-neutral-700 focus:border-[#d4af37]'
+                      }`}
                     />
+                    {regFieldErrors.password && (
+                      <p className="mt-1 text-[11px] text-rose-400">{regFieldErrors.password}</p>
+                    )}
                   </div>
                   <div>
-                    <label className="block text-neutral-300 uppercase tracking-wider text-[10px] font-semibold mb-1">
-                      Phone Number *
-                    </label>
+                    <div className="flex items-center justify-between mb-1">
+                      <label className="block text-neutral-300 uppercase tracking-wider text-[10px] font-semibold">
+                        Phone (11 Digits) *
+                      </label>
+                      <span className="text-[10px] text-[#C6A15B] font-mono">09XXXXXXXXX</span>
+                    </div>
                     <input
                       type="tel"
                       required
                       value={regPhone}
-                      onChange={(e) => setRegPhone(e.target.value)}
-                      placeholder="+63 9XX XXX XXXX"
-                      className="w-full p-2.5 rounded-lg bg-black/50 border border-neutral-700 text-xs text-white focus:outline-none focus:border-[#d4af37]"
+                      onChange={(e) => {
+                        setRegPhone(e.target.value);
+                        if (regFieldErrors.phone) setRegFieldErrors(prev => ({ ...prev, phone: undefined }));
+                      }}
+                      placeholder="09171234567"
+                      maxLength={13}
+                      className={`w-full p-2.5 rounded-lg bg-black/50 border text-xs text-white focus:outline-none transition-colors ${
+                        regFieldErrors.phone ? 'border-rose-500 focus:border-rose-400' : 'border-neutral-700 focus:border-[#d4af37]'
+                      }`}
                     />
+                    {regFieldErrors.phone ? (
+                      <p className="mt-1 text-[11px] text-rose-400">{regFieldErrors.phone}</p>
+                    ) : (
+                      <p className="mt-1 text-[10px] text-neutral-400">11-digit mobile number</p>
+                    )}
                   </div>
                 </div>
 
@@ -405,15 +566,23 @@ export const CheckoutModal: React.FC = () => {
 
                 <div>
                   <label className="block text-neutral-300 uppercase tracking-wider text-[10px] font-semibold mb-1">
-                    Delivery Address in Davao (Street / Barangay)
+                    Delivery Address in Davao (Street / Barangay) *
                   </label>
                   <input
                     type="text"
                     value={regStreet}
-                    onChange={(e) => setRegStreet(e.target.value)}
-                    placeholder="e.g. Unit 4B, Lanang Premier Condominiums"
-                    className="w-full p-2 rounded-lg bg-black/50 border border-neutral-700 text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-[#d4af37]"
+                    onChange={(e) => {
+                      setRegStreet(e.target.value);
+                      if (regFieldErrors.street) setRegFieldErrors(prev => ({ ...prev, street: undefined }));
+                    }}
+                    placeholder="e.g. Unit 4B, Lanang Premier Condominiums, J.P. Laurel Ave"
+                    className={`w-full p-2 rounded-lg bg-black/50 border text-xs text-white placeholder-neutral-500 focus:outline-none transition-colors ${
+                      regFieldErrors.street ? 'border-rose-500 focus:border-rose-400' : 'border-neutral-700 focus:border-[#d4af37]'
+                    }`}
                   />
+                  {regFieldErrors.street && (
+                    <p className="mt-1 text-[11px] text-rose-400">{regFieldErrors.street}</p>
+                  )}
                 </div>
 
                 <button
@@ -494,37 +663,83 @@ export const CheckoutModal: React.FC = () => {
                       type="text"
                       required
                       value={fullName}
-                      onChange={(e) => setFullName(e.target.value)}
-                      className="w-full p-3 rounded-lg bg-black/40 border border-neutral-700 text-sm text-white focus:outline-none focus:border-[#d4af37]"
+                      onChange={(e) => {
+                        setFullName(e.target.value);
+                        if (contactErrors.fullName) setContactErrors(prev => ({ ...prev, fullName: undefined }));
+                      }}
+                      placeholder="e.g. Maria Clara Santos"
+                      className={`w-full p-3 rounded-lg bg-black/40 border text-sm text-white focus:outline-none transition-colors ${
+                        contactErrors.fullName ? 'border-rose-500 focus:border-rose-400' : 'border-neutral-700 focus:border-[#d4af37]'
+                      }`}
                     />
+                    {contactErrors.fullName && (
+                      <p className="mt-1 text-[11px] text-rose-400 flex items-center gap-1">
+                        <AlertCircle className="w-3.5 h-3.5" />
+                        <span>{contactErrors.fullName}</span>
+                      </p>
+                    )}
                   </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div>
-                      <label className="block text-neutral-300 uppercase tracking-wider text-[10px] font-semibold mb-1">
-                        Email Address *
-                      </label>
+                      <div className="flex items-center justify-between mb-1">
+                        <label className="block text-neutral-300 uppercase tracking-wider text-[10px] font-semibold">
+                          Email Address *
+                        </label>
+                        <span className="text-[10px] text-[#C6A15B] font-mono">@gmail.com</span>
+                      </div>
                       <input
                         type="email"
                         required
                         value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        className="w-full p-3 rounded-lg bg-black/40 border border-neutral-700 text-sm text-white focus:outline-none focus:border-[#d4af37]"
+                        onChange={(e) => {
+                          setEmail(e.target.value);
+                          if (contactErrors.email) setContactErrors(prev => ({ ...prev, email: undefined }));
+                        }}
+                        placeholder="yourname@gmail.com"
+                        className={`w-full p-3 rounded-lg bg-black/40 border text-sm text-white focus:outline-none transition-colors ${
+                          contactErrors.email ? 'border-rose-500 focus:border-rose-400' : 'border-neutral-700 focus:border-[#d4af37]'
+                        }`}
                       />
+                      {contactErrors.email ? (
+                        <p className="mt-1 text-[11px] text-rose-400 flex items-center gap-1">
+                          <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                          <span>{contactErrors.email}</span>
+                        </p>
+                      ) : (
+                        <p className="mt-1 text-[10px] text-neutral-400">Must be a valid @gmail.com address</p>
+                      )}
                     </div>
 
                     <div>
-                      <label className="block text-neutral-300 uppercase tracking-wider text-[10px] font-semibold mb-1">
-                        Phone Number (+63 Davao Mobile) *
-                      </label>
+                      <div className="flex items-center justify-between mb-1">
+                        <label className="block text-neutral-300 uppercase tracking-wider text-[10px] font-semibold">
+                          Phone Number (11-Digits) *
+                        </label>
+                        <span className="text-[10px] text-[#C6A15B] font-mono">09XXXXXXXXX</span>
+                      </div>
                       <input
                         type="tel"
                         required
                         value={phone}
-                        onChange={(e) => setPhone(e.target.value)}
-                        placeholder="+63 9XX XXX XXXX"
-                        className="w-full p-3 rounded-lg bg-black/40 border border-neutral-700 text-sm text-white focus:outline-none focus:border-[#d4af37]"
+                        onChange={(e) => {
+                          setPhone(e.target.value);
+                          if (contactErrors.phone) setContactErrors(prev => ({ ...prev, phone: undefined }));
+                        }}
+                        placeholder="09171234567"
+                        maxLength={13}
+                        className={`w-full p-3 rounded-lg bg-black/40 border text-sm text-white focus:outline-none transition-colors ${
+                          contactErrors.phone ? 'border-rose-500 focus:border-rose-400' : 'border-neutral-700 focus:border-[#d4af37]'
+                        }`}
                       />
+                      {contactErrors.phone ? (
+                        <p className="mt-1 text-[11px] text-rose-400 flex items-center gap-1">
+                          <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                          <span>{contactErrors.phone}</span>
+                        </p>
+                      ) : (
+                        <p className="mt-1 text-[10px] text-neutral-400">Exact 11-digit mobile number</p>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -532,9 +747,8 @@ export const CheckoutModal: React.FC = () => {
                 <div className="pt-4 flex justify-end">
                   <button
                     type="button"
-                    onClick={() => setStep(2)}
-                    disabled={!fullName || !email || !phone}
-                    className="py-3 px-6 rounded-lg bg-[#801729] hover:bg-[#961e33] text-white text-xs uppercase tracking-wider font-semibold flex items-center gap-2 transition-all cursor-pointer disabled:opacity-40"
+                    onClick={handleContinueToDelivery}
+                    className="py-3 px-6 rounded-lg bg-[#801729] hover:bg-[#961e33] text-white text-xs uppercase tracking-wider font-semibold flex items-center gap-2 transition-all cursor-pointer shadow-lg hover:shadow-[#801729]/30"
                   >
                     <span>Continue to Delivery</span>
                     <ArrowRight className="w-4 h-4" />
@@ -562,10 +776,21 @@ export const CheckoutModal: React.FC = () => {
                       type="text"
                       required
                       value={street}
-                      onChange={(e) => setStreet(e.target.value)}
+                      onChange={(e) => {
+                        setStreet(e.target.value);
+                        if (addressErrors.street) setAddressErrors(prev => ({ ...prev, street: undefined }));
+                      }}
                       placeholder="e.g. Unit 12B, One Oasis Davao, Eco West Drive"
-                      className="w-full p-3 rounded-lg bg-black/40 border border-neutral-700 text-sm text-white focus:outline-none focus:border-[#d4af37]"
+                      className={`w-full p-3 rounded-lg bg-black/40 border text-sm text-white focus:outline-none transition-colors ${
+                        addressErrors.street ? 'border-rose-500 focus:border-rose-400' : 'border-neutral-700 focus:border-[#d4af37]'
+                      }`}
                     />
+                    {addressErrors.street && (
+                      <p className="mt-1 text-[11px] text-rose-400 flex items-center gap-1">
+                        <AlertCircle className="w-3.5 h-3.5" />
+                        <span>{addressErrors.street}</span>
+                      </p>
+                    )}
                   </div>
 
                   <div className="grid grid-cols-2 gap-3">
@@ -577,9 +802,20 @@ export const CheckoutModal: React.FC = () => {
                         type="text"
                         required
                         value={city}
-                        onChange={(e) => setCity(e.target.value)}
-                        className="w-full p-3 rounded-lg bg-black/40 border border-neutral-700 text-sm text-white focus:outline-none focus:border-[#d4af37]"
+                        onChange={(e) => {
+                          setCity(e.target.value);
+                          if (addressErrors.city) setAddressErrors(prev => ({ ...prev, city: undefined }));
+                        }}
+                        className={`w-full p-3 rounded-lg bg-black/40 border text-sm text-white focus:outline-none transition-colors ${
+                          addressErrors.city ? 'border-rose-500 focus:border-rose-400' : 'border-neutral-700 focus:border-[#d4af37]'
+                        }`}
                       />
+                      {addressErrors.city && (
+                        <p className="mt-1 text-[11px] text-rose-400 flex items-center gap-1">
+                          <AlertCircle className="w-3.5 h-3.5" />
+                          <span>{addressErrors.city}</span>
+                        </p>
+                      )}
                     </div>
 
                     <div>
@@ -590,24 +826,53 @@ export const CheckoutModal: React.FC = () => {
                         type="text"
                         required
                         value={stateProv}
-                        onChange={(e) => setStateProv(e.target.value)}
-                        className="w-full p-3 rounded-lg bg-black/40 border border-neutral-700 text-sm text-white focus:outline-none focus:border-[#d4af37]"
+                        onChange={(e) => {
+                          setStateProv(e.target.value);
+                          if (addressErrors.state) setAddressErrors(prev => ({ ...prev, state: undefined }));
+                        }}
+                        className={`w-full p-3 rounded-lg bg-black/40 border text-sm text-white focus:outline-none transition-colors ${
+                          addressErrors.state ? 'border-rose-500 focus:border-rose-400' : 'border-neutral-700 focus:border-[#d4af37]'
+                        }`}
                       />
+                      {addressErrors.state && (
+                        <p className="mt-1 text-[11px] text-rose-400 flex items-center gap-1">
+                          <AlertCircle className="w-3.5 h-3.5" />
+                          <span>{addressErrors.state}</span>
+                        </p>
+                      )}
                     </div>
                   </div>
 
                   <div className="grid grid-cols-2 gap-3">
                     <div>
-                      <label className="block text-neutral-300 uppercase tracking-wider text-[10px] font-semibold mb-1">
-                        Postal Code *
-                      </label>
+                      <div className="flex items-center justify-between mb-1">
+                        <label className="block text-neutral-300 uppercase tracking-wider text-[10px] font-semibold">
+                          Postal Code *
+                        </label>
+                        <span className="text-[10px] text-[#C6A15B] font-mono">4-Digits</span>
+                      </div>
                       <input
                         type="text"
                         required
+                        maxLength={4}
                         value={postalCode}
-                        onChange={(e) => setPostalCode(e.target.value)}
-                        className="w-full p-3 rounded-lg bg-black/40 border border-neutral-700 text-sm text-white focus:outline-none focus:border-[#d4af37]"
+                        onChange={(e) => {
+                          setPostalCode(e.target.value);
+                          if (addressErrors.postalCode) setAddressErrors(prev => ({ ...prev, postalCode: undefined }));
+                        }}
+                        placeholder="8000"
+                        className={`w-full p-3 rounded-lg bg-black/40 border text-sm text-white focus:outline-none transition-colors ${
+                          addressErrors.postalCode ? 'border-rose-500 focus:border-rose-400' : 'border-neutral-700 focus:border-[#d4af37]'
+                        }`}
                       />
+                      {addressErrors.postalCode ? (
+                        <p className="mt-1 text-[11px] text-rose-400 flex items-center gap-1">
+                          <AlertCircle className="w-3.5 h-3.5" />
+                          <span>{addressErrors.postalCode}</span>
+                        </p>
+                      ) : (
+                        <p className="mt-1 text-[10px] text-neutral-400">e.g. 8000 for Davao City</p>
+                      )}
                     </div>
 
                     <div>
@@ -634,9 +899,8 @@ export const CheckoutModal: React.FC = () => {
                   </button>
                   <button
                     type="button"
-                    onClick={() => setStep(3)}
-                    disabled={!street || !city || !postalCode}
-                    className="py-3 px-6 rounded-lg bg-[#801729] hover:bg-[#961e33] text-white text-xs uppercase tracking-wider font-semibold flex items-center gap-2 transition-all cursor-pointer disabled:opacity-40"
+                    onClick={handleContinueToPayment}
+                    className="py-3 px-6 rounded-lg bg-[#801729] hover:bg-[#961e33] text-white text-xs uppercase tracking-wider font-semibold flex items-center gap-2 transition-all cursor-pointer shadow-lg hover:shadow-[#801729]/30"
                   >
                     <span>Continue to Payment</span>
                     <ArrowRight className="w-4 h-4" />

@@ -68,12 +68,23 @@ export const FadeInUp: React.FC<FadeInUpProps> = ({
     };
   }, [threshold]);
 
+  const [hasFinishedTransition, setHasFinishedTransition] = useState(false);
+
+  useEffect(() => {
+    if (isVisible) {
+      const timer = setTimeout(() => {
+        setHasFinishedTransition(true);
+      }, duration + delay + 100);
+      return () => clearTimeout(timer);
+    }
+  }, [isVisible, duration, delay]);
+
   const translateY = direction === 'up' ? (isVisible ? 0 : distance) : 0;
 
   return (
     <div
       ref={domRef}
-      className={`will-change-transform ${className}`}
+      className={`${hasFinishedTransition ? '' : 'will-change-transform'} ${className}`}
       style={{
         opacity: isVisible ? 1 : 0,
         transform: `translate3d(0, ${translateY}px, 0)`,

@@ -100,11 +100,11 @@ export const VineaLogo: React.FC<VineaLogoProps> = ({
       <VineaLogoIcon sizePx={current.px} />
       {showText && (
         <div className="flex flex-col">
-          <span className={`font-serif tracking-wider text-[#F5EFE7] font-normal leading-none block ${current.titleClass}`}>
+          <span className={`font-serif tracking-wider text-white font-medium leading-none block drop-shadow-sm ${current.titleClass}`}>
             VÍNEA
           </span>
           {subtitle && (
-            <span className={`text-[#C6A15B] uppercase block mt-1 font-sans ${current.subClass}`}>
+            <span className={`text-[#E5D7B7] font-semibold uppercase block mt-1.5 font-sans tracking-widest ${current.subClass}`}>
               {subtitle}
             </span>
           )}

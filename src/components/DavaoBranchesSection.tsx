@@ -19,8 +19,9 @@ import { useWineStore } from '../context/WineStoreContext';
 import { BranchDirectionsModal } from './BranchDirectionsModal';
 
 export const DavaoBranchesSection: React.FC = () => {
-  const { showToast } = useWineStore();
+  const { showToast, setSelectedProduct, products } = useWineStore();
   const [selectedBranch, setSelectedBranch] = useState<DavaoBranch | null>(null);
+
 
   const handleCall = (phone: string, name: string) => {
     showToast(`Connecting to ${name} concierge... (${phone})`, 'info');
@@ -133,6 +134,48 @@ export const DavaoBranchesSection: React.FC = () => {
                   </span>
                 ))}
               </div>
+
+              {/* Featured Branch Wine Spotlight */}
+              {DAVAO_BRANCHES[0].featuredWine && (
+                <div
+                  onClick={() => {
+                    const p = products.find((prod) => prod.product_id === DAVAO_BRANCHES[0].featuredWine?.productId);
+                    if (p) {
+                      setSelectedProduct(p);
+                      window.scrollTo({ top: 0, behavior: 'smooth' });
+                    }
+                  }}
+                  className="p-3.5 rounded-xl bg-[#130B0D] hover:bg-[#351116] border border-[#48151F] hover:border-[#C6A15B]/50 transition-all cursor-pointer flex items-center justify-between gap-4 group/wine shadow-lg"
+                  title="Click to view full vintage details"
+                >
+                  <div className="flex items-center gap-3.5 min-w-0">
+                    <div className="w-12 h-14 rounded-lg bg-[#210D12] border border-[#48151F] p-1 flex items-center justify-center shrink-0">
+                      <img
+                        src={getWineImageUrl(DAVAO_BRANCHES[0].featuredWine.image)}
+                        alt={DAVAO_BRANCHES[0].featuredWine.name}
+                        onError={handleImageError}
+                        className="h-full object-contain group-hover/wine:scale-110 transition-transform duration-300"
+                      />
+                    </div>
+                    <div className="min-w-0">
+                      <span className="text-[10px] uppercase tracking-wider text-[#C6A15B] font-semibold flex items-center gap-1.5">
+                        <Wine className="w-3 h-3" />
+                        <span>{DAVAO_BRANCHES[0].featuredWine.tagline}</span>
+                      </span>
+                      <h4 className="font-serif text-sm text-[#F5EFE7] group-hover/wine:text-[#C6A15B] transition-colors truncate">
+                        {DAVAO_BRANCHES[0].featuredWine.name} · {DAVAO_BRANCHES[0].featuredWine.vintage}
+                      </h4>
+                      <p className="text-[11px] text-[#B7AAA1]">
+                        {DAVAO_BRANCHES[0].featuredWine.wineType} Wine · <span className="text-[#C6A15B] font-serif font-medium">₱{DAVAO_BRANCHES[0].featuredWine.price.toLocaleString()}</span>
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-1 text-[11px] uppercase tracking-wider text-[#C6A15B] font-semibold group-hover/wine:translate-x-0.5 transition-transform shrink-0">
+                    <span>View Vintage</span>
+                    <ChevronRight className="w-3.5 h-3.5" />
+                  </div>
+                </div>
+              )}
 
               {/* Action Buttons */}
               <div className="flex flex-wrap gap-3 pt-4">
@@ -274,7 +317,7 @@ export const DavaoBranchesSection: React.FC = () => {
                 </div>
 
                 {/* Features list */}
-                <div className="space-y-1.5 mb-6 pt-3 border-t border-[#48151F]/40">
+                <div className="space-y-1.5 mb-4 pt-3 border-t border-[#48151F]/40">
                   {branch.features.map((feat, idx) => (
                     <div key={idx} className="flex items-center gap-2 text-xs text-[#B7AAA1]">
                       <CheckCircle2 className="w-3.5 h-3.5 text-[#C6A15B] shrink-0" />
@@ -282,6 +325,43 @@ export const DavaoBranchesSection: React.FC = () => {
                     </div>
                   ))}
                 </div>
+
+                {/* Featured Wine for this specific branch */}
+                {branch.featuredWine && (
+                  <div
+                    onClick={() => {
+                      const p = products.find((prod) => prod.product_id === branch.featuredWine?.productId);
+                      if (p) {
+                        setSelectedProduct(p);
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                      }
+                    }}
+                    className="mb-4 p-2.5 rounded-xl bg-[#210D12] hover:bg-[#351116] border border-[#48151F] hover:border-[#C6A15B]/50 transition-all cursor-pointer flex items-center gap-3 group/wine shadow-sm"
+                    title="Click to view vintage details"
+                  >
+                    <div className="w-10 h-12 rounded-lg bg-[#130B0D] border border-[#48151F]/60 p-1 flex items-center justify-center shrink-0">
+                      <img
+                        src={getWineImageUrl(branch.featuredWine.image)}
+                        alt={branch.featuredWine.name}
+                        onError={handleImageError}
+                        className="h-full object-contain group-hover/wine:scale-110 transition-transform duration-300"
+                      />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-1 text-[10px] text-[#C6A15B] uppercase tracking-wider font-semibold">
+                        <Wine className="w-3 h-3" />
+                        <span>Branch Allocation</span>
+                      </div>
+                      <p className="text-xs font-serif text-[#F5EFE7] truncate group-hover/wine:text-[#C6A15B] transition-colors">
+                        {branch.featuredWine.name}
+                      </p>
+                      <div className="flex items-center justify-between text-[11px] mt-0.5">
+                        <span className="text-[#B7AAA1]">{branch.featuredWine.vintage} · {branch.featuredWine.wineType}</span>
+                        <span className="text-[#C6A15B] font-serif font-medium">₱{branch.featuredWine.price.toLocaleString()}</span>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* Action row with Google Maps directions button */}

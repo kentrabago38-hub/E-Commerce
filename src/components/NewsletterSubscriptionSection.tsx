@@ -13,6 +13,7 @@ import {
   ArrowRight
 } from 'lucide-react';
 import { subscribeNewsletterInSupabase } from '../services/dbService';
+import { validateGmail } from '../utils/validation';
 
 export const NewsletterSubscriptionSection: React.FC = () => {
   const { showToast, setActiveTab, setSelectedProduct } = useWineStore();
@@ -37,23 +38,18 @@ export const NewsletterSubscriptionSection: React.FC = () => {
   };
 
   /**
-   * Basic & robust RFC 5322 compatible email validation
+   * Validates specifically for @gmail.com addresses
    */
   const validateEmail = (value: string): boolean => {
-    const trimmed = value.trim();
-    if (!trimmed) {
-      setErrorMessage('Please enter your email address.');
-      return false;
-    }
-    // Standard email regex: must contain local part, @, domain, and TLD of at least 2 chars
-    const emailRegex = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)+$/;
-    if (!emailRegex.test(trimmed)) {
-      setErrorMessage('Please enter a valid email format (e.g., patron@domain.com).');
+    const res = validateGmail(value);
+    if (!res.isValid) {
+      setErrorMessage(res.error || 'Email must be a valid @gmail.com address (e.g. yourname@gmail.com).');
       return false;
     }
     setErrorMessage('');
     return true;
   };
+
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = e.target.value;

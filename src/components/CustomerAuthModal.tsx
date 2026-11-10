@@ -17,6 +17,13 @@ import {
   AlertCircle
 } from 'lucide-react';
 import { DAVAO_BRANCHES } from '../data/mockData';
+import {
+  validateGmail,
+  validatePhone11Digit,
+  validateAddress,
+  validateFullName,
+  validatePassword
+} from '../utils/validation';
 
 export const CustomerAuthModal: React.FC = () => {
   const {
@@ -45,12 +52,20 @@ export const CustomerAuthModal: React.FC = () => {
   const [regPassword, setRegPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showRegPassword, setShowRegPassword] = useState(false);
-  const [phone, setPhone] = useState('+63 917 ');
+  const [phone, setPhone] = useState('0917');
   const [dob, setDob] = useState('2000-01-15');
   const [favoriteBranch, setFavoriteBranch] = useState(DAVAO_BRANCHES[0]?.name || 'VÍNEA Lanang Flagship & Subterranean Cellar');
   const [streetAddress, setStreetAddress] = useState('');
   const [confirmAge, setConfirmAge] = useState(true);
   const [regError, setRegError] = useState('');
+  const [fieldErrors, setFieldErrors] = useState<{
+    name?: string;
+    email?: string;
+    phone?: string;
+    street?: string;
+    password?: string;
+    confirmPassword?: string;
+  }>({});
 
   if (!isAuthModalOpen) return null;
 
@@ -59,11 +74,18 @@ export const CustomerAuthModal: React.FC = () => {
     setAuthRedirectReason(null);
     setLoginError('');
     setRegError('');
+    setFieldErrors({});
   };
 
   const handleLoginSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setLoginError('');
+
+    const emailCheck = validateGmail(loginEmail);
+    if (!emailCheck.isValid) {
+      setLoginError(emailCheck.error || 'Please enter your registered @gmail.com address.');
+      return;
+    }
 
     const res = loginCustomer(loginEmail, loginPassword);
     if (!res.success) {
@@ -80,14 +102,52 @@ export const CustomerAuthModal: React.FC = () => {
   const handleRegisterSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setRegError('');
+    const errors: {
+      name?: string;
+      email?: string;
+      phone?: string;
+      street?: string;
+      password?: string;
+      confirmPassword?: string;
+    } = {};
 
-    if (!confirmAge) {
-      setRegError('You must confirm that you are at least 21 years of age.');
+    const nameRes = validateFullName(name);
+    if (!nameRes.isValid) errors.name = nameRes.error;
+
+    const emailRes = validateGmail(regEmail);
+    if (!emailRes.isValid) errors.email = emailRes.error;
+
+    const phoneRes = validatePhone11Digit(phone);
+    if (!phoneRes.isValid) errors.phone = phoneRes.error;
+
+    const passRes = validatePassword(regPassword);
+    if (!passRes.isValid) errors.password = passRes.error;
+
+    if (regPassword !== confirmPassword) {
+      errors.confirmPassword = 'Passwords do not match. Please re-enter.';
+    }
+
+    if (streetAddress.trim()) {
+      const addrRes = validateAddress({
+        street: streetAddress.trim(),
+        city: 'Davao City',
+        state: 'Davao del Sur',
+        postalCode: '8000'
+      });
+      if (!addrRes.isValid && addrRes.errors.street) {
+        errors.street = addrRes.errors.street;
+      }
+    }
+
+    setFieldErrors(errors);
+
+    if (Object.keys(errors).length > 0) {
+      setRegError(Object.values(errors)[0] || 'Please fix the highlighted fields.');
       return;
     }
 
-    if (regPassword !== confirmPassword) {
-      setRegError('Passwords do not match. Please re-enter.');
+    if (!confirmAge) {
+      setRegError('You must confirm that you are at least 21 years of age.');
       return;
     }
 
@@ -192,9 +252,12 @@ export const CustomerAuthModal: React.FC = () => {
             )}
 
             <div>
-              <label className="block text-[#B7AAA1] uppercase tracking-wider text-[10px] font-semibold mb-1.5">
-                Email Address
-              </label>
+              <div className="flex items-center justify-between mb-1.5">
+                <label className="block text-[#B7AAA1] uppercase tracking-wider text-[10px] font-semibold">
+                  Email Address
+                </label>
+                <span className="text-[10px] text-[#C6A15B] font-mono">@gmail.com</span>
+              </div>
               <div className="relative">
                 <Mail className="w-4 h-4 absolute left-3 top-3 text-[#B7AAA1]" />
                 <input
@@ -202,7 +265,7 @@ export const CustomerAuthModal: React.FC = () => {
                   required
                   value={loginEmail}
                   onChange={(e) => setLoginEmail(e.target.value)}
-                  placeholder="name@example.ph"
+                  placeholder="yourname@gmail.com"
                   className="w-full pl-9 pr-3 py-2.5 rounded-lg bg-[#210D12] border border-[#48151F] text-sm text-[#F5EFE7] placeholder-[#B7AAA1]/60 focus:outline-none focus:border-[#C6A15B] transition-colors"
                 />
               </div>
@@ -264,28 +327,49 @@ export const CustomerAuthModal: React.FC = () => {
                   type="text"
                   required
                   value={name}
-                  onChange={(e) => setName(e.target.value)}
+                  onChange={(e) => {
+                    setName(e.target.value);
+                    if (fieldErrors.name) setFieldErrors(prev => ({ ...prev, name: undefined }));
+                  }}
                   placeholder="e.g. Sofia Delgado"
-                  className="w-full pl-9 pr-3 py-2 rounded-lg bg-[#210D12] border border-[#48151F] text-sm text-[#F5EFE7] placeholder-[#B7AAA1]/60 focus:outline-none focus:border-[#C6A15B] transition-colors"
+                  className={`w-full pl-9 pr-3 py-2 rounded-lg bg-[#210D12] border text-sm text-[#F5EFE7] placeholder-[#B7AAA1]/60 focus:outline-none transition-colors ${
+                    fieldErrors.name ? 'border-rose-500 focus:border-rose-400' : 'border-[#48151F] focus:border-[#C6A15B]'
+                  }`}
                 />
               </div>
+              {fieldErrors.name && (
+                <p className="mt-1 text-[11px] text-rose-400">{fieldErrors.name}</p>
+              )}
             </div>
 
             <div>
-              <label className="block text-[#B7AAA1] uppercase tracking-wider text-[10px] font-semibold mb-1">
-                Email Address *
-              </label>
+              <div className="flex items-center justify-between mb-1">
+                <label className="block text-[#B7AAA1] uppercase tracking-wider text-[10px] font-semibold">
+                  Email Address *
+                </label>
+                <span className="text-[10px] text-[#C6A15B] font-mono">@gmail.com</span>
+              </div>
               <div className="relative">
                 <Mail className="w-4 h-4 absolute left-3 top-3 text-[#B7AAA1]" />
                 <input
                   type="email"
                   required
                   value={regEmail}
-                  onChange={(e) => setRegEmail(e.target.value)}
-                  placeholder="sofia.delgado@example.ph"
-                  className="w-full pl-9 pr-3 py-2 rounded-lg bg-[#210D12] border border-[#48151F] text-sm text-[#F5EFE7] placeholder-[#B7AAA1]/60 focus:outline-none focus:border-[#C6A15B] transition-colors"
+                  onChange={(e) => {
+                    setRegEmail(e.target.value);
+                    if (fieldErrors.email) setFieldErrors(prev => ({ ...prev, email: undefined }));
+                  }}
+                  placeholder="sofia.delgado@gmail.com"
+                  className={`w-full pl-9 pr-3 py-2 rounded-lg bg-[#210D12] border text-sm text-[#F5EFE7] placeholder-[#B7AAA1]/60 focus:outline-none transition-colors ${
+                    fieldErrors.email ? 'border-rose-500 focus:border-rose-400' : 'border-[#48151F] focus:border-[#C6A15B]'
+                  }`}
                 />
               </div>
+              {fieldErrors.email ? (
+                <p className="mt-1 text-[11px] text-rose-400">{fieldErrors.email}</p>
+              ) : (
+                <p className="mt-1 text-[10px] text-[#B7AAA1]/80">Must be a valid @gmail.com address</p>
+              )}
             </div>
 
             <div className="grid grid-cols-2 gap-3">
@@ -299,9 +383,14 @@ export const CustomerAuthModal: React.FC = () => {
                     type={showRegPassword ? 'text' : 'password'}
                     required
                     value={regPassword}
-                    onChange={(e) => setRegPassword(e.target.value)}
+                    onChange={(e) => {
+                      setRegPassword(e.target.value);
+                      if (fieldErrors.password) setFieldErrors(prev => ({ ...prev, password: undefined }));
+                    }}
                     placeholder="Create password"
-                    className="w-full pl-9 pr-8 py-2 rounded-lg bg-[#210D12] border border-[#48151F] text-xs text-[#F5EFE7] placeholder-[#B7AAA1]/60 focus:outline-none focus:border-[#C6A15B] transition-colors"
+                    className={`w-full pl-9 pr-8 py-2 rounded-lg bg-[#210D12] border text-xs text-[#F5EFE7] placeholder-[#B7AAA1]/60 focus:outline-none transition-colors ${
+                      fieldErrors.password ? 'border-rose-500 focus:border-rose-400' : 'border-[#48151F] focus:border-[#C6A15B]'
+                    }`}
                   />
                   <button
                     type="button"
@@ -311,6 +400,9 @@ export const CustomerAuthModal: React.FC = () => {
                     {showRegPassword ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
                   </button>
                 </div>
+                {fieldErrors.password && (
+                  <p className="mt-1 text-[11px] text-rose-400">{fieldErrors.password}</p>
+                )}
               </div>
 
               <div>
@@ -321,29 +413,51 @@ export const CustomerAuthModal: React.FC = () => {
                   type={showRegPassword ? 'text' : 'password'}
                   required
                   value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  onChange={(e) => {
+                    setConfirmPassword(e.target.value);
+                    if (fieldErrors.confirmPassword) setFieldErrors(prev => ({ ...prev, confirmPassword: undefined }));
+                  }}
                   placeholder="Repeat password"
-                  className="w-full px-3 py-2 rounded-lg bg-[#210D12] border border-[#48151F] text-xs text-[#F5EFE7] placeholder-[#B7AAA1]/60 focus:outline-none focus:border-[#C6A15B] transition-colors"
+                  className={`w-full px-3 py-2 rounded-lg bg-[#210D12] border text-xs text-[#F5EFE7] placeholder-[#B7AAA1]/60 focus:outline-none transition-colors ${
+                    fieldErrors.confirmPassword ? 'border-rose-500 focus:border-rose-400' : 'border-[#48151F] focus:border-[#C6A15B]'
+                  }`}
                 />
+                {fieldErrors.confirmPassword && (
+                  <p className="mt-1 text-[11px] text-rose-400">{fieldErrors.confirmPassword}</p>
+                )}
               </div>
             </div>
 
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="block text-[#B7AAA1] uppercase tracking-wider text-[10px] font-semibold mb-1">
-                  Phone Number (+63 Davao) *
-                </label>
+                <div className="flex items-center justify-between mb-1">
+                  <label className="block text-[#B7AAA1] uppercase tracking-wider text-[10px] font-semibold">
+                    Phone (11 Digits) *
+                  </label>
+                  <span className="text-[10px] text-[#C6A15B] font-mono">09XXXXXXXXX</span>
+                </div>
                 <div className="relative">
                   <Phone className="w-4 h-4 absolute left-3 top-3 text-[#B7AAA1]" />
                   <input
                     type="tel"
                     required
                     value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
-                    placeholder="+63 9XX XXX XXXX"
-                    className="w-full pl-9 pr-3 py-2 rounded-lg bg-[#210D12] border border-[#48151F] text-xs text-[#F5EFE7] placeholder-[#B7AAA1]/60 focus:outline-none focus:border-[#C6A15B] transition-colors"
+                    onChange={(e) => {
+                      setPhone(e.target.value);
+                      if (fieldErrors.phone) setFieldErrors(prev => ({ ...prev, phone: undefined }));
+                    }}
+                    placeholder="09171234567"
+                    maxLength={13}
+                    className={`w-full pl-9 pr-3 py-2 rounded-lg bg-[#210D12] border text-xs text-[#F5EFE7] placeholder-[#B7AAA1]/60 focus:outline-none transition-colors ${
+                      fieldErrors.phone ? 'border-rose-500 focus:border-rose-400' : 'border-[#48151F] focus:border-[#C6A15B]'
+                    }`}
                   />
                 </div>
+                {fieldErrors.phone ? (
+                  <p className="mt-1 text-[11px] text-rose-400">{fieldErrors.phone}</p>
+                ) : (
+                  <p className="mt-1 text-[10px] text-[#B7AAA1]/80">Exact 11-digit mobile number</p>
+                )}
               </div>
 
               <div>
@@ -380,19 +494,30 @@ export const CustomerAuthModal: React.FC = () => {
             </div>
 
             <div>
-              <label className="block text-[#B7AAA1] uppercase tracking-wider text-[10px] font-semibold mb-1">
-                Davao Delivery Street / Barangay
-              </label>
+              <div className="flex items-center justify-between mb-1">
+                <label className="block text-[#B7AAA1] uppercase tracking-wider text-[10px] font-semibold">
+                  Davao Delivery Street / Barangay *
+                </label>
+                <span className="text-[10px] text-[#C6A15B]">Min 5 chars</span>
+              </div>
               <div className="relative">
                 <MapPin className="w-4 h-4 absolute left-3 top-3 text-[#B7AAA1]" />
                 <input
                   type="text"
                   value={streetAddress}
-                  onChange={(e) => setStreetAddress(e.target.value)}
-                  placeholder="e.g. One Oasis Davao, Eco West Drive"
-                  className="w-full pl-9 pr-3 py-2 rounded-lg bg-[#210D12] border border-[#48151F] text-xs text-[#F5EFE7] placeholder-[#B7AAA1]/60 focus:outline-none focus:border-[#C6A15B] transition-colors"
+                  onChange={(e) => {
+                    setStreetAddress(e.target.value);
+                    if (fieldErrors.street) setFieldErrors(prev => ({ ...prev, street: undefined }));
+                  }}
+                  placeholder="e.g. Unit 4B, Lanang Premier Condominiums, J.P. Laurel Ave"
+                  className={`w-full pl-9 pr-3 py-2 rounded-lg bg-[#210D12] border text-xs text-[#F5EFE7] placeholder-[#B7AAA1]/60 focus:outline-none transition-colors ${
+                    fieldErrors.street ? 'border-rose-500 focus:border-rose-400' : 'border-[#48151F] focus:border-[#C6A15B]'
+                  }`}
                 />
               </div>
+              {fieldErrors.street && (
+                <p className="mt-1 text-[11px] text-rose-400">{fieldErrors.street}</p>
+              )}
             </div>
 
             <label className="flex items-start gap-2 pt-1 text-[11px] text-[#B7AAA1] cursor-pointer">

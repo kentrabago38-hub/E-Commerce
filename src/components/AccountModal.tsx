@@ -28,12 +28,15 @@ import {
   Plus,
   Save,
   Check,
-  Compass
+  Compass,
+  Download
 } from 'lucide-react';
 import { DAVAO_BRANCHES } from '../data/mockData';
 import { VineaRewardsSection } from './VineaRewardsSection';
 import { getWineImageUrl, handleImageError } from '../utils/imageUtils';
 import { uploadImageApi } from '../services/apiClient';
+import { validatePhone11Digit, validateAddress } from '../utils/validation';
+import { downloadVineaReceipt } from '../utils/receiptGenerator';
 
 const AVATAR_PRESETS = [
   {
@@ -86,7 +89,8 @@ export const AccountModal: React.FC = () => {
     setIsAuthModalOpen,
     setAuthModalMode,
     accountActiveSubTab,
-    setAccountActiveSubTab
+    setAccountActiveSubTab,
+    setViewingDigitalReceiptOrder
   } = useWineStore();
 
   const activeSubTab = accountActiveSubTab;
@@ -123,6 +127,8 @@ export const AccountModal: React.FC = () => {
   const [newStreet, setNewStreet] = useState('');
   const [newDistrict, setNewDistrict] = useState('Lanang');
   const [showAddAddress, setShowAddAddress] = useState(false);
+  const [profilePhoneError, setProfilePhoneError] = useState('');
+  const [addressError, setAddressError] = useState('');
 
   if (!isAccountOpen) return null;
 
@@ -183,9 +189,21 @@ export const AccountModal: React.FC = () => {
 
   const handleSaveProfile = (e: React.FormEvent) => {
     e.preventDefault();
+    setProfilePhoneError('');
+
+    if (editPhone.trim()) {
+      const phoneVal = validatePhone11Digit(editPhone);
+      if (!phoneVal.isValid) {
+        setProfilePhoneError(phoneVal.error || 'Must be a valid 11-digit mobile number (09XXXXXXXXX).');
+        showToast(phoneVal.error || 'Invalid phone: 11-digit number required (09XXXXXXXXX)', 'error');
+        return;
+      }
+      setEditPhone(phoneVal.normalized || editPhone);
+    }
+
     updateUserProfile({
       name: editName,
-      phone: editPhone,
+      phone: editPhone.trim() ? (validatePhone11Digit(editPhone).normalized || editPhone) : editPhone,
       date_of_birth: editDob,
       favorite_davao_branch: editBranch,
       bio: editBio,
@@ -253,7 +271,21 @@ export const AccountModal: React.FC = () => {
 
   const handleAddAddress = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newStreet.trim()) return;
+    setAddressError('');
+
+    const addrVal = validateAddress({
+      street: newStreet.trim(),
+      city: 'Davao City',
+      state: 'Davao del Sur',
+      postalCode: '8000'
+    });
+
+    if (!addrVal.isValid) {
+      const err = addrVal.firstError || addrVal.errors.street || 'Street address must be at least 5 characters.';
+      setAddressError(err);
+      showToast(err, 'error');
+      return;
+    }
 
     const newAddr: DeliveryAddress = {
       street: newStreet.trim(),
@@ -533,12 +565,21 @@ export const AccountModal: React.FC = () => {
                           ))}
                         </div>
 
-                        {ord.tracking_number && (
-                          <div className="pt-2 text-[11px] text-neutral-400 flex flex-wrap justify-between border-t border-white/5">
+                        <div className="pt-2 text-[11px] text-neutral-400 flex flex-wrap items-center justify-between gap-2 border-t border-white/5">
+                          {ord.tracking_number ? (
                             <span>Tracking: <span className="font-mono text-[#dfbe76]">{ord.tracking_number}</span></span>
-                            <span>Carrier: VÍNEA Davao Climate-Controlled Van</span>
-                          </div>
-                        )}
+                          ) : (
+                            <span>Davao Climate-Controlled Cold-Chain</span>
+                          )}
+                          <button
+                            onClick={() => setViewingDigitalReceiptOrder(ord)}
+                            className="py-1 px-2.5 rounded-md bg-[#210D12] hover:bg-[#48151F] text-[#dfbe76] hover:text-white border border-[#dfbe76]/40 hover:border-[#dfbe76] text-xs font-medium transition-all cursor-pointer flex items-center gap-1.5 ml-auto"
+                            title="View and print official VÍNEA Boutique Invoice & Digital Receipt"
+                          >
+                            <Download className="w-3.5 h-3.5 text-[#dfbe76]" />
+                            <span>Invoice & Receipt</span>
+                          </button>
+                        </div>
                       </div>
                     );
                   })}
@@ -596,16 +637,31 @@ export const AccountModal: React.FC = () => {
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-[#C1B7B4] uppercase tracking-wider text-[10px] font-semibold mb-1">
-                      Phone Number (+63 Davao)
-                    </label>
+                    <div className="flex items-center justify-between mb-1">
+                      <label className="block text-[#C1B7B4] uppercase tracking-wider text-[10px] font-semibold">
+                        Phone Number (11-Digit Mobile)
+                      </label>
+                      <span className="text-[9px] text-[#D5B15C] font-mono">09XXXXXXXXX</span>
+                    </div>
                     <input
                       type="tel"
                       value={editPhone}
-                      onChange={(e) => setEditPhone(e.target.value)}
-                      placeholder="+63 9XX XXX XXXX"
-                      className="w-full p-2.5 rounded-lg bg-[#100809] border border-[#392126] text-sm text-[#F5EFE7] focus:outline-none focus:border-[#D5B15C] transition-colors"
+                      onChange={(e) => {
+                        setEditPhone(e.target.value);
+                        if (profilePhoneError) setProfilePhoneError('');
+                      }}
+                      placeholder="09171234567"
+                      maxLength={14}
+                      className={`w-full p-2.5 rounded-lg bg-[#100809] border text-sm text-[#F5EFE7] focus:outline-none transition-colors ${
+                        profilePhoneError ? 'border-rose-500 focus:border-rose-400' : 'border-[#392126] focus:border-[#D5B15C]'
+                      }`}
                     />
+                    {profilePhoneError && (
+                      <p className="text-[11px] text-rose-400 mt-1 flex items-center gap-1 font-medium">
+                        <AlertCircle className="w-3 h-3 shrink-0" />
+                        <span>{profilePhoneError}</span>
+                      </p>
+                    )}
                   </div>
 
                   <div>
@@ -1000,15 +1056,29 @@ export const AccountModal: React.FC = () => {
                     New Davao City Address
                   </span>
                   <div>
-                    <label className="block text-neutral-400 text-[10px] mb-1">Street Address / Unit / Subdivision *</label>
+                    <div className="flex items-center justify-between mb-1">
+                      <label className="block text-neutral-400 text-[10px]">Street Address / Unit / Subdivision *</label>
+                      <span className="text-[9px] text-[#dfbe76]">Min 5 characters</span>
+                    </div>
                     <input
                       type="text"
                       required
                       value={newStreet}
-                      onChange={(e) => setNewStreet(e.target.value)}
-                      placeholder="e.g. Unit 302, Insular Village Phase 1"
-                      className="w-full p-2.5 rounded bg-black/40 border border-neutral-700 text-white"
+                      onChange={(e) => {
+                        setNewStreet(e.target.value);
+                        if (addressError) setAddressError('');
+                      }}
+                      placeholder="e.g. Unit 302, Insular Village Phase 1, Lanang"
+                      className={`w-full p-2.5 rounded bg-black/40 border text-white transition-colors ${
+                        addressError ? 'border-rose-500 focus:border-rose-400' : 'border-neutral-700 focus:border-[#d4af37]'
+                      }`}
                     />
+                    {addressError && (
+                      <p className="text-[11px] text-rose-400 mt-1 flex items-center gap-1 font-medium">
+                        <AlertCircle className="w-3 h-3 shrink-0" />
+                        <span>{addressError}</span>
+                      </p>
+                    )}
                   </div>
                   <div className="grid grid-cols-2 gap-3">
                     <div>

@@ -1,10 +1,11 @@
 import React, { useState, useRef } from 'react';
 import { useWineStore } from '../context/WineStoreContext';
-import { WineType, DeliveryAddress, OrderStatus } from '../types/wine';
+import { WineType, DeliveryAddress, OrderStatus, Order } from '../types/wine';
 import { formatPeso } from '../utils/formatCurrency';
 import { DAVAO_BRANCHES } from '../data/mockData';
 import { VineaRewardsSection } from './VineaRewardsSection';
 import { uploadImageApi } from '../services/apiClient';
+import { validatePhone11Digit, validateAddress } from '../utils/validation';
 import {
   User as UserIcon,
   Package,
@@ -42,9 +43,11 @@ import {
   PhoneCall,
   Navigation,
   FileText,
-  CheckCheck
+  CheckCheck,
+  Download
 } from 'lucide-react';
 import { getWineImageUrl, handleImageError } from '../utils/imageUtils';
+import { downloadVineaReceipt } from '../utils/receiptGenerator';
 
 const AVATAR_PRESETS = [
   {
@@ -94,7 +97,8 @@ export const UserDashboard: React.FC = () => {
     setIsAuthModalOpen,
     setAuthModalMode,
     accountActiveSubTab,
-    setAccountActiveSubTab
+    setAccountActiveSubTab,
+    setViewingDigitalReceiptOrder
   } = useWineStore();
 
   const [activeTabState, setActiveTabState] = useState<'orders' | 'tracking' | 'rewards' | 'profile' | 'avatar' | 'password' | 'preferences' | 'addresses' | 'wishlist'>(
@@ -119,11 +123,9 @@ export const UserDashboard: React.FC = () => {
     }
   };
 
-  const handleDownloadSlip = (ordId: string, trackCode: string) => {
-    showToast(`Downloading VÍNEA Cold-Chain Transit & Provenance Slip for ${ordId}...`, 'info');
-    setTimeout(() => {
-      showToast(`Transit document for ${trackCode} verified.`, 'success');
-    }, 1200);
+  const handleDownloadSlip = (ord: Order) => {
+    downloadVineaReceipt(ord);
+    showToast(`Official VÍNEA Cellar Receipt downloaded for Order #${ord.order_id}`, 'success');
   };
 
   // Profile Edit State
@@ -156,6 +158,8 @@ export const UserDashboard: React.FC = () => {
   const [newStreet, setNewStreet] = useState('');
   const [newDistrict, setNewDistrict] = useState('Lanang');
   const [showAddAddress, setShowAddAddress] = useState(false);
+  const [profilePhoneError, setProfilePhoneError] = useState('');
+  const [addressError, setAddressError] = useState('');
 
   // Sync state if user changes
   React.useEffect(() => {
@@ -228,9 +232,21 @@ export const UserDashboard: React.FC = () => {
 
   const handleSaveProfile = (e: React.FormEvent) => {
     e.preventDefault();
+    setProfilePhoneError('');
+
+    if (editPhone.trim()) {
+      const phoneVal = validatePhone11Digit(editPhone);
+      if (!phoneVal.isValid) {
+        setProfilePhoneError(phoneVal.error || 'Must be a valid 11-digit mobile number (09XXXXXXXXX).');
+        showToast(phoneVal.error || 'Invalid phone: 11-digit number required (09XXXXXXXXX)', 'error');
+        return;
+      }
+      setEditPhone(phoneVal.normalized || editPhone);
+    }
+
     updateUserProfile({
       name: editName,
-      phone: editPhone,
+      phone: editPhone.trim() ? (validatePhone11Digit(editPhone).normalized || editPhone) : editPhone,
       date_of_birth: editDob,
       favorite_davao_branch: editBranch,
       bio: editBio,
@@ -297,7 +313,21 @@ export const UserDashboard: React.FC = () => {
 
   const handleAddAddress = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newStreet.trim()) return;
+    setAddressError('');
+
+    const addrVal = validateAddress({
+      street: newStreet.trim(),
+      city: 'Davao City',
+      state: 'Davao del Sur',
+      postalCode: '8000'
+    });
+
+    if (!addrVal.isValid) {
+      const err = addrVal.firstError || addrVal.errors.street || 'Street address must be at least 5 characters.';
+      setAddressError(err);
+      showToast(err, 'error');
+      return;
+    }
 
     const newAddr: DeliveryAddress = {
       street: newStreet.trim(),
@@ -678,7 +708,15 @@ export const UserDashboard: React.FC = () => {
                                   title="Open full cold-chain tracking monitor"
                                 >
                                   <Truck className="w-3.5 h-3.5" />
-                                  <span>Track Shipment</span>
+                                  <span>Track</span>
+                                </button>
+                                <button
+                                  onClick={() => setViewingDigitalReceiptOrder(ord)}
+                                  className="py-1 px-2.5 rounded-md bg-[#210D12] hover:bg-[#48151F] text-[#E5D7B7] hover:text-white border border-[#C6A15B]/40 hover:border-[#C6A15B] text-xs font-medium transition-all cursor-pointer flex items-center gap-1.5"
+                                  title="View and print official VÍNEA Boutique Invoice & Digital Receipt"
+                                >
+                                  <Download className="w-3.5 h-3.5 text-[#D5B15C]" />
+                                  <span>Invoice & Receipt</span>
                                 </button>
                                 <button
                                   onClick={() =>
@@ -686,7 +724,7 @@ export const UserDashboard: React.FC = () => {
                                   }
                                   className="text-xs text-[#B7AAA1] hover:text-[#F5EFE7] flex items-center gap-1 cursor-pointer py-1 px-1.5"
                                 >
-                                  <span>{isTrackingOpen ? 'Hide' : 'Quick Progress'}</span>
+                                  <span>{isTrackingOpen ? 'Hide' : 'Progress'}</span>
                                   <ChevronRight
                                     className={`w-3.5 h-3.5 transition-transform ${isTrackingOpen ? 'rotate-90' : ''}`}
                                   />
@@ -1289,11 +1327,12 @@ export const UserDashboard: React.FC = () => {
 
                         <div className="flex items-center gap-3 w-full sm:w-auto">
                           <button
-                            onClick={() => handleDownloadSlip(activeTrackedOrder.order_id, activeTrackedOrder.tracking_number || `VNX-DVO-${activeTrackedOrder.order_id}`)}
-                            className="flex-1 sm:flex-none py-2.5 px-4 rounded-lg bg-[#210D12] hover:bg-[#48151F] text-[#F5EFE7] text-xs font-medium border border-[#48151F] hover:border-[#C6A15B]/50 transition-all cursor-pointer flex items-center justify-center gap-2"
+                            onClick={() => setViewingDigitalReceiptOrder(activeTrackedOrder)}
+                            className="flex-1 sm:flex-none py-2.5 px-4 rounded-lg bg-[#210D12] hover:bg-[#48151F] text-[#E5D7B7] hover:text-white text-xs font-semibold border border-[#C6A15B]/50 hover:border-[#C6A15B] transition-all cursor-pointer flex items-center justify-center gap-2 shadow-sm"
+                            title="View and print official VÍNEA Boutique Invoice & Digital Receipt"
                           >
-                            <FileText className="w-3.5 h-3.5 text-[#C6A15B]" />
-                            <span>Download Transit Slip</span>
+                            <Download className="w-3.5 h-3.5 text-[#D5B15C]" />
+                            <span>View Boutique Invoice & PDF</span>
                           </button>
 
                           <button
@@ -1356,16 +1395,31 @@ export const UserDashboard: React.FC = () => {
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-[#C1B7B4] uppercase tracking-wider text-[10px] font-semibold mb-1">
-                        Phone Number (+63 Davao)
-                      </label>
+                      <div className="flex items-center justify-between mb-1">
+                        <label className="block text-[#C1B7B4] uppercase tracking-wider text-[10px] font-semibold">
+                          Phone Number (11-Digit Mobile)
+                        </label>
+                        <span className="text-[9px] text-[#D5B15C] font-mono">09XXXXXXXXX</span>
+                      </div>
                       <input
                         type="tel"
                         value={editPhone}
-                        onChange={(e) => setEditPhone(e.target.value)}
-                        placeholder="+63 9XX XXX XXXX"
-                        className="w-full p-2.5 rounded-lg bg-[#100809] border border-[#392126] text-sm text-[#F5EFE7] focus:outline-none focus:border-[#D5B15C] transition-colors"
+                        onChange={(e) => {
+                          setEditPhone(e.target.value);
+                          if (profilePhoneError) setProfilePhoneError('');
+                        }}
+                        placeholder="09171234567"
+                        maxLength={14}
+                        className={`w-full p-2.5 rounded-lg bg-[#100809] border text-sm text-[#F5EFE7] focus:outline-none transition-colors ${
+                          profilePhoneError ? 'border-rose-500 focus:border-rose-400' : 'border-[#392126] focus:border-[#D5B15C]'
+                        }`}
                       />
+                      {profilePhoneError && (
+                        <p className="text-[11px] text-rose-400 mt-1 flex items-center gap-1 font-medium">
+                          <AlertCircle className="w-3 h-3 shrink-0" />
+                          <span>{profilePhoneError}</span>
+                        </p>
+                      )}
                     </div>
 
                     <div>
@@ -1736,17 +1790,31 @@ export const UserDashboard: React.FC = () => {
                 {showAddAddress && (
                   <form onSubmit={handleAddAddress} className="mb-6 p-4 rounded-xl bg-[#100809] border border-[#392126] space-y-3 text-xs animate-fade-in">
                     <div>
-                      <label className="block text-[#C1B7B4] uppercase tracking-wider text-[10px] font-semibold mb-1">
-                        Street Address / Condominium / Subdivision
-                      </label>
+                      <div className="flex items-center justify-between mb-1">
+                        <label className="block text-[#C1B7B4] uppercase tracking-wider text-[10px] font-semibold">
+                          Street Address / Condominium / Subdivision
+                        </label>
+                        <span className="text-[9px] text-[#D5B15C]">Min 5 characters</span>
+                      </div>
                       <input
                         type="text"
                         required
                         value={newStreet}
-                        onChange={(e) => setNewStreet(e.target.value)}
+                        onChange={(e) => {
+                          setNewStreet(e.target.value);
+                          if (addressError) setAddressError('');
+                        }}
                         placeholder="e.g. Unit 12B, Abreeza Residences, J.P. Laurel Avenue"
-                        className="w-full p-2.5 rounded-lg bg-[#190D10] border border-[#392126] text-xs text-[#F5EFE7] focus:outline-none focus:border-[#D5B15C]"
+                        className={`w-full p-2.5 rounded-lg bg-[#190D10] border text-xs text-[#F5EFE7] focus:outline-none transition-colors ${
+                          addressError ? 'border-rose-500 focus:border-rose-400' : 'border-[#392126] focus:border-[#D5B15C]'
+                        }`}
                       />
+                      {addressError && (
+                        <p className="text-[11px] text-rose-400 mt-1 flex items-center gap-1 font-medium">
+                          <AlertCircle className="w-3 h-3 shrink-0" />
+                          <span>{addressError}</span>
+                        </p>
+                      )}
                     </div>
 
                     <div className="grid grid-cols-2 gap-3">

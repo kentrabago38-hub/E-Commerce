@@ -347,7 +347,7 @@ export const AdminDashboard: React.FC = () => {
             <div className="flex flex-wrap items-center gap-2 text-xs text-[#C1B7B4]">
               <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
               <span>
-                Authenticated: <strong className="text-white">{adminUser?.name || 'Master Sommelier Julian Vance'}</strong> ({adminUser?.email || 'admin@vinea.com'}) · <span className="text-[#D5B15C]">{adminUser?.title || 'Master Sommelier'}</span>
+                Authenticated: <strong className="text-white">{adminUser?.name || 'Master Sommelier Kent Jorich Rabago'}</strong> ({adminUser?.email || 'admin@vinea.com'}) · <span className="text-[#D5B15C]">{adminUser?.title || 'Master Sommelier'}</span>
               </span>
               <span className="text-[#392126]">·</span>
               <button

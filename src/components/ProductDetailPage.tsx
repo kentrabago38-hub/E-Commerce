@@ -17,7 +17,8 @@ import {
   ZoomIn,
   MessageSquarePlus,
   Wine,
-  TrendingUp
+  TrendingUp,
+  Plus
 } from 'lucide-react';
 import { VintageComparisonTab } from './VintageComparisonTab';
 import { getWineImageUrl, handleImageError } from '../utils/imageUtils';
@@ -102,69 +103,96 @@ export const ProductDetailPage: React.FC<ProductDetailPageProps> = ({ product, o
     setReviewSubmitting(false);
   };
 
+  // Sensory metric dot helper (1-5 scale)
+  const bodyDots = product.body === 'Full' ? 5 : product.body === 'Medium' ? 3 : 2;
+  const acidityDots = product.wine_type === 'White' || product.wine_type === 'Sparkling' ? 4 : 3;
+  const tanninDots = product.wine_type === 'Red' ? (product.body === 'Full' ? 5 : 4) : 1;
+
+  const renderDots = (value: number) => {
+    return (
+      <div className="flex items-center gap-1.5">
+        {[1, 2, 3, 4, 5].map((dot) => (
+          <span
+            key={dot}
+            className={`w-2.5 h-2.5 rounded-full transition-colors ${
+              dot <= value
+                ? 'bg-[#D5B15C] shadow-[0_0_8px_#D5B15C]'
+                : 'bg-white/20'
+            }`}
+          />
+        ))}
+      </div>
+    );
+  };
+
   return (
-    <div className="min-h-screen py-10 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto text-[#f3efe6]">
-      {/* Breadcrumb Navigation */}
-      <nav className="flex items-center gap-2 text-xs text-neutral-400 mb-8 overflow-x-auto whitespace-nowrap">
+    <div className="min-h-screen py-10 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto text-[#FDFBF7]">
+      {/* Breadcrumb Navigation with High-Contrast Legibility */}
+      <nav className="flex items-center gap-2.5 text-xs text-white/80 mb-8 overflow-x-auto whitespace-nowrap">
         <button
           onClick={onBack}
-          className="hover:text-[#dfbe76] transition-colors flex items-center gap-1 cursor-pointer"
+          className="hover:text-[#E5D7B7] text-white/90 transition-colors flex items-center gap-1.5 cursor-pointer font-medium"
         >
-          <ArrowLeft className="w-3.5 h-3.5" />
+          <ArrowLeft className="w-3.5 h-3.5 text-[#D5B15C]" />
           <span>Back to Catalog</span>
         </button>
-        <ChevronRight className="w-3.5 h-3.5 text-neutral-600 shrink-0" />
-        <span className="text-neutral-400">{product.wine_type} Wine</span>
-        <ChevronRight className="w-3.5 h-3.5 text-neutral-600 shrink-0" />
-        <span className="text-neutral-400">{product.country}</span>
-        <ChevronRight className="w-3.5 h-3.5 text-neutral-600 shrink-0" />
-        <span className="text-[#dfbe76] truncate font-medium">{product.name}</span>
+        <ChevronRight className="w-3.5 h-3.5 text-white/30 shrink-0" />
+        <span className="text-white/80 font-medium">{product.wine_type} Wine</span>
+        <ChevronRight className="w-3.5 h-3.5 text-white/30 shrink-0" />
+        <span className="text-white/80 font-medium">{product.country}</span>
+        <ChevronRight className="w-3.5 h-3.5 text-white/30 shrink-0" />
+        <span className="text-[#E5D7B7] truncate font-bold">{product.name}</span>
       </nav>
 
-      {/* Main PDP Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14 mb-20">
-        {/* Left Gallery: High-resolution Bottle Image with Zoom */}
-        <div className="lg:col-span-6 flex flex-col items-center">
+      {/* Main Split-Screen PDP Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14 mb-20 items-start">
+        {/* Left Column: Large Sticky Bottle Showcase */}
+        <div className="lg:col-span-6 lg:sticky lg:top-24 flex flex-col items-center">
           <div
-            className="relative w-full aspect-4/3 rounded-xl overflow-hidden bg-gradient-to-b from-[#48151F]/40 via-[#210D12] to-[#130B0D] border border-[#48151F] cursor-crosshair group shadow-2xl"
+            className="relative w-full aspect-4/3 rounded-3xl overflow-hidden dark-luxury-glass-elevated cursor-crosshair group shadow-2xl p-4 flex items-center justify-center bg-black/40 border border-white/10"
             onMouseEnter={() => setIsZoomed(true)}
             onMouseLeave={() => setIsZoomed(false)}
             onMouseMove={handleMouseMove}
           >
-            <img
-              src={getWineImageUrl(selectedImage || product.image)}
-              alt={product.name}
-              onError={handleImageError}
-              className={`w-full h-full object-cover object-center transition-transform duration-200 ${
-                isZoomed ? 'scale-150' : 'scale-100'
-              }`}
-              style={
-                isZoomed
-                  ? {
-                      transformOrigin: `${zoomCoords.x}% ${zoomCoords.y}%`
-                    }
-                  : undefined
-              }
-              referrerPolicy="no-referrer"
-            />
+            <div className="relative w-full h-full flex items-center justify-center animate-float">
+              <img
+                src={getWineImageUrl(selectedImage || product.image)}
+                alt={product.name}
+                onError={handleImageError}
+                className={`max-h-full max-w-full object-contain transition-transform duration-200 text-transparent ${
+                  isZoomed ? 'scale-150' : 'scale-100'
+                }`}
+                style={
+                  isZoomed
+                    ? {
+                        transformOrigin: `${zoomCoords.x}% ${zoomCoords.y}%`
+                      }
+                    : undefined
+                }
+                referrerPolicy="no-referrer"
+              />
+            </div>
 
-            {/* Vintage tag */}
-            <div className="absolute top-4 left-4 pointer-events-none">
-              <span className="text-xs uppercase tracking-[0.2em] text-[#C6A15B] font-semibold drop-shadow-md">
-                Vintage {product.vintage} · {product.wine_type}
+            {/* High-Contrast Floating Vintage Badge (Protected against light/busy imagery) */}
+            <div className="absolute top-4 left-4 pointer-events-none z-10">
+              <span className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#120A0C]/95 backdrop-blur-md border border-[#D5B15C]/80 text-xs uppercase tracking-[0.22em] text-white font-bold shadow-2xl">
+                <span className="w-2 h-2 rounded-full bg-[#D5B15C] shadow-[0_0_8px_#D5B15C]" />
+                <span className="text-[#E5D7B7]">VINTAGE {product.vintage}</span>
+                <span className="text-white/40">·</span>
+                <span className="text-white">{product.wine_type.toUpperCase()}</span>
               </span>
             </div>
 
-            {/* Zoom hint */}
-            <div className="absolute bottom-4 right-4 pointer-events-none bg-[#130B0D]/80 backdrop-blur-md px-3 py-1 rounded text-[11px] text-[#B7AAA1] flex items-center gap-1.5 opacity-80 group-hover:opacity-100 transition-opacity">
-              <ZoomIn className="w-3.5 h-3.5 text-[#C6A15B]" />
-              <span>Hover image to inspect label</span>
+            {/* High-Contrast Zoom Hint Badge */}
+            <div className="absolute bottom-4 right-4 pointer-events-none bg-[#120A0C]/95 backdrop-blur-md px-3.5 py-1.5 rounded-full text-xs text-white border border-white/20 flex items-center gap-2 font-medium shadow-2xl opacity-90 group-hover:opacity-100 transition-opacity z-10">
+              <ZoomIn className="w-3.5 h-3.5 text-[#D5B15C]" />
+              <span className="text-white font-medium">Hover image to inspect label</span>
             </div>
           </div>
 
           {/* Interactive Multi-Photo Gallery Thumbnails */}
           {allPhotos.length > 1 && (
-            <div className="flex items-center gap-2.5 mt-3.5 w-full overflow-x-auto pb-1">
+            <div className="flex items-center gap-3 mt-4 w-full overflow-x-auto pb-1">
               {allPhotos.map((imgUrl, i) => {
                 const isSelected = (selectedImage || product.image) === imgUrl;
                 return (
@@ -172,10 +200,10 @@ export const ProductDetailPage: React.FC<ProductDetailPageProps> = ({ product, o
                     key={i}
                     type="button"
                     onClick={() => setSelectedImage(imgUrl)}
-                    className={`relative w-16 h-16 rounded-lg overflow-hidden border-2 transition-all cursor-pointer shrink-0 ${
+                    className={`relative w-18 h-18 rounded-xl overflow-hidden border-2 transition-all cursor-pointer shrink-0 bg-black/40 p-1 flex items-center justify-center ${
                       isSelected
-                        ? 'border-[#D5B15C] scale-105 shadow-md shadow-[#D5B15C]/20'
-                        : 'border-[#48151F] hover:border-neutral-400 opacity-60 hover:opacity-100'
+                        ? 'border-[#D5B15C] scale-105 shadow-md shadow-[#D5B15C]/40 ring-1 ring-[#D5B15C]'
+                        : 'border-white/10 hover:border-white/40 opacity-70 hover:opacity-100'
                     }`}
                     title={`View photo ${i + 1}`}
                   >
@@ -183,7 +211,7 @@ export const ProductDetailPage: React.FC<ProductDetailPageProps> = ({ product, o
                       src={getWineImageUrl(imgUrl)}
                       alt={`${product.name} photo ${i + 1}`}
                       onError={handleImageError}
-                      className="w-full h-full object-cover"
+                      className="max-h-full max-w-full object-contain text-transparent"
                       referrerPolicy="no-referrer"
                     />
                   </button>
@@ -192,43 +220,47 @@ export const ProductDetailPage: React.FC<ProductDetailPageProps> = ({ product, o
             </div>
           )}
 
-          {/* Provenance & Shipping Badges */}
-          <div className="grid grid-cols-3 gap-3 w-full mt-4 text-center">
-            <div className="p-3 rounded-lg bg-[#130B0D] border border-[#48151F] text-xs">
-              <Thermometer className="w-4 h-4 mx-auto mb-1 text-[#C6A15B]" />
-              <span className="text-[11px] text-[#B7AAA1] block">Serving Temp</span>
-              <span className="font-semibold text-[#F5EFE7]">{product.serving_temp}</span>
+          {/* Provenance & Serving Conditions Glass Badges */}
+          <div className="grid grid-cols-3 gap-3 w-full mt-5 text-center">
+            <div className="p-4 rounded-2xl dark-luxury-glass text-xs border border-white/10">
+              <Thermometer className="w-4 h-4 mx-auto mb-1 text-[#D5B15C]" />
+              <span className="text-[11px] uppercase tracking-wider text-[#E5D7B7] font-semibold block">Serving Temp</span>
+              <span className="font-bold text-white mt-1 block text-sm">{product.serving_temp}</span>
             </div>
-            <div className="p-3 rounded-lg bg-[#130B0D] border border-[#48151F] text-xs">
-              <Wine className="w-4 h-4 mx-auto mb-1 text-[#C6A15B]" />
-              <span className="text-[11px] text-[#B7AAA1] block">Decanting</span>
-              <span className="font-semibold text-[#F5EFE7]">{product.decanting}</span>
+            <div className="p-4 rounded-2xl dark-luxury-glass text-xs border border-white/10">
+              <Wine className="w-4 h-4 mx-auto mb-1 text-[#D5B15C]" />
+              <span className="text-[11px] uppercase tracking-wider text-[#E5D7B7] font-semibold block">Decanting</span>
+              <span className="font-bold text-white mt-1 block text-sm">{product.decanting}</span>
             </div>
-            <div className="p-3 rounded-lg bg-[#130B0D] border border-[#48151F] text-xs">
-              <ShieldAlert className="w-4 h-4 mx-auto mb-1 text-[#C6A15B]" />
-              <span className="text-[11px] text-[#B7AAA1] block">Cellar Seal</span>
-              <span className="font-semibold text-[#F5EFE7]">Inspected Provenance</span>
+            <div className="p-4 rounded-2xl dark-luxury-glass text-xs border border-white/10">
+              <ShieldAlert className="w-4 h-4 mx-auto mb-1 text-[#D5B15C]" />
+              <span className="text-[11px] uppercase tracking-wider text-[#E5D7B7] font-semibold block">Cellar Seal</span>
+              <span className="font-bold text-white mt-1 block text-sm">Inspected Provenance</span>
             </div>
           </div>
         </div>
 
         {/* Right Column: Contiguous Purchase Module & Specifications */}
-        <div className="lg:col-span-6 flex flex-col justify-between">
+        <div className="lg:col-span-6 flex flex-col justify-between space-y-8">
           <div>
-            {/* Terroir Header */}
-            <div className="flex items-center justify-between text-xs uppercase tracking-[0.2em] text-[#C6A15B] font-medium mb-2">
-              <span>{product.winery}</span>
-              <span>{product.country} · {product.region}</span>
+            {/* Terroir & Origin Header with enhanced brand contrast */}
+            <div className="flex items-center justify-between text-xs uppercase tracking-[0.25em] mb-2">
+              <span className="text-[#E5D7B7] text-sm sm:text-base font-bold tracking-[0.25em] drop-shadow-sm">
+                {product.winery}
+              </span>
+              <span className="text-white/80 font-semibold text-xs tracking-wider">
+                {product.country} · {product.region}
+              </span>
             </div>
 
-            {/* Product Title */}
-            <h1 className="font-serif text-3xl sm:text-4xl md:text-5xl font-normal text-[#F5EFE7] mb-3 leading-tight">
+            {/* Product Title with Modern Editorial Scale & pure white readability */}
+            <h1 className="font-serif text-3xl sm:text-5xl font-medium text-white mb-4 leading-[1.1] tracking-tight drop-shadow-sm">
               {product.name}
             </h1>
 
             {/* Ratings Bar */}
-            <div className="flex items-center gap-3 text-sm mb-6 pb-6 border-b border-[#48151F]">
-              <div className="flex items-center text-[#C6A15B]">
+            <div className="flex items-center gap-3 text-sm mb-6 pb-6 border-b border-white/15">
+              <div className="flex items-center text-[#D5B15C]">
                 {[...Array(5)].map((_, i) => (
                   <Star
                     key={i}
@@ -238,127 +270,152 @@ export const ProductDetailPage: React.FC<ProductDetailPageProps> = ({ product, o
                   />
                 ))}
               </div>
-              <span className="font-bold text-[#F5EFE7] tabular-nums">{product.rating.toFixed(1)} / 5.0</span>
-              <span className="text-[#B7AAA1]">({product.reviews_count} collector reviews)</span>
+              <span className="font-bold text-white tabular-nums text-base">{product.rating.toFixed(1)} / 5.0</span>
+              <span className="text-white/70 text-xs">({product.reviews_count} collector reviews)</span>
               <button
                 onClick={handleShare}
-                className="ml-auto text-xs text-[#B7AAA1] hover:text-white flex items-center gap-1 cursor-pointer"
+                className="ml-auto text-xs text-white/80 hover:text-white flex items-center gap-1.5 cursor-pointer font-medium"
               >
-                <Share2 className="w-3.5 h-3.5" />
+                <Share2 className="w-3.5 h-3.5 text-[#D5B15C]" />
                 <span>Share</span>
               </button>
             </div>
 
-            {/* Pricing */}
+            {/* Pricing Section with High-Contrast Champagne Gold */}
             <div className="mb-6">
               <div className="flex items-baseline gap-3">
-                <span className="font-serif text-4xl text-[#C6A15B] font-normal tabular-nums">
+                <span className="font-serif text-4xl sm:text-5xl text-[#E5D7B7] font-bold tabular-nums drop-shadow-sm">
                   {formatPeso(product.price)}
                 </span>
                 {product.original_price && (
-                  <span className="text-base text-[#B7AAA1]/60 line-through tabular-nums">
+                  <span className="text-base text-white/50 line-through tabular-nums">
                     {formatPeso(product.original_price)}
                   </span>
                 )}
-                <span className="text-xs text-[#B7AAA1]">PHP · Tax Included · Available in 5 Davao Branches</span>
               </div>
-              <p className="text-xs text-[#F5EFE7] mt-1 font-medium">
+              <p className="text-xs text-white/80 mt-1 font-medium">
+                PHP · Davao Climate Delivery Included · Available across 5 Cellar Branches
+              </p>
+              <p className="text-xs mt-2 font-medium">
                 {isOutOfStock ? (
-                  <span className="text-rose-400">Sold Out</span>
+                  <span className="text-rose-400 font-bold">Sold Out of Allocation</span>
                 ) : (
-                  <span className="text-emerald-400">In Stock · {product.stock} bottles remaining in allocation</span>
+                  <span className="text-emerald-400 font-bold">In Cellar Stock · {product.stock} allocations remaining</span>
                 )}
               </p>
             </div>
 
-            {/* Description */}
-            <p className="text-[#B7AAA1] text-sm sm:text-base leading-relaxed mb-8 font-light">
-              {product.description}
-            </p>
-
-            {/* Wine Specifications Matrix */}
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 p-4 rounded-xl bg-[#130B0D] border border-[#48151F] mb-8">
+            {/* Sensory Attribute Dots (Body, Acidity, Tannin) with High-Contrast Gold */}
+            <div className="p-4.5 rounded-2xl dark-luxury-glass mb-6 grid grid-cols-3 gap-4 border border-white/10">
               <div>
-                <span className="text-[11px] text-[#B7AAA1]/70 uppercase tracking-wider block">Grape Variety</span>
-                <span className="text-xs sm:text-sm font-medium text-[#F5EFE7]">{product.grape_variety}</span>
+                <span className="text-xs uppercase tracking-wider text-[#E5D7B7] font-bold block mb-1.5">
+                  Body ({product.body})
+                </span>
+                {renderDots(bodyDots)}
               </div>
               <div>
-                <span className="text-[11px] text-[#B7AAA1]/70 uppercase tracking-wider block">Alcohol %</span>
-                <span className="text-xs sm:text-sm font-medium text-[#F5EFE7]">{product.alcohol_percentage}% ABV</span>
+                <span className="text-xs uppercase tracking-wider text-[#E5D7B7] font-bold block mb-1.5">
+                  Acidity
+                </span>
+                {renderDots(acidityDots)}
               </div>
               <div>
-                <span className="text-[11px] text-[#B7AAA1]/70 uppercase tracking-wider block">Sweetness Level</span>
-                <span className="text-xs sm:text-sm font-medium text-[#F5EFE7]">{product.sweetness}</span>
-              </div>
-              <div>
-                <span className="text-[11px] text-[#B7AAA1]/70 uppercase tracking-wider block">Body</span>
-                <span className="text-xs sm:text-sm font-medium text-[#F5EFE7]">{product.body} Body</span>
-              </div>
-              <div>
-                <span className="text-[11px] text-[#B7AAA1]/70 uppercase tracking-wider block">Appellation</span>
-                <span className="text-xs sm:text-sm font-medium text-[#F5EFE7]">{product.region}</span>
-              </div>
-              <div>
-                <span className="text-[11px] text-[#B7AAA1]/70 uppercase tracking-wider block">Vintage Year</span>
-                <span className="text-xs sm:text-sm font-medium text-[#F5EFE7]">{product.vintage}</span>
+                <span className="text-xs uppercase tracking-wider text-[#E5D7B7] font-bold block mb-1.5">
+                  Tannin
+                </span>
+                {renderDots(tanninDots)}
               </div>
             </div>
 
-            {/* Purchase CTA Cluster */}
+            {/* Editorial Description with Crisp Reading Contrast */}
+            <p className="text-[#F5EFE7] text-sm sm:text-base leading-relaxed mb-6 font-normal">
+              {product.description}
+            </p>
+
+            {/* Wine Specifications Matrix with Enhanced Legibility */}
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3.5 p-5 rounded-2xl dark-luxury-glass mb-8 border border-white/10">
+              <div>
+                <span className="text-xs text-[#E5D7B7] font-bold uppercase tracking-wider block mb-1">Grape Variety</span>
+                <span className="text-xs sm:text-sm font-semibold text-white">{product.grape_variety}</span>
+              </div>
+              <div>
+                <span className="text-xs text-[#E5D7B7] font-bold uppercase tracking-wider block mb-1">Alcohol %</span>
+                <span className="text-xs sm:text-sm font-semibold text-white">{product.alcohol_percentage}% ABV</span>
+              </div>
+              <div>
+                <span className="text-xs text-[#E5D7B7] font-bold uppercase tracking-wider block mb-1">Sweetness Level</span>
+                <span className="text-xs sm:text-sm font-semibold text-white">{product.sweetness}</span>
+              </div>
+              <div>
+                <span className="text-xs text-[#E5D7B7] font-bold uppercase tracking-wider block mb-1">Body</span>
+                <span className="text-xs sm:text-sm font-semibold text-white">{product.body} Body</span>
+              </div>
+              <div>
+                <span className="text-xs text-[#E5D7B7] font-bold uppercase tracking-wider block mb-1">Appellation</span>
+                <span className="text-xs sm:text-sm font-semibold text-white">{product.region}</span>
+              </div>
+              <div>
+                <span className="text-xs text-[#E5D7B7] font-bold uppercase tracking-wider block mb-1">Vintage Year</span>
+                <span className="text-xs sm:text-sm font-semibold text-white">{product.vintage}</span>
+              </div>
+            </div>
+
+            {/* Purchase CTA Cluster with + ADD TO CELLAR */}
             <div className="flex flex-col gap-3.5 mb-8">
               <div className="flex items-center gap-3">
                 {/* Quantity selector */}
-                <div className="flex items-center border border-[#48151F] rounded-lg bg-[#130B0D]">
+                <div className="flex items-center border border-white/15 rounded-xl dark-luxury-glass">
                   <button
                     onClick={() => setQuantity(Math.max(1, quantity - 1))}
                     disabled={isOutOfStock}
-                    className="px-4 py-3 text-[#B7AAA1] hover:text-white transition-colors cursor-pointer text-sm font-medium"
+                    className="px-4 py-3 text-white hover:text-[#D5B15C] transition-colors cursor-pointer text-sm font-bold"
                   >
                     -
                   </button>
-                  <span className="px-4 py-3 text-sm font-semibold tabular-nums min-w-[2.5rem] text-center text-[#F5EFE7]">
+                  <span className="px-4 py-3 text-sm font-bold tabular-nums min-w-[2.5rem] text-center text-white">
                     {quantity}
                   </span>
                   <button
                     onClick={() => setQuantity(Math.min(product.stock, quantity + 1))}
                     disabled={isOutOfStock || quantity >= product.stock}
-                    className="px-4 py-3 text-[#B7AAA1] hover:text-white transition-colors cursor-pointer text-sm font-medium"
+                    className="px-4 py-3 text-white hover:text-[#D5B15C] transition-colors cursor-pointer text-sm font-bold"
                   >
                     +
                   </button>
                 </div>
 
-                {/* Add to Cart */}
+                {/* + ADD TO CELLAR Primary CTA */}
                 <button
                   onClick={handleAddToCart}
                   disabled={isOutOfStock}
-                  className="gold-shimmer-cta flex-1 py-3.5 px-6 rounded-lg bg-[#48151F] hover:bg-[#861F32] text-[#C6A15B] hover:text-white border border-[#C6A15B]/40 text-xs sm:text-sm uppercase tracking-wider font-semibold flex items-center justify-center gap-2 transition-all cursor-pointer shadow-md"
+                  className="btn-magnetic flex-1 py-4 px-6 rounded-xl bg-[#861F32] hover:bg-[#a1253c] text-white text-xs sm:text-sm uppercase tracking-[0.18em] font-bold flex items-center justify-center gap-2 transition-all cursor-pointer shadow-xl group disabled:opacity-50 border border-[#D5B15C]/40"
+                  data-cursor="add"
                 >
-                  <ShoppingBag className="w-4 h-4" />
-                  <span>Add to Cart</span>
+                  <Plus className="w-4 h-4 text-[#D5B15C] btn-magnetic-arrow" />
+                  <span>+ ADD TO CELLAR</span>
                 </button>
 
-                {/* Wishlist */}
+                {/* Wishlist button */}
                 <button
                   onClick={() => toggleWishlist(product.product_id)}
-                  className={`p-3.5 rounded-lg border transition-colors cursor-pointer ${
+                  className={`p-4 rounded-xl border transition-colors cursor-pointer ${
                     isFavorited
-                      ? 'bg-[#861F32] text-white border-[#C6A15B]'
-                      : 'border-[#48151F] hover:border-[#C6A15B] text-[#B7AAA1] bg-[#130B0D]'
+                      ? 'bg-[#861F32] text-white border-[#D5B15C]'
+                      : 'border-white/15 hover:border-[#D5B15C] text-white/80 dark-luxury-glass'
                   }`}
                   aria-label="Wishlist"
                 >
-                  <Heart className={`w-5 h-5 ${isFavorited ? 'fill-current' : ''}`} />
+                  <Heart className={`w-5 h-5 ${isFavorited ? 'fill-current text-[#D5B15C]' : ''}`} />
                 </button>
               </div>
 
-              {/* Buy Now Button */}
+              {/* Instant Checkout Button */}
               <button
                 onClick={handleBuyNow}
                 disabled={isOutOfStock}
-                className="gold-shimmer-cta w-full py-4 px-6 rounded-lg bg-[#861F32] hover:bg-[#a1253c] text-white text-xs sm:text-sm uppercase tracking-[0.15em] font-semibold border border-[#C6A15B]/40 transition-all cursor-pointer shadow-xl"
+                className="btn-magnetic w-full py-4 px-6 rounded-xl dark-luxury-glass hover:bg-white/10 text-white text-xs sm:text-sm uppercase tracking-[0.15em] font-bold transition-all cursor-pointer border border-white/15 disabled:opacity-50"
               >
-                Buy Now — Instant Checkout
+                Instant Davao Concierge Checkout
               </button>
             </div>
           </div>
@@ -366,43 +423,40 @@ export const ProductDetailPage: React.FC<ProductDetailPageProps> = ({ product, o
       </div>
 
       {/* Editorial Product Detail Tabs Navigation */}
-      <div className="flex items-center gap-4 sm:gap-8 border-b border-[#351116] mb-12 overflow-x-auto">
+      <div className="flex items-center gap-4 sm:gap-8 border-b border-white/15 mb-12 overflow-x-auto">
         <button
           onClick={() => setActiveDetailTab('vintage')}
-          className={`pb-4 px-1 text-xs sm:text-sm font-semibold uppercase tracking-wider transition-all flex items-center gap-2 cursor-pointer border-b-2 whitespace-nowrap ${
+          className={`pb-4 px-1 text-xs sm:text-sm uppercase tracking-wider transition-all flex items-center gap-2 cursor-pointer border-b-2 whitespace-nowrap ${
             activeDetailTab === 'vintage'
-              ? 'border-[#C6A15B] text-[#C6A15B]'
-              : 'border-transparent text-[#B7AAA1] hover:text-[#F5EFE7]'
+              ? 'border-[#D5B15C] text-[#E5D7B7] font-bold'
+              : 'border-transparent text-white/70 hover:text-white font-medium'
           }`}
         >
-          <TrendingUp className="w-4 h-4" />
-          <span>Vintage Comparison</span>
-          <span className="text-[10px] px-2 py-0.5 rounded-full bg-[#861F32] text-white font-sans font-bold">
-            Analytics
-          </span>
+          <TrendingUp className="w-4 h-4 text-[#D5B15C]" />
+          <span>Vintage Analytics</span>
         </button>
 
         <button
           onClick={() => setActiveDetailTab('tasting')}
-          className={`pb-4 px-1 text-xs sm:text-sm font-semibold uppercase tracking-wider transition-all flex items-center gap-2 cursor-pointer border-b-2 whitespace-nowrap ${
+          className={`pb-4 px-1 text-xs sm:text-sm uppercase tracking-wider transition-all flex items-center gap-2 cursor-pointer border-b-2 whitespace-nowrap ${
             activeDetailTab === 'tasting'
-              ? 'border-[#C6A15B] text-[#C6A15B]'
-              : 'border-transparent text-[#B7AAA1] hover:text-[#F5EFE7]'
+              ? 'border-[#D5B15C] text-[#E5D7B7] font-bold'
+              : 'border-transparent text-white/70 hover:text-white font-medium'
           }`}
         >
-          <Sparkles className="w-4 h-4" />
+          <Sparkles className="w-4 h-4 text-[#D5B15C]" />
           <span>Sensory & Gastronomy</span>
         </button>
 
         <button
           onClick={() => setActiveDetailTab('reviews')}
-          className={`pb-4 px-1 text-xs sm:text-sm font-semibold uppercase tracking-wider transition-all flex items-center gap-2 cursor-pointer border-b-2 whitespace-nowrap ${
+          className={`pb-4 px-1 text-xs sm:text-sm uppercase tracking-wider transition-all flex items-center gap-2 cursor-pointer border-b-2 whitespace-nowrap ${
             activeDetailTab === 'reviews'
-              ? 'border-[#C6A15B] text-[#C6A15B]'
-              : 'border-transparent text-[#B7AAA1] hover:text-[#F5EFE7]'
+              ? 'border-[#D5B15C] text-[#E5D7B7] font-bold'
+              : 'border-transparent text-white/70 hover:text-white font-medium'
           }`}
         >
-          <Star className="w-4 h-4" />
+          <Star className="w-4 h-4 text-[#D5B15C]" />
           <span>Collector Reviews ({productReviews.length})</span>
         </button>
       </div>
@@ -416,12 +470,12 @@ export const ProductDetailPage: React.FC<ProductDetailPageProps> = ({ product, o
 
       {/* Tab 2: Sensory Architecture & Gastronomy */}
       {activeDetailTab === 'tasting' && (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-20 p-8 rounded-2xl bg-[#140b0f] border border-[#2b151f]">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-20 p-8 rounded-3xl dark-luxury-glass-elevated border border-white/10">
           {/* Sommelier Tasting Notes */}
           <div>
-            <div className="flex items-center gap-2 text-xs uppercase tracking-widest text-[#dfbe76] font-semibold mb-3">
-              <Sparkles className="w-4 h-4" />
-              <span>Master Sommelier Tasting Notes</span>
+            <div className="flex items-center gap-2 text-xs uppercase tracking-widest text-[#E5D7B7] font-bold mb-3">
+              <Sparkles className="w-4 h-4 text-[#D5B15C]" />
+              <span>Kent Jorich Rabago's Tasting Notes</span>
             </div>
             <h3 className="font-serif text-2xl text-white font-normal mb-4">
               Sensory Architecture
@@ -429,7 +483,7 @@ export const ProductDetailPage: React.FC<ProductDetailPageProps> = ({ product, o
 
             <div className="space-y-4 text-sm">
               <div>
-                <span className="text-xs text-neutral-400 font-semibold uppercase tracking-wider block mb-1">
+                <span className="text-xs text-[#E5D7B7] font-bold uppercase tracking-wider block mb-1.5">
                   Aromas & Bouquet
                 </span>
                 <div className="flex flex-wrap gap-2">
@@ -451,7 +505,7 @@ export const ProductDetailPage: React.FC<ProductDetailPageProps> = ({ product, o
                     return aromas.map((note, idx) => (
                       <span
                         key={idx}
-                        className="px-2.5 py-1 rounded bg-[#251119] border border-[#3b1a26] text-xs text-neutral-200"
+                        className="px-3.5 py-1.5 rounded-full bg-[#18090C] border border-[#D5B15C]/40 text-xs text-white font-medium"
                       >
                         {note}
                       </span>
@@ -461,10 +515,10 @@ export const ProductDetailPage: React.FC<ProductDetailPageProps> = ({ product, o
               </div>
 
               <div>
-                <span className="text-xs text-neutral-400 font-semibold uppercase tracking-wider block mb-1">
+                <span className="text-xs text-[#E5D7B7] font-bold uppercase tracking-wider block mb-1">
                   Palate & Texture
                 </span>
-                <p className="text-neutral-300 leading-relaxed font-light">
+                <p className="text-[#F5EFE7] leading-relaxed font-normal">
                   {typeof product.tasting_notes === 'string'
                     ? product.tasting_notes
                     : product.tasting_notes?.palate || 'Structured, velvety tannins, refined fruit concentration and noble French oak.'}
@@ -472,10 +526,10 @@ export const ProductDetailPage: React.FC<ProductDetailPageProps> = ({ product, o
               </div>
 
               <div>
-                <span className="text-xs text-neutral-400 font-semibold uppercase tracking-wider block mb-1">
+                <span className="text-xs text-[#E5D7B7] font-bold uppercase tracking-wider block mb-1">
                   Finish & Longevity
                 </span>
-                <p className="text-neutral-300 leading-relaxed font-light">
+                <p className="text-[#F5EFE7] leading-relaxed font-normal">
                   {typeof product.tasting_notes === 'object'
                     ? product.tasting_notes?.finish || 'Persistent, harmonious finish with lingering mineral and spice notes.'
                     : 'Persistent, harmonious finish.'}
@@ -486,23 +540,23 @@ export const ProductDetailPage: React.FC<ProductDetailPageProps> = ({ product, o
 
           {/* Food Pairings */}
           <div>
-            <div className="flex items-center gap-2 text-xs uppercase tracking-widest text-[#dfbe76] font-semibold mb-3">
-              <Utensils className="w-4 h-4" />
+            <div className="flex items-center gap-2 text-xs uppercase tracking-widest text-[#E5D7B7] font-bold mb-3">
+              <Utensils className="w-4 h-4 text-[#D5B15C]" />
               <span>Culinary Harmonization</span>
             </div>
             <h3 className="font-serif text-2xl text-white font-normal mb-4">
-              Food Pairing Suggestions
+              Gastronomy Suggestions
             </h3>
-            <p className="text-xs text-neutral-400 mb-4 font-light">
+            <p className="text-xs text-white/80 mb-4 font-normal">
               Crafted to complement rich dining experiences by cleansing the palate and accentuating savoriness.
             </p>
             <div className="grid grid-cols-2 gap-3">
               {product.food_pairings.map((pairing, idx) => (
                 <div
                   key={idx}
-                  className="p-3.5 rounded-xl bg-[#1b0d13] border border-[#2e1520] flex items-center gap-2.5 text-xs font-medium text-neutral-200"
+                  className="p-4 rounded-xl dark-luxury-glass flex items-center gap-2.5 text-xs font-semibold text-white border border-white/10"
                 >
-                  <div className="w-2 h-2 rounded-full bg-[#dfbe76] shrink-0" />
+                  <div className="w-2 h-2 rounded-full bg-[#D5B15C] shrink-0" />
                   <span>{pairing}</span>
                 </div>
               ))}
@@ -514,46 +568,46 @@ export const ProductDetailPage: React.FC<ProductDetailPageProps> = ({ product, o
       {/* Tab 3: Reviews & Community Feedback */}
       {activeDetailTab === 'reviews' && (
         <div className="mb-20">
-          <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-8 border-b border-[#2b161f] pb-6">
+          <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-8 border-b border-white/15 pb-6">
             <div>
-              <p className="text-xs uppercase tracking-widest text-[#dfbe76] font-semibold mb-1">
+              <p className="text-xs uppercase tracking-widest text-[#E5D7B7] font-bold mb-1">
                 Collector Verdicts
               </p>
               <h3 className="font-serif text-3xl text-white font-normal">
                 Customer Reviews ({productReviews.length})
               </h3>
             </div>
-            <div className="flex items-center gap-2 text-sm text-[#dfbe76] mt-3 sm:mt-0">
+            <div className="flex items-center gap-2 text-sm text-[#D5B15C] mt-3 sm:mt-0">
               <Star className="w-4 h-4 fill-current" />
-              <span className="font-bold text-white">{product.rating.toFixed(1)}</span>
-              <span className="text-neutral-400">Average across {product.reviews_count} collectors</span>
+              <span className="font-bold text-white text-base">{product.rating.toFixed(1)}</span>
+              <span className="text-white/70">Average across {product.reviews_count} collectors</span>
             </div>
           </div>
 
           {/* Existing reviews */}
           <div className="space-y-4 mb-10">
             {productReviews.length === 0 ? (
-              <p className="text-sm text-neutral-400 py-6 text-center italic">
+              <p className="text-sm text-white/80 py-6 text-center italic">
                 No reviews written yet. Be the first to add your tasting notes for this vintage.
               </p>
             ) : (
               productReviews.map((rev) => (
                 <div
                   key={rev.review_id}
-                  className="p-5 rounded-xl bg-[#150c10] border border-[#27131d]"
+                  className="p-5 rounded-2xl dark-luxury-glass border border-white/10"
                 >
                   <div className="flex items-center justify-between mb-2">
                     <div className="flex items-center gap-2">
-                      <span className="font-medium text-white text-sm">{rev.user_name}</span>
-                      <span className="text-xs text-neutral-500">· {rev.review_date}</span>
+                      <span className="font-bold text-white text-sm">{rev.user_name}</span>
+                      <span className="text-xs text-white/50">· {rev.review_date}</span>
                     </div>
-                    <div className="flex items-center text-[#dfbe76]">
+                    <div className="flex items-center text-[#D5B15C]">
                       {[...Array(rev.rating)].map((_, i) => (
                         <Star key={i} className="w-3.5 h-3.5 fill-current" />
                       ))}
                     </div>
                   </div>
-                  <p className="text-xs sm:text-sm text-neutral-300 leading-relaxed font-light">
+                  <p className="text-xs sm:text-sm text-[#F5EFE7] leading-relaxed font-normal">
                     {rev.comment}
                   </p>
                 </div>
@@ -564,48 +618,48 @@ export const ProductDetailPage: React.FC<ProductDetailPageProps> = ({ product, o
           {/* Add Review Form */}
           <form
             onSubmit={handleSubmitReview}
-            className="p-6 rounded-2xl bg-[#170c11] border border-[#341824] max-w-2xl"
+            className="p-6 sm:p-8 rounded-3xl dark-luxury-glass-elevated max-w-2xl border border-white/10"
           >
-            <div className="flex items-center gap-2 text-xs uppercase tracking-wider text-[#dfbe76] font-semibold mb-3">
-              <MessageSquarePlus className="w-4 h-4" />
+            <div className="flex items-center gap-2 text-xs uppercase tracking-wider text-[#E5D7B7] font-bold mb-3">
+              <MessageSquarePlus className="w-4 h-4 text-[#D5B15C]" />
               <span>Leave a Tasting Review</span>
             </div>
 
             <div className="mb-4">
-              <label className="block text-xs text-neutral-400 mb-1.5">Rating (1 to 5 Stars)</label>
+              <label className="block text-xs text-white/80 font-medium mb-1.5">Rating (1 to 5 Stars)</label>
               <div className="flex items-center gap-2">
                 {[1, 2, 3, 4, 5].map((star) => (
                   <button
                     type="button"
                     key={star}
                     onClick={() => setNewRating(star)}
-                    className="p-1 text-[#dfbe76] hover:scale-110 transition-transform cursor-pointer"
+                    className="p-1 text-[#D5B15C] hover:scale-110 transition-transform cursor-pointer"
                   >
                     <Star
                       className={`w-5 h-5 ${star <= newRating ? 'fill-current' : 'text-neutral-700'}`}
                     />
                   </button>
                 ))}
-                <span className="text-xs text-neutral-400 ml-2 font-medium">{newRating} Stars</span>
+                <span className="text-xs text-white font-bold ml-2">{newRating} Stars</span>
               </div>
             </div>
 
             <div className="mb-4">
-              <label className="block text-xs text-neutral-400 mb-1.5">Your Tasting Impression</label>
+              <label className="block text-xs text-white/80 font-medium mb-1.5">Your Tasting Impression</label>
               <textarea
                 value={newComment}
                 onChange={(e) => setNewComment(e.target.value)}
                 placeholder="Describe aromas, palate texture, aging notes, or food pairings..."
                 rows={3}
                 required
-                className="w-full p-3 rounded-lg bg-black/40 border border-neutral-700 text-sm text-[#f3efe6] placeholder-neutral-500 focus:outline-none focus:border-[#d4af37]"
+                className="w-full p-3.5 rounded-xl bg-black/50 border border-white/20 text-sm text-white placeholder-white/40 focus:outline-none focus:border-[#D5B15C]"
               />
             </div>
 
             <button
               type="submit"
               disabled={reviewSubmitting || !newComment.trim()}
-              className="py-2.5 px-5 rounded-lg bg-[#29121a] hover:bg-[#801729] text-[#dfbe76] hover:text-white border border-[#d4af37]/40 text-xs uppercase tracking-wider font-semibold transition-all cursor-pointer disabled:opacity-50"
+              className="btn-magnetic py-3 px-6 rounded-xl bg-[#861F32] hover:bg-[#a1253c] text-white text-xs uppercase tracking-wider font-bold transition-all cursor-pointer disabled:opacity-50 border border-[#D5B15C]/40"
             >
               Submit Review
             </button>
@@ -614,10 +668,10 @@ export const ProductDetailPage: React.FC<ProductDetailPageProps> = ({ product, o
       )}
 
       {/* “You May Also Like” Section */}
-      <div className="border-t border-[#2b161f] pt-16">
+      <div className="border-t border-white/15 pt-16">
         <div className="flex items-center justify-between mb-8">
           <div>
-            <p className="text-xs uppercase tracking-widest text-[#dfbe76] font-semibold mb-1">
+            <p className="text-xs uppercase tracking-widest text-[#E5D7B7] font-bold mb-1">
               Curated Recommendations
             </p>
             <h3 className="font-serif text-3xl text-white font-normal">
@@ -626,7 +680,7 @@ export const ProductDetailPage: React.FC<ProductDetailPageProps> = ({ product, o
           </div>
           <button
             onClick={onBack}
-            className="text-xs uppercase tracking-wider text-[#dfbe76] hover:underline cursor-pointer"
+            className="text-xs uppercase tracking-wider text-[#E5D7B7] font-bold hover:underline cursor-pointer"
           >
             View Full Catalog
           </button>

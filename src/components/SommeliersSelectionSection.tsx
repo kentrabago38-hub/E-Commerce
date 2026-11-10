@@ -168,7 +168,7 @@ export const SommeliersSelectionSection: React.FC = () => {
               <blockquote className="border-l-2 border-[#C6A15B] pl-4 italic text-sm text-[#574E4C] mb-8 font-serif">
                 “This vintage demonstrates an uncommon harmony between powerful fruit concentration and crystalline mineral tension. Decant for one hour in our Davao cellars.”
                 <footer className="text-xs font-sans not-italic text-[#741E2B] font-semibold mt-1">
-                  — Julian Vance, Master Sommelier
+                  — Kent Jorich Rabago, Master Sommelier
                 </footer>
               </blockquote>
             </div>

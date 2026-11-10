@@ -18,6 +18,10 @@ import { UserDashboard } from './components/UserDashboard';
 import { AdminPortal } from './components/AdminPortal';
 import { Footer } from './components/Footer';
 import { TheArtOfWineSection } from './components/TheArtOfWineSection';
+import { DiscoverCollectionSection } from './components/DiscoverCollectionSection';
+import { WineShelfCarousel } from './components/WineShelfCarousel';
+import { WhyVineaSection } from './components/WhyVineaSection';
+import { CustomCursor } from './components/CustomCursor';
 import { CollectorsRoomSection } from './components/CollectorsRoomSection';
 import { MomentWorthRememberingSection } from './components/MomentWorthRememberingSection';
 import { FadeInUp } from './components/FadeInUp';
@@ -26,13 +30,17 @@ import { ProductQuickViewModal } from './components/ProductQuickViewModal';
 import { CartDrawer } from './components/CartDrawer';
 import { CheckoutModal } from './components/CheckoutModal';
 import { OrderConfirmationModal } from './components/OrderConfirmationModal';
+import { DigitalReceipt } from './components/DigitalReceipt';
 import { AccountModal } from './components/AccountModal';
 import { CustomerAuthModal } from './components/CustomerAuthModal';
 import { FindYourWineQuiz } from './components/FindYourWineQuiz';
 import { SupabaseConfigModal } from './components/SupabaseConfigModal';
 import { ToastContainer } from './components/Toast';
+import { PageTransitionManager } from './components/PageTransitionManager';
+import { EditorialSectionDivider } from './components/EditorialSectionDivider';
 import { Sparkles, ArrowRight, Award, Wine } from 'lucide-react';
 import { getWineImageUrl, handleImageError } from './utils/imageUtils';
+
 
 const MainStoreContent: React.FC = () => {
   const {
@@ -44,123 +52,171 @@ const MainStoreContent: React.FC = () => {
     setIsQuizOpen
   } = useWineStore();
 
-  // If a product is selected for full detail view
-  if (selectedProduct) {
+  const currentSectionKey = selectedProduct
+    ? `product-detail-${selectedProduct.product_id}`
+    : `section-${activeTab}`;
+
+  const renderSectionContent = () => {
+    // If a product is selected for full detail view
+    if (selectedProduct) {
+      return (
+        <main className="min-h-[80vh]">
+          <ProductDetailPage
+            product={selectedProduct}
+            onBack={() => setSelectedProduct(null)}
+          />
+        </main>
+      );
+    }
+
+    // Route based on activeTab
+    if (activeTab === 'shop') {
+      return (
+        <main className="min-h-[80vh]">
+          <ProductCatalog />
+        </main>
+      );
+    }
+
+    if (activeTab === 'red') {
+      return (
+        <main className="min-h-[80vh]">
+          <ProductCatalog initialTypeFilter="Red" />
+        </main>
+      );
+    }
+
+    if (activeTab === 'white') {
+      return (
+        <main className="min-h-[80vh]">
+          <ProductCatalog initialTypeFilter="White" />
+        </main>
+      );
+    }
+
+    if (activeTab === 'rose') {
+      return (
+        <main className="min-h-[80vh]">
+          <ProductCatalog initialTypeFilter="Rosé" />
+        </main>
+      );
+    }
+
+    if (activeTab === 'sparkling') {
+      return (
+        <main className="min-h-[80vh]">
+          <ProductCatalog initialTypeFilter="Sparkling" />
+        </main>
+      );
+    }
+
+    if (activeTab === 'collections') {
+      return (
+        <main className="min-h-[80vh]">
+          <ProductCatalog initialTypeFilter="Collections" />
+        </main>
+      );
+    }
+
+    if (activeTab === 'guide') {
+      return (
+        <main className="min-h-[80vh]">
+          <WineGuideSection />
+        </main>
+      );
+    }
+
+    if (activeTab === 'branches') {
+      return (
+        <main className="min-h-[80vh]">
+          <DavaoBranchesSection />
+        </main>
+      );
+    }
+
+    if (activeTab === 'about') {
+      return (
+        <main className="min-h-[80vh]">
+          <AboutSection />
+        </main>
+      );
+    }
+
+    if (activeTab === 'account') {
+      return (
+        <main className="min-h-[80vh]">
+          <UserDashboard />
+        </main>
+      );
+    }
+
+    // Home Tab
+    const featuredWines = products.filter((p) => p.featured).slice(0, 4);
+
     return (
-      <main className="min-h-[80vh]">
-        <ProductDetailPage
-          product={selectedProduct}
-          onBack={() => setSelectedProduct(null)}
-        />
-      </main>
-    );
-  }
-
-  // Route based on activeTab
-  if (activeTab === 'shop') {
-    return (
-      <main className="min-h-[80vh]">
-        <ProductCatalog />
-      </main>
-    );
-  }
-
-  if (activeTab === 'red') {
-    return (
-      <main className="min-h-[80vh]">
-        <ProductCatalog initialTypeFilter="Red" />
-      </main>
-    );
-  }
-
-  if (activeTab === 'white') {
-    return (
-      <main className="min-h-[80vh]">
-        <ProductCatalog initialTypeFilter="White" />
-      </main>
-    );
-  }
-
-  if (activeTab === 'rose') {
-    return (
-      <main className="min-h-[80vh]">
-        <ProductCatalog initialTypeFilter="Rosé" />
-      </main>
-    );
-  }
-
-  if (activeTab === 'sparkling') {
-    return (
-      <main className="min-h-[80vh]">
-        <ProductCatalog initialTypeFilter="Sparkling" />
-      </main>
-    );
-  }
-
-  if (activeTab === 'collections') {
-    return (
-      <main className="min-h-[80vh]">
-        <ProductCatalog initialTypeFilter="Collections" />
-      </main>
-    );
-  }
-
-  if (activeTab === 'guide') {
-    return (
-      <main className="min-h-[80vh]">
-        <WineGuideSection />
-      </main>
-    );
-  }
-
-  if (activeTab === 'branches') {
-    return (
-      <main className="min-h-[80vh]">
-        <DavaoBranchesSection />
-      </main>
-    );
-  }
-
-  if (activeTab === 'about') {
-    return (
-      <main className="min-h-[80vh]">
-        <AboutSection />
-      </main>
-    );
-  }
-
-  if (activeTab === 'account') {
-    return (
-      <main className="min-h-[80vh]">
-        <UserDashboard />
-      </main>
-    );
-  }
-
-  // Home Tab
-  const featuredWines = products.filter((p) => p.featured).slice(0, 4);
-
-  return (
-    <main>
+      <main>
       {/* 1. Cinematic Asymmetrical Hero Campaign with Brand Trust Indicators */}
       <HeroSection />
 
-      {/* 2. The Art of Wine Editorial Feature (Crystal Glass Pour & Heritage) */}
+      <EditorialSectionDivider />
+
+      {/* 2. Discover the Collection (Editorial-style Asymmetric Product Catalog) */}
+      <FadeInUp>
+        <DiscoverCollectionSection />
+      </FadeInUp>
+
+      <EditorialSectionDivider />
+
+      {/* 3. Horizontal Wine Discovery Shelf Carousel ("Curated for You") */}
+      <FadeInUp>
+        <WineShelfCarousel />
+      </FadeInUp>
+
+      <EditorialSectionDivider />
+
+      {/* 4. Wine Storytelling Section ("Wine is not simply poured. It is remembered.") */}
       <FadeInUp>
         <TheArtOfWineSection />
       </FadeInUp>
 
-      {/* 3. Featured Wine Collections Showcase (Warm Ivory Editorial Background) */}
+      <EditorialSectionDivider />
+
+      {/* 5. Vineyard / Origin Terroir Interactive Experience */}
       <FadeInUp>
-        <CategoryShowcase />
+        <WineRegionsSection />
       </FadeInUp>
 
-      {/* 4. The Collector's Room (Exclusive Vault Allocations & Style C Cards) */}
+      <EditorialSectionDivider />
+
+      {/* 6. Why VÍNEA? Luxury Benefit Pillars */}
+      <FadeInUp>
+        <WhyVineaSection />
+      </FadeInUp>
+
+      <EditorialSectionDivider />
+
+      {/* 7. The Collector's Room (Exclusive Vault Allocations) */}
       <FadeInUp>
         <CollectorsRoomSection />
       </FadeInUp>
 
-      {/* 5. Featured Cellar Allocations & Bestselling Wines (Boutique Style Grid) */}
+      <EditorialSectionDivider />
+
+      {/* 8. Perfect Pairings (Gastronomy & Food Matching) */}
+      <FadeInUp>
+        <FoodPairingSection />
+      </FadeInUp>
+
+      <EditorialSectionDivider />
+
+      {/* 9. Featured Wine Categories Showcase */}
+      <FadeInUp>
+        <CategoryShowcase />
+      </FadeInUp>
+
+      <EditorialSectionDivider />
+
+      {/* 10. Featured Cellar Allocations & Bestselling Wines (Boutique Style Grid) */}
       <FadeInUp>
         <section className="py-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
           <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 border-b border-[#48151F] pb-8">
@@ -196,27 +252,23 @@ const MainStoreContent: React.FC = () => {
         </section>
       </FadeInUp>
 
-      {/* 6. Sommelier's Reserve Selection (Magazine-Style Editorial Feature) */}
+      <EditorialSectionDivider />
+
+      {/* 11. Sommelier's Reserve Selection (Magazine-Style Editorial Feature) */}
       <FadeInUp>
         <SommeliersSelectionSection />
       </FadeInUp>
 
-      {/* 7. Explore the World of Wine / Terroir Discovery */}
-      <FadeInUp>
-        <WineRegionsSection />
-      </FadeInUp>
+      <EditorialSectionDivider />
 
-      {/* 8. Perfect Pairings (Gastronomy & Food Matching) */}
-      <FadeInUp>
-        <FoodPairingSection />
-      </FadeInUp>
-
-      {/* 9. A Moment Worth Remembering (Atmospheric Lifestyle & Celebrations) */}
+      {/* 12. A Moment Worth Remembering (Atmospheric Lifestyle & Celebrations) */}
       <FadeInUp>
         <MomentWorthRememberingSection />
       </FadeInUp>
 
-      {/* 10. Interactive Sommelier Quiz Banner */}
+      <EditorialSectionDivider />
+
+      {/* 13. Interactive Sommelier Wine Finder Callout */}
       <FadeInUp>
         <section className="py-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
           <div className="relative rounded-2xl overflow-hidden bg-gradient-to-r from-[#210D12] via-[#48151F]/40 to-[#130B0D] border border-[#48151F] p-8 sm:p-12 lg:p-16 flex flex-col md:flex-row items-center justify-between gap-8 shadow-2xl">
@@ -258,26 +310,34 @@ const MainStoreContent: React.FC = () => {
         </section>
       </FadeInUp>
 
-      {/* 11. Editorial Brand Story & Terroir Manifesto */}
-      <FadeInUp>
-        <EditorialStorySection />
-      </FadeInUp>
+      <EditorialSectionDivider />
 
-      {/* 12. 5 Davao Physical Boutique Branches */}
+      {/* 14. 5 Davao Physical Boutique Branches with Featured Wines */}
       <FadeInUp>
         <DavaoBranchesSection />
       </FadeInUp>
 
-      {/* 13. Sommelier Wine Guide Articles */}
+      <EditorialSectionDivider />
+
+      {/* 15. Sommelier Wine Guide Articles */}
       <FadeInUp>
         <WineGuideSection />
       </FadeInUp>
 
-      {/* 14. Elegant Newsletter Subscription Section */}
+      <EditorialSectionDivider />
+
+      {/* 16. Elegant Newsletter Subscription Section */}
       <FadeInUp>
         <NewsletterSubscriptionSection />
       </FadeInUp>
     </main>
+    );
+  };
+
+  return (
+    <PageTransitionManager transitionKey={currentSectionKey}>
+      {renderSectionContent()}
+    </PageTransitionManager>
   );
 };
 
@@ -300,7 +360,10 @@ const AppLayout: React.FC = () => {
 
   // User Storefront Interface
   return (
-    <div className="min-h-screen bg-[#210D12] text-[#F5EFE7] flex flex-col justify-between selection:bg-[#861F32] selection:text-white">
+    <div className="min-h-screen bg-[#210D12] text-[#FDFBF7] flex flex-col justify-between selection:bg-[#861F32] selection:text-white">
+      {/* Refined Desktop Custom Fluid Cursor */}
+      <CustomCursor />
+
       <Navbar />
       <MainStoreContent />
       <Footer />
@@ -311,6 +374,7 @@ const AppLayout: React.FC = () => {
       <CartDrawer />
       <CheckoutModal />
       <OrderConfirmationModal />
+      <DigitalReceipt />
       <AccountModal />
       <CustomerAuthModal />
       <FindYourWineQuiz />

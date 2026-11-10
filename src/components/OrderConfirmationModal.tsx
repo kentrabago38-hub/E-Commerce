@@ -11,16 +11,19 @@ import {
   ShieldCheck,
   Calendar,
   Clock,
-  Compass
+  Compass,
+  Download
 } from 'lucide-react';
 import { getWineImageUrl, handleImageError } from '../utils/imageUtils';
+import { downloadVineaReceipt } from '../utils/receiptGenerator';
 
 export const OrderConfirmationModal: React.FC = () => {
   const {
     activeOrderConfirmation,
     setActiveOrderConfirmation,
     setIsAccountOpen,
-    setActiveTab
+    setActiveTab,
+    setViewingDigitalReceiptOrder
   } = useWineStore();
 
   const [showTracker, setShowTracker] = useState(false);
@@ -149,6 +152,14 @@ export const OrderConfirmationModal: React.FC = () => {
                 Track My Order
               </button>
               <button
+                onClick={() => setViewingDigitalReceiptOrder(order)}
+                className="py-3.5 px-5 rounded-lg bg-[#210D12] hover:bg-[#48151F] text-[#E5D7B7] hover:text-white border border-[#C6A15B]/50 hover:border-[#C6A15B] text-xs uppercase tracking-wider font-semibold transition-all cursor-pointer shadow-md flex items-center justify-center gap-2"
+                title="View and print official VÍNEA Boutique Invoice & Digital Receipt"
+              >
+                <Download className="w-3.5 h-3.5 text-[#D5B15C]" />
+                <span>Boutique Invoice & PDF</span>
+              </button>
+              <button
                 onClick={handleDone}
                 className="py-3.5 px-6 rounded-lg border border-[#48151F] hover:border-[#C6A15B]/40 text-[#B7AAA1] hover:text-[#F5EFE7] text-xs uppercase tracking-wider font-medium transition-colors cursor-pointer"
               >
@@ -233,19 +244,29 @@ export const OrderConfirmationModal: React.FC = () => {
               </div>
             </div>
 
-            <div className="flex items-center justify-between">
+            <div className="flex flex-wrap items-center justify-between gap-3">
               <button
                 onClick={() => setShowTracker(false)}
                 className="py-2.5 px-4 text-xs text-[#B7AAA1] hover:text-[#F5EFE7] cursor-pointer"
               >
                 Back to Receipt
               </button>
-              <button
-                onClick={handleGoToAccount}
-                className="py-3 px-6 rounded-lg bg-[#861F32] hover:bg-[#a1253c] text-white text-xs uppercase tracking-wider font-semibold transition-colors cursor-pointer border border-[#C6A15B]/40"
-              >
-                View in Account History
-              </button>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setViewingDigitalReceiptOrder(order)}
+                  className="py-2.5 px-4 rounded-lg bg-[#210D12] hover:bg-[#48151F] text-[#E5D7B7] hover:text-white text-xs uppercase tracking-wider font-semibold border border-[#C6A15B]/50 hover:border-[#C6A15B] transition-colors cursor-pointer flex items-center gap-1.5"
+                  title="View and print official VÍNEA Boutique Invoice & Digital Receipt"
+                >
+                  <Download className="w-3.5 h-3.5 text-[#D5B15C]" />
+                  <span>Invoice & PDF</span>
+                </button>
+                <button
+                  onClick={handleGoToAccount}
+                  className="py-2.5 px-5 rounded-lg bg-[#861F32] hover:bg-[#a1253c] text-white text-xs uppercase tracking-wider font-semibold transition-colors cursor-pointer border border-[#C6A15B]/40"
+                >
+                  View in Account
+                </button>
+              </div>
             </div>
           </div>
         )}

@@ -50,6 +50,13 @@ import {
   supabaseSignOut
 } from '../services/dbService';
 import { revokeGateSession } from '../lib/adminSecurity';
+import {
+  validateGmail,
+  validatePhone11Digit,
+  validateAddress,
+  validateFullName
+} from '../utils/validation';
+
 
 export type NavTab = 'home' | 'shop' | 'red' | 'white' | 'rose' | 'sparkling' | 'collections' | 'branches' | 'about' | 'guide' | 'account' | 'admin';
 
@@ -96,6 +103,7 @@ interface WineStoreContextType {
   accountActiveSubTab: 'orders' | 'tracking' | 'rewards' | 'profile' | 'avatar' | 'password' | 'preferences' | 'wishlist' | 'addresses';
   isQuizOpen: boolean;
   activeOrderConfirmation: Order | null;
+  viewingDigitalReceiptOrder: Order | null;
   toasts: ToastMessage[];
 
   // Actions
@@ -111,6 +119,7 @@ interface WineStoreContextType {
   openWishlist: () => void;
   setIsQuizOpen: (open: boolean) => void;
   setActiveOrderConfirmation: (o: Order | null) => void;
+  setViewingDigitalReceiptOrder: (o: Order | null) => void;
   setIsAuthModalOpen: (open: boolean) => void;
   setAuthModalMode: (mode: 'login' | 'register') => void;
   setAuthRedirectReason: (reason: string | null) => void;
@@ -413,7 +422,17 @@ export const WineStoreProvider: React.FC<{ children: ReactNode }> = ({ children 
   const [adminUser, setAdminUser] = useState<AdminUser | null>(() => {
     try {
       const saved = localStorage.getItem('vinea_admin_user');
-      return saved ? JSON.parse(saved) : null;
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (parsed?.name && parsed.name.includes('Julian Vance')) {
+          parsed.name = parsed.name.replace('Julian Vance', 'Kent Jorich Rabago');
+          try {
+            localStorage.setItem('vinea_admin_user', JSON.stringify(parsed));
+          } catch {}
+        }
+        return parsed;
+      }
+      return null;
     } catch {
       return null;
     }
@@ -436,6 +455,7 @@ export const WineStoreProvider: React.FC<{ children: ReactNode }> = ({ children 
   const [isAccountOpen, setIsAccountOpen] = useState<boolean>(false);
   const [isQuizOpen, setIsQuizOpen] = useState<boolean>(false);
   const [activeOrderConfirmation, setActiveOrderConfirmation] = useState<Order | null>(null);
+  const [viewingDigitalReceiptOrder, setViewingDigitalReceiptOrder] = useState<Order | null>(null);
   const [toasts, setToasts] = useState<ToastMessage[]>([]);
   const [isCloudConnected, setIsCloudConnected] = useState<boolean>(true);
   const [isPostgresConnected, setIsPostgresConnected] = useState<boolean>(true);
@@ -770,6 +790,27 @@ export const WineStoreProvider: React.FC<{ children: ReactNode }> = ({ children 
       throw new Error('Authentication required to place order');
     }
 
+    // Strict error validation for orders
+    const finalEmail = orderData.email || user.email;
+    const emailRes = validateGmail(finalEmail);
+    if (!emailRes.isValid) {
+      showToast(emailRes.error || 'A valid @gmail.com address is required for dispatch.', 'error');
+      throw new Error(emailRes.error);
+    }
+
+    const finalPhone = orderData.phone || user.phone;
+    const phoneRes = validatePhone11Digit(finalPhone);
+    if (!phoneRes.isValid) {
+      showToast(phoneRes.error || 'An 11-digit mobile phone number is required for dispatch.', 'error');
+      throw new Error(phoneRes.error);
+    }
+
+    const addrRes = validateAddress(orderData.delivery_address);
+    if (!addrRes.isValid) {
+      showToast(addrRes.firstError || 'Complete delivery address is required.', 'error');
+      throw new Error(addrRes.firstError);
+    }
+
     const newOrderId = `VN-${Math.floor(10000 + Math.random() * 90000)}`;
     const trackingNum = `VNX-DVO-${Math.floor(1000 + Math.random() * 9000)}PH`;
     const today = new Date().toISOString().split('T')[0];
@@ -778,8 +819,8 @@ export const WineStoreProvider: React.FC<{ children: ReactNode }> = ({ children 
       ...orderData,
       user_id: user.user_id,
       customer_name: user.name || orderData.customer_name,
-      email: user.email || orderData.email,
-      phone: user.phone || orderData.phone,
+      email: emailRes.normalized || finalEmail,
+      phone: phoneRes.normalized || finalPhone,
       order_id: newOrderId,
       order_date: today,
       status: 'Processing',
@@ -838,17 +879,11 @@ export const WineStoreProvider: React.FC<{ children: ReactNode }> = ({ children 
 
     showToast(`Order #${newOrderId} placed successfully! +${pointsEarned} VÍNEA Points earned.`, 'success');
 
-    // Persist Order and updated stock to Supabase & backend
+    // Persist Order and updated stock to Supabase & backend silently in background (no technical database toasts to customer)
     saveOrderToSupabase(newOrder)
       .then((res) => {
-        if (res.success) {
-          showToast(`Order #${newOrderId} synced to your Supabase database!`, 'success');
-        } else if (res.isTableMissing) {
-          showToast(`Notice: Supabase 'orders' table not found. Open 'Database: Supabase' in footer & run SQL schema.`, 'info');
-        } else if (res.isRlsBlocked) {
-          showToast(`Notice: Supabase RLS blocked insert. Run the updated SQL schema to allow orders.`, 'error');
-        } else if (res.error && res.code !== 'NOT_CONFIGURED') {
-          console.warn('[Supabase Sync Notice]:', res.error);
+        if (!res.success && res.error && res.code !== 'NOT_CONFIGURED') {
+          console.warn('[Supabase Order Sync Note]:', res.error);
         }
       })
       .catch((e: unknown) => console.warn('Supabase order sync note:', e));
@@ -1080,6 +1115,15 @@ export const WineStoreProvider: React.FC<{ children: ReactNode }> = ({ children 
     const email = emailInput.trim().toLowerCase();
     const pass = passwordInput.trim();
 
+    // Check @gmail.com validation for customer accounts
+    const emailRes = validateGmail(email);
+    if (!emailRes.isValid) {
+      return {
+        success: false,
+        error: emailRes.error || 'Customer sign in requires your registered @gmail.com address.'
+      };
+    }
+
     const matched = registeredUsers.find(u => u.email.toLowerCase() === email);
     if (!matched) {
       return {
@@ -1114,7 +1158,47 @@ export const WineStoreProvider: React.FC<{ children: ReactNode }> = ({ children 
     favorite_davao_branch?: string;
     saved_addresses?: DeliveryAddress[];
   }): { success: boolean; error?: string } => {
-    const email = data.email.trim().toLowerCase();
+    // 1. Full name validation
+    const nameRes = validateFullName(data.name);
+    if (!nameRes.isValid) {
+      return {
+        success: false,
+        error: nameRes.error || 'Please enter your full legal name (minimum 3 characters).'
+      };
+    }
+
+    // 2. Email validation (must be @gmail.com)
+    const emailRes = validateGmail(data.email);
+    if (!emailRes.isValid) {
+      return {
+        success: false,
+        error: emailRes.error || 'Email must be a valid @gmail.com address (e.g. yourname@gmail.com).'
+      };
+    }
+    const email = emailRes.normalized!;
+
+    // 3. Phone validation (must be 11 digits)
+    const phoneRes = validatePhone11Digit(data.phone);
+    if (!phoneRes.isValid) {
+      return {
+        success: false,
+        error: phoneRes.error || 'Phone number must be an 11-digit mobile number (e.g., 09171234567).'
+      };
+    }
+    const phone = phoneRes.normalized!;
+
+    // 4. Address validation if provided
+    if (data.saved_addresses && data.saved_addresses.length > 0) {
+      for (const addr of data.saved_addresses) {
+        const addrRes = validateAddress(addr);
+        if (!addrRes.isValid) {
+          return {
+            success: false,
+            error: addrRes.firstError || 'Please provide complete delivery address details.'
+          };
+        }
+      }
+    }
 
     if (registeredUsers.some(u => u.email.toLowerCase() === email)) {
       return {
@@ -1149,10 +1233,10 @@ export const WineStoreProvider: React.FC<{ children: ReactNode }> = ({ children 
 
     const newUser: User = {
       user_id: `usr-${Date.now().toString().slice(-5)}`,
-      name: data.name.trim(),
+      name: nameRes.normalized || data.name.trim(),
       email,
       password: data.password.trim(),
-      phone: data.phone.trim(),
+      phone,
       role: 'customer',
       avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80',
       date_of_birth: data.date_of_birth,
@@ -1176,17 +1260,13 @@ export const WineStoreProvider: React.FC<{ children: ReactNode }> = ({ children 
     setRegisteredUsers(prev => [newUser, ...prev]);
     setUser(newUser);
 
+    showToast(`Welcome to VÍNEA Cellar, ${data.name}!`, 'success');
+
     if (isSupabaseConfigured) {
       saveUserToSupabase(newUser)
         .then((res) => {
-          if (res.success) {
-            showToast(`Account saved to your live Supabase database!`, 'success');
-          } else if (res.isTableMissing) {
-            showToast(`Notice: Supabase 'users' table not found. Run SQL schema in Supabase.`, 'info');
-          } else if (res.isRlsBlocked) {
-            showToast(`Notice: Supabase RLS blocked user insert. Ensure public insert policy is enabled.`, 'error');
-          } else if (res.error) {
-            console.warn('[Supabase User Register Notice]:', res.error);
+          if (!res.success && res.error) {
+            console.warn('[Supabase User Register Note]:', res.error);
           }
         })
         .catch((e: unknown) => console.warn('Supabase user register note:', e));
@@ -1216,6 +1296,28 @@ export const WineStoreProvider: React.FC<{ children: ReactNode }> = ({ children 
 
   const updateUserProfile = (updates: Partial<User>): { success: boolean; error?: string } => {
     if (!user) return { success: false, error: 'User is not logged in.' };
+
+    // Validate phone number if updated
+    if (updates.phone !== undefined && updates.phone.trim()) {
+      const phoneRes = validatePhone11Digit(updates.phone);
+      if (!phoneRes.isValid) {
+        showToast(phoneRes.error || 'Invalid phone number format.', 'error');
+        return { success: false, error: phoneRes.error };
+      }
+      updates.phone = phoneRes.normalized;
+    }
+
+    // Validate saved addresses if updated
+    if (updates.saved_addresses && updates.saved_addresses.length > 0) {
+      for (const addr of updates.saved_addresses) {
+        const addrRes = validateAddress(addr);
+        if (!addrRes.isValid) {
+          const err = addrRes.firstError || 'Invalid address format.';
+          showToast(err, 'error');
+          return { success: false, error: err };
+        }
+      }
+    }
 
     const updatedUser: User = { ...user, ...updates };
     setUser(updatedUser);
@@ -1345,7 +1447,7 @@ export const WineStoreProvider: React.FC<{ children: ReactNode }> = ({ children 
     if (validCodes.includes(input.toLowerCase())) {
       const masterUser: AdminUser = {
         id: 'adm-001',
-        name: 'Master Sommelier Julian Vance',
+        name: 'Master Sommelier Kent Jorich Rabago',
         email: 'admin@vinea.com',
         role: 'admin',
         title: 'Chief Cellar Administrator & Sommelier'
@@ -1381,7 +1483,7 @@ export const WineStoreProvider: React.FC<{ children: ReactNode }> = ({ children 
         pass: 'vinea2026',
         user: {
           id: 'adm-001',
-          name: 'Julian Vance',
+          name: 'Kent Jorich Rabago',
           email: 'admin@vinea.com',
           role: 'admin',
           title: 'Master Sommelier & Chief Cellar Administrator'
@@ -1496,6 +1598,7 @@ export const WineStoreProvider: React.FC<{ children: ReactNode }> = ({ children 
         accountActiveSubTab,
         isQuizOpen,
         activeOrderConfirmation,
+        viewingDigitalReceiptOrder,
         toasts,
 
         setSearchQuery,
@@ -1510,6 +1613,7 @@ export const WineStoreProvider: React.FC<{ children: ReactNode }> = ({ children 
         openWishlist,
         setIsQuizOpen,
         setActiveOrderConfirmation,
+        setViewingDigitalReceiptOrder,
         setIsAuthModalOpen,
         setAuthModalMode,
         setAuthRedirectReason,

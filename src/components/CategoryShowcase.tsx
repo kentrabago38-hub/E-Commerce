@@ -106,19 +106,22 @@ export const CategoryShowcase: React.FC = () => {
             <div
               key={col.id}
               onClick={() => handleCollectionClick(col.slug)}
-              className={`${col.colSpan} ${col.minHeight} group relative rounded-2xl overflow-hidden cursor-pointer shadow-lg hover:shadow-2xl transition-all duration-500 border border-[#B7AA9B]/40 flex flex-col justify-end p-6 sm:p-8`}
+              className={`${col.colSpan} ${col.minHeight} group relative rounded-2xl overflow-hidden cursor-pointer shadow-lg hover:shadow-2xl transition-all duration-500 border border-[#B7AA9B]/40 flex flex-col justify-end p-6 sm:p-8 bg-[#18080C]`}
             >
-              {/* Media Layer */}
+              {/* Opulent Ambient Cellar Backdrop */}
+              <div className="absolute inset-0 bg-gradient-to-br from-[#351116] via-[#1A080D] to-[#0D0407]" />
+
+              {/* Media Layer with text-transparent to suppress ugly broken image icon text */}
               <img
                 src={getWineImageUrl(col.image)}
                 alt={col.title}
-                onError={handleImageError}
-                className="absolute inset-0 w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-700 ease-out"
+                onError={(e) => handleImageError(e, '/images/hero_wine_cellar_1791213186963.jpg')}
+                className="absolute inset-0 w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-700 ease-out text-transparent"
                 referrerPolicy="no-referrer"
               />
 
               {/* Gradient Scrim for Contrast & Legibility */}
-              <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/45 to-transparent group-hover:from-black/90 transition-colors" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent group-hover:from-black/95 transition-colors" />
 
               {/* Card Content in Editorial Typography */}
               <div className="relative z-10 text-white">
