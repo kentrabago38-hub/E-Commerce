@@ -417,19 +417,31 @@ export const Navbar: React.FC = () => {
                 )}
               </button>
 
-              {/* Account Profile Button */}
+              {/* Account Profile Button with persistent avatar preview */}
               <button
                 type="button"
                 onClick={() => handleNavClick('account')}
-                className={`p-2 rounded-full transition-colors cursor-pointer ${
+                className={`p-1.5 sm:p-2 rounded-full transition-all cursor-pointer flex items-center justify-center ${
                   activeTab === 'account'
-                    ? 'bg-[#861F32] text-white border border-[#D5B15C]'
+                    ? 'bg-[#861F32] text-white ring-2 ring-[#D5B15C] shadow-lg shadow-[#861F32]/50'
                     : 'hover:bg-white/10 hover:text-[#D5B15C]'
                 }`}
                 aria-label="Customer Account Profile"
                 title={user ? `Signed in as ${user.name}` : 'Sign In / Register (21+)'}
               >
-                <UserIcon className="w-5 h-5" />
+                {user?.avatar ? (
+                  <img
+                    src={user.avatar}
+                    alt={user.name}
+                    className="w-5 h-5 sm:w-6 sm:h-6 rounded-full object-cover border border-[#D5B15C]"
+                    referrerPolicy="no-referrer"
+                    onError={(e) => {
+                      e.currentTarget.style.display = 'none';
+                    }}
+                  />
+                ) : (
+                  <UserIcon className="w-5 h-5" />
+                )}
               </button>
 
               {/* Mobile Menu Hamburger */}

@@ -22,6 +22,7 @@ import {
 } from 'lucide-react';
 import { VintageComparisonTab } from './VintageComparisonTab';
 import { getWineImageUrl, handleImageError } from '../utils/imageUtils';
+import { LazyWineImage } from './LazyWineImage';
 
 type DetailTab = 'vintage' | 'tasting' | 'reviews';
 
@@ -149,17 +150,20 @@ export const ProductDetailPage: React.FC<ProductDetailPageProps> = ({ product, o
         {/* Left Column: Large Sticky Bottle Showcase */}
         <div className="lg:col-span-6 lg:sticky lg:top-24 flex flex-col items-center">
           <div
-            className="relative w-full aspect-4/3 rounded-3xl overflow-hidden dark-luxury-glass-elevated cursor-crosshair group shadow-2xl p-4 flex items-center justify-center bg-black/40 border border-white/10"
+            className="relative w-full aspect-4/3 rounded-3xl overflow-hidden bg-gradient-to-b from-[#210D12] via-[#14080A] to-[#0A0406] cursor-crosshair group shadow-2xl p-6 flex items-center justify-center border border-[#D5B15C]/25"
             onMouseEnter={() => setIsZoomed(true)}
             onMouseLeave={() => setIsZoomed(false)}
             onMouseMove={handleMouseMove}
           >
-            <div className="relative w-full h-full flex items-center justify-center animate-float">
+            {/* Ambient luxury cellar backdrop radial glow */}
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-[#861F32]/25 via-transparent to-transparent pointer-events-none" />
+
+            <div className="relative w-full h-full flex items-center justify-center animate-float z-5">
               <img
                 src={getWineImageUrl(selectedImage || product.image)}
                 alt={product.name}
                 onError={handleImageError}
-                className={`max-h-full max-w-full object-contain transition-transform duration-200 text-transparent ${
+                className={`max-h-full max-w-full object-contain transition-transform duration-200 drop-shadow-[0_20px_35px_rgba(0,0,0,0.9)] ${
                   isZoomed ? 'scale-150' : 'scale-100'
                 }`}
                 style={
@@ -173,24 +177,24 @@ export const ProductDetailPage: React.FC<ProductDetailPageProps> = ({ product, o
               />
             </div>
 
-            {/* High-Contrast Floating Vintage Badge (Protected against light/busy imagery) */}
-            <div className="absolute top-4 left-4 pointer-events-none z-10">
-              <span className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#120A0C]/95 backdrop-blur-md border border-[#D5B15C]/80 text-xs uppercase tracking-[0.22em] text-white font-bold shadow-2xl">
-                <span className="w-2 h-2 rounded-full bg-[#D5B15C] shadow-[0_0_8px_#D5B15C]" />
-                <span className="text-[#E5D7B7]">VINTAGE {product.vintage}</span>
-                <span className="text-white/40">·</span>
-                <span className="text-white">{product.wine_type.toUpperCase()}</span>
+            {/* High-Contrast Floating Vintage Badge (Shielded against light/busy backgrounds) */}
+            <div className="absolute top-4 left-4 pointer-events-none z-20">
+              <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#0D0407]/95 backdrop-blur-xl border border-[#D5B15C] text-xs uppercase tracking-[0.22em] text-white font-bold shadow-2xl ring-1 ring-black">
+                <span className="w-2 h-2 rounded-full bg-[#D5B15C] shadow-[0_0_10px_#D5B15C]" />
+                <span className="text-[#F5EFE7] font-extrabold">VINTAGE {product.vintage}</span>
+                <span className="text-[#D5B15C]/70">·</span>
+                <span className="text-white font-bold">{product.wine_type.toUpperCase()}</span>
               </span>
             </div>
 
             {/* High-Contrast Zoom Hint Badge */}
-            <div className="absolute bottom-4 right-4 pointer-events-none bg-[#120A0C]/95 backdrop-blur-md px-3.5 py-1.5 rounded-full text-xs text-white border border-white/20 flex items-center gap-2 font-medium shadow-2xl opacity-90 group-hover:opacity-100 transition-opacity z-10">
+            <div className="absolute bottom-4 right-4 pointer-events-none bg-[#0D0407]/95 backdrop-blur-xl px-4 py-2 rounded-full text-xs text-white border border-white/30 flex items-center gap-2 font-semibold shadow-2xl z-20 ring-1 ring-black">
               <ZoomIn className="w-3.5 h-3.5 text-[#D5B15C]" />
-              <span className="text-white font-medium">Hover image to inspect label</span>
+              <span className="text-[#FDFBF7] font-semibold">Hover image to inspect label</span>
             </div>
           </div>
 
-          {/* Interactive Multi-Photo Gallery Thumbnails */}
+          {/* Interactive Multi-Photo Gallery Thumbnails with Lazy Loading */}
           {allPhotos.length > 1 && (
             <div className="flex items-center gap-3 mt-4 w-full overflow-x-auto pb-1">
               {allPhotos.map((imgUrl, i) => {
@@ -200,19 +204,17 @@ export const ProductDetailPage: React.FC<ProductDetailPageProps> = ({ product, o
                     key={i}
                     type="button"
                     onClick={() => setSelectedImage(imgUrl)}
-                    className={`relative w-18 h-18 rounded-xl overflow-hidden border-2 transition-all cursor-pointer shrink-0 bg-black/40 p-1 flex items-center justify-center ${
+                    className={`relative w-18 h-18 rounded-xl overflow-hidden border-2 transition-all cursor-pointer shrink-0 bg-black/60 p-1 flex items-center justify-center ${
                       isSelected
-                        ? 'border-[#D5B15C] scale-105 shadow-md shadow-[#D5B15C]/40 ring-1 ring-[#D5B15C]'
-                        : 'border-white/10 hover:border-white/40 opacity-70 hover:opacity-100'
+                        ? 'border-[#D5B15C] scale-105 shadow-md shadow-[#D5B15C]/40 ring-2 ring-[#D5B15C]'
+                        : 'border-white/15 hover:border-white/50 opacity-75 hover:opacity-100'
                     }`}
                     title={`View photo ${i + 1}`}
                   >
-                    <img
-                      src={getWineImageUrl(imgUrl)}
+                    <LazyWineImage
+                      src={imgUrl}
                       alt={`${product.name} photo ${i + 1}`}
-                      onError={handleImageError}
-                      className="max-h-full max-w-full object-contain text-transparent"
-                      referrerPolicy="no-referrer"
+                      className="max-h-full max-w-full object-contain"
                     />
                   </button>
                 );

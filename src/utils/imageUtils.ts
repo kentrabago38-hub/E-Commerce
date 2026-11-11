@@ -1,7 +1,7 @@
 import React from 'react';
 
-// Default luxury wine image fallback (100% reliable local asset)
-export const DEFAULT_WINE_FALLBACK = '/images/category_red_wine_curated.jpg';
+// Default luxury wine image fallback (100% reliable local bottle asset)
+export const DEFAULT_WINE_FALLBACK = '/images/product_chateau_lumiere_cabernet.jpg';
 export const DEFAULT_CELLAR_FALLBACK = '/images/hero_wine_cellar_1791213186963.jpg';
 
 // Pure inline SVG vector fallback that never requires network or disk access

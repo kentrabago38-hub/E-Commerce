@@ -4,6 +4,7 @@ import { Product } from '../types/wine';
 import { formatPeso } from '../utils/formatCurrency';
 import { Heart, ShoppingBag, Eye, ArrowRight, Award, Sparkles, Wine } from 'lucide-react';
 import { getWineImageUrl, handleImageError } from '../utils/imageUtils';
+import { LazyWineImage } from './LazyWineImage';
 
 export const DiscoverCollectionSection: React.FC = () => {
   const {
@@ -79,12 +80,10 @@ export const DiscoverCollectionSection: React.FC = () => {
                   className="sm:col-span-6 relative aspect-3/4 rounded-2xl overflow-hidden bg-[#210D12] cursor-pointer group"
                   onClick={() => handleSelectProduct(heroRed)}
                 >
-                  <img
-                    src={getWineImageUrl(heroRed.image)}
+                  <LazyWineImage
+                    src={heroRed.image}
                     alt={heroRed.name}
-                    onError={handleImageError}
                     className="w-full h-full object-cover object-center group-hover:scale-106 transition-transform duration-700 ease-out"
-                    referrerPolicy="no-referrer"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-[#130B0D] via-transparent to-transparent opacity-70" />
 
@@ -183,12 +182,10 @@ export const DiscoverCollectionSection: React.FC = () => {
                   className="w-28 sm:w-32 aspect-3/4 rounded-xl overflow-hidden bg-[#210D12] shrink-0 cursor-pointer relative"
                   onClick={() => handleSelectProduct(sideChampagne)}
                 >
-                  <img
-                    src={getWineImageUrl(sideChampagne.image)}
+                  <LazyWineImage
+                    src={sideChampagne.image}
                     alt={sideChampagne.name}
-                    onError={handleImageError}
                     className="w-full h-full object-cover group-hover:scale-106 transition-transform duration-700 ease-out"
-                    referrerPolicy="no-referrer"
                   />
                   <div className="absolute top-2 left-2 px-2 py-0.5 rounded bg-black/80 text-[9px] text-[#C6A15B] uppercase font-semibold">
                     {sideChampagne.vintage}
@@ -239,12 +236,10 @@ export const DiscoverCollectionSection: React.FC = () => {
                   className="w-28 sm:w-32 aspect-3/4 rounded-xl overflow-hidden bg-[#210D12] shrink-0 cursor-pointer relative"
                   onClick={() => handleSelectProduct(sideWhite)}
                 >
-                  <img
-                    src={getWineImageUrl(sideWhite.image)}
+                  <LazyWineImage
+                    src={sideWhite.image}
                     alt={sideWhite.name}
-                    onError={handleImageError}
                     className="w-full h-full object-cover group-hover:scale-106 transition-transform duration-700 ease-out"
-                    referrerPolicy="no-referrer"
                   />
                   <div className="absolute top-2 left-2 px-2 py-0.5 rounded bg-black/80 text-[9px] text-[#C6A15B] uppercase font-semibold">
                     {sideWhite.vintage}
@@ -300,12 +295,10 @@ export const DiscoverCollectionSection: React.FC = () => {
                 className="relative aspect-3/4 rounded-2xl overflow-hidden bg-[#210D12] mb-4 cursor-pointer"
                 onClick={() => handleSelectProduct(lowerRose)}
               >
-                <img
-                  src={getWineImageUrl(lowerRose.image)}
+                <LazyWineImage
+                  src={lowerRose.image}
                   alt={lowerRose.name}
-                  onError={handleImageError}
                   className="w-full h-full object-cover group-hover:scale-106 transition-transform duration-700 ease-out"
-                  referrerPolicy="no-referrer"
                 />
                 <div className="absolute top-3 left-3 px-2.5 py-1 rounded bg-black/80 text-[10px] text-[#C6A15B] uppercase font-semibold border border-[#C6A15B]/30">
                   {lowerRose.vintage} · Provençal Rosé
@@ -355,12 +348,10 @@ export const DiscoverCollectionSection: React.FC = () => {
                   className="sm:col-span-6 relative aspect-3/4 rounded-2xl overflow-hidden bg-[#210D12] cursor-pointer"
                   onClick={() => handleSelectProduct(lowerBrunello)}
                 >
-                  <img
-                    src={getWineImageUrl(lowerBrunello.image)}
+                  <LazyWineImage
+                    src={lowerBrunello.image}
                     alt={lowerBrunello.name}
-                    onError={handleImageError}
                     className="w-full h-full object-cover group-hover:scale-106 transition-transform duration-700 ease-out"
-                    referrerPolicy="no-referrer"
                   />
                   <div className="absolute top-3 left-3 px-2.5 py-1 rounded bg-black/80 text-[10px] text-[#C6A15B] uppercase font-semibold border border-[#C6A15B]/30">
                     {lowerBrunello.vintage} · {lowerBrunello.region}

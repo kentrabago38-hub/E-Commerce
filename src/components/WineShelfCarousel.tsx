@@ -4,6 +4,7 @@ import { Product } from '../types/wine';
 import { formatPeso } from '../utils/formatCurrency';
 import { ChevronLeft, ChevronRight, ShoppingBag, Eye, Heart, Sparkles, Award } from 'lucide-react';
 import { getWineImageUrl, handleImageError } from '../utils/imageUtils';
+import { LazyWineImage } from './LazyWineImage';
 
 export const WineShelfCarousel: React.FC = () => {
   const { products, addToCart, setSelectedProduct, setQuickViewProduct, toggleWishlist, isInWishlist } = useWineStore();
@@ -142,12 +143,10 @@ export const WineShelfCarousel: React.FC = () => {
                   className="relative aspect-3/4 rounded-xl overflow-hidden bg-[#210D12] mb-4 cursor-pointer"
                   onClick={() => handleSelectProduct(wine)}
                 >
-                  <img
-                    src={getWineImageUrl(wine.image)}
+                  <LazyWineImage
+                    src={wine.image}
                     alt={wine.name}
-                    onError={handleImageError}
                     className="w-full h-full object-cover group-hover:scale-106 transition-transform duration-700 ease-out"
-                    referrerPolicy="no-referrer"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-[#130B0D] via-transparent to-transparent opacity-80" />
 

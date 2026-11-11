@@ -37,6 +37,7 @@ import { getWineImageUrl, handleImageError } from '../utils/imageUtils';
 import { uploadImageApi } from '../services/apiClient';
 import { validatePhone11Digit, validateAddress } from '../utils/validation';
 import { downloadVineaReceipt } from '../utils/receiptGenerator';
+import { OrderTracking } from './OrderTracking';
 
 const AVATAR_PRESETS = [
   {
@@ -226,7 +227,8 @@ export const AccountModal: React.FC = () => {
         showToast('Uploading profile image...', 'info');
         const permanentUrl = await uploadImageApi(file, file.name);
         setSelectedAvatarUrl(permanentUrl);
-        showToast('Image uploaded! Click "Save Profile Picture" to apply.', 'success');
+        updateUserProfile({ avatar: permanentUrl });
+        showToast('Profile photo uploaded and saved successfully!', 'success');
       } catch (err) {
         console.error('Avatar upload failed:', err);
         showToast('Failed to upload image. Please try another.', 'error');
@@ -520,37 +522,13 @@ export const AccountModal: React.FC = () => {
                           </div>
                         </div>
 
-                        {/* Order Stepper */}
-                        <div>
-                          <div className="flex items-center justify-between text-[11px] text-neutral-400 mb-2">
-                            <span>Status: <strong className="text-[#dfbe76]">{ord.status}</strong></span>
-                            <span>ETA: {ord.estimated_delivery}</span>
-                          </div>
-
-                          <div className="relative flex items-center justify-between py-2">
-                            <div className="absolute top-1/2 left-0 right-0 -translate-y-1/2 h-1 bg-neutral-800 z-0" />
-                            <div
-                              className="absolute top-1/2 left-0 -translate-y-1/2 h-1 bg-[#801729] transition-all z-0"
-                              style={{ width: `${(stepIdx / 3) * 100}%` }}
-                            />
-
-                            {orderStatuses.map((st, idx) => (
-                              <div key={st} className="relative z-10 flex flex-col items-center">
-                                <div
-                                  className={`w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold ${
-                                    idx <= stepIdx
-                                      ? 'bg-[#801729] text-white border border-[#dfbe76]'
-                                      : 'bg-neutral-800 text-neutral-500'
-                                  }`}
-                                >
-                                  {idx + 1}
-                                </div>
-                                <span className={`text-[10px] mt-1 ${idx === stepIdx ? 'text-[#dfbe76] font-semibold' : 'text-neutral-500'}`}>
-                                  {st}
-                                </span>
-                              </div>
-                            ))}
-                          </div>
+                        {/* Order Visual Progress Timeline */}
+                        <div className="my-2">
+                          <OrderTracking
+                            order={ord}
+                            variant="compact"
+                            onViewReceipt={setViewingDigitalReceiptOrder}
+                          />
                         </div>
 
                         {/* Bottles list */}

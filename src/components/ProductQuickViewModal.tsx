@@ -3,6 +3,7 @@ import { useWineStore } from '../context/WineStoreContext';
 import { formatPeso } from '../utils/formatCurrency';
 import { X, Heart, ShoppingBag, Star, Sparkles, Utensils, Check, ArrowRight } from 'lucide-react';
 import { getWineImageUrl, handleImageError } from '../utils/imageUtils';
+import { LazyWineImage } from './LazyWineImage';
 
 export const ProductQuickViewModal: React.FC = () => {
   const {
@@ -66,12 +67,10 @@ export const ProductQuickViewModal: React.FC = () => {
           {/* Left Media Column */}
           <div className="space-y-3">
             <div className="relative aspect-4/3 rounded-xl overflow-hidden bg-gradient-to-b from-[#48151F]/40 to-[#130B0D] border border-[#48151F]">
-              <img
-                src={getWineImageUrl(activeModalImg || quickViewProduct.image)}
+              <LazyWineImage
+                src={activeModalImg || quickViewProduct.image}
                 alt={quickViewProduct.name}
-                onError={handleImageError}
                 className="w-full h-full object-cover object-center transition-all duration-200"
-                referrerPolicy="no-referrer"
               />
               <div className="absolute top-3 left-3">
                 <span className="text-xs uppercase tracking-[0.2em] text-[#C6A15B] font-semibold drop-shadow-md">
@@ -90,16 +89,14 @@ export const ProductQuickViewModal: React.FC = () => {
                     onClick={() => setActiveModalImg(imgUrl)}
                     className={`relative w-12 h-12 rounded-lg overflow-hidden border-2 transition-all cursor-pointer shrink-0 ${
                       (activeModalImg || quickViewProduct.image) === imgUrl
-                        ? 'border-[#D5B15C] scale-105'
+                        ? 'border-[#D5B15C] scale-105 ring-1 ring-[#D5B15C]'
                         : 'border-[#48151F] opacity-60 hover:opacity-100'
                     }`}
                   >
-                    <img
-                      src={getWineImageUrl(imgUrl)}
+                    <LazyWineImage
+                      src={imgUrl}
                       alt={`View ${i + 1}`}
-                      onError={handleImageError}
                       className="w-full h-full object-cover"
-                      referrerPolicy="no-referrer"
                     />
                   </button>
                 ))}

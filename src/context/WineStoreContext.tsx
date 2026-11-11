@@ -314,17 +314,18 @@ export const WineStoreProvider: React.FC<{ children: ReactNode }> = ({ children 
       const saved = localStorage.getItem('vinea_current_user');
       if (saved) {
         const parsed = JSON.parse(saved);
-        if (
-          parsed &&
-          (parsed.email === 'maria.santos@vinea.ph' ||
-            parsed.email === 'roberto.tan@vinea.ph' ||
-            parsed.user_id === 'usr-101' ||
-            parsed.user_id === 'usr-102')
-        ) {
-          localStorage.removeItem('vinea_current_user');
-          return null;
+        if (parsed && typeof parsed === 'object') {
+          // Restore and preserve user's avatar/profile photo across browser sessions
+          const backupAvatar =
+            parsed.avatar ||
+            localStorage.getItem(`vinea_user_avatar_${parsed.email?.toLowerCase()}`) ||
+            localStorage.getItem(`vinea_user_avatar_${parsed.user_id}`) ||
+            localStorage.getItem('vinea_saved_avatar');
+          if (backupAvatar) {
+            parsed.avatar = backupAvatar;
+          }
+          return parsed;
         }
-        return parsed;
       }
       return null;
     } catch {
@@ -548,7 +549,27 @@ export const WineStoreProvider: React.FC<{ children: ReactNode }> = ({ children 
             setOrders(pgOrders);
           }
           if (pgUsers && pgUsers.length > 0) {
-            setRegisteredUsers(pgUsers);
+            const mergedUsers = pgUsers.map(pu => {
+              const savedAvatar =
+                pu.avatar ||
+                localStorage.getItem(`vinea_user_avatar_${pu.email.toLowerCase()}`) ||
+                localStorage.getItem(`vinea_user_avatar_${pu.user_id}`);
+              return savedAvatar ? { ...pu, avatar: savedAvatar } : pu;
+            });
+            setRegisteredUsers(mergedUsers);
+
+            // Re-merge current user session so their avatar and details remain intact
+            if (user) {
+              const currentMatch = mergedUsers.find(
+                mu => mu.user_id === user.user_id || mu.email.toLowerCase() === user.email.toLowerCase()
+              );
+              if (currentMatch) {
+                const preservedAvatar = user.avatar || currentMatch.avatar || localStorage.getItem('vinea_saved_avatar');
+                if (preservedAvatar && preservedAvatar !== currentMatch.avatar) {
+                  setUser({ ...currentMatch, avatar: preservedAvatar });
+                }
+              }
+            }
           }
           if (pgReviews && pgReviews.length > 0) {
             setReviews(pgReviews);
@@ -561,7 +582,13 @@ export const WineStoreProvider: React.FC<{ children: ReactNode }> = ({ children 
           if (remoteUsers && remoteUsers.length > 0 && isMounted) {
             setRegisteredUsers(prev => {
               const map = new Map<string, User>();
-              remoteUsers.forEach(u => map.set(u.email.toLowerCase(), u));
+              remoteUsers.forEach(u => {
+                const savedAvatar =
+                  u.avatar ||
+                  localStorage.getItem(`vinea_user_avatar_${u.email.toLowerCase()}`) ||
+                  localStorage.getItem(`vinea_user_avatar_${u.user_id}`);
+                map.set(u.email.toLowerCase(), savedAvatar ? { ...u, avatar: savedAvatar } : u);
+              });
               prev.forEach(u => {
                 if (!map.has(u.email.toLowerCase())) {
                   map.set(u.email.toLowerCase(), u);
@@ -653,10 +680,16 @@ export const WineStoreProvider: React.FC<{ children: ReactNode }> = ({ children 
   useEffect(() => {
     try {
       localStorage.setItem('vinea_wishlist', JSON.stringify(wishlist));
+      if (user?.user_id) {
+        localStorage.setItem(`vinea_wishlist_${user.user_id}`, JSON.stringify(wishlist));
+      }
+      if (user?.email) {
+        localStorage.setItem(`vinea_wishlist_${user.email.toLowerCase()}`, JSON.stringify(wishlist));
+      }
     } catch (e) {
       console.error(e);
     }
-  }, [wishlist]);
+  }, [wishlist, user?.user_id, user?.email]);
 
   useEffect(() => {
     try {
@@ -1139,7 +1172,30 @@ export const WineStoreProvider: React.FC<{ children: ReactNode }> = ({ children 
       };
     }
 
-    setUser(matched);
+    // Restore and lock in customer profile photo from local storage backup keys
+    const savedAvatar =
+      matched.avatar ||
+      localStorage.getItem(`vinea_user_avatar_${email}`) ||
+      localStorage.getItem(`vinea_user_avatar_${matched.user_id}`) ||
+      localStorage.getItem('vinea_saved_avatar');
+
+    const userToSet = savedAvatar ? { ...matched, avatar: savedAvatar } : matched;
+    setUser(userToSet);
+
+    // Restore user session wishlist
+    try {
+      const userWishlistRaw = localStorage.getItem(`vinea_wishlist_${matched.user_id}`) ||
+        localStorage.getItem(`vinea_wishlist_${email}`);
+      if (userWishlistRaw) {
+        const userWishlist = JSON.parse(userWishlistRaw);
+        if (Array.isArray(userWishlist) && userWishlist.length > 0) {
+          setWishlist(prev => Array.from(new Set([...prev, ...userWishlist])));
+        }
+      }
+    } catch (err) {
+      console.warn('Wishlist restore note:', err);
+    }
+
     setIsAuthModalOpen(false);
     setAuthRedirectReason(null);
     if (isSupabaseConfigured) {
@@ -1320,7 +1376,23 @@ export const WineStoreProvider: React.FC<{ children: ReactNode }> = ({ children 
     }
 
     const updatedUser: User = { ...user, ...updates };
+
+    // Explicitly lock in and persist custom avatar to prevent loss
+    if (updates.avatar) {
+      try {
+        localStorage.setItem(`vinea_user_avatar_${user.email.toLowerCase()}`, updates.avatar);
+        localStorage.setItem(`vinea_user_avatar_${user.user_id}`, updates.avatar);
+        localStorage.setItem('vinea_saved_avatar', updates.avatar);
+      } catch (err) {
+        console.warn('Avatar storage note:', err);
+      }
+    }
+
     setUser(updatedUser);
+    try {
+      localStorage.setItem('vinea_current_user', JSON.stringify(updatedUser));
+    } catch {}
+
     setRegisteredUsers(prev =>
       prev.map(u => (u.user_id === user.user_id ? updatedUser : u))
     );

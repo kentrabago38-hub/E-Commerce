@@ -4,6 +4,7 @@ import { useWineStore } from '../context/WineStoreContext';
 import { formatPeso } from '../utils/formatCurrency';
 import { Heart, Eye, ShoppingBag, Star, Check } from 'lucide-react';
 import { getWineImageUrl, handleImageError } from '../utils/imageUtils';
+import { LazyWineImage } from './LazyWineImage';
 
 export type ProductCardStyle = 'boutique' | 'editorial' | 'collector';
 
@@ -71,37 +72,36 @@ export const ProductCard: React.FC<ProductCardProps> = ({
           className="relative aspect-3/4 overflow-hidden bg-gradient-to-b from-[#2A0E13] to-[#130B0D] cursor-pointer"
           onClick={handleCardClick}
         >
-          {/* Subtle Floating Wine Bottle in Cellar */}
+          {/* Subtle Floating Wine Bottle in Cellar with Lazy Loading & Blur-Up */}
           <div className={`w-full h-full ${floatAnimationClass}`}>
-            <img
-              src={getWineImageUrl(product.image)}
+            <LazyWineImage
+              src={product.image}
               alt={product.name}
-              onError={handleImageError}
               className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-700 ease-out text-transparent"
-              referrerPolicy="no-referrer"
             />
           </div>
           <div className="absolute inset-0 bg-gradient-to-t from-[#18090C] via-transparent to-black/30 opacity-70 group-hover:opacity-40 transition-opacity pointer-events-none" />
 
           {/* Editorial Top Stamp */}
-          <div className="absolute top-4 left-4">
+          <div className="absolute top-4 left-4 z-10">
             <span className="text-[10px] font-semibold tracking-[0.25em] text-[#C6A15B] uppercase bg-black/75 px-3 py-1 rounded backdrop-blur-md border border-[#C6A15B]/30">
               {product.vintage} · {product.region}
             </span>
           </div>
 
-          {/* Wishlist Button with Pulse */}
+          {/* Wishlist Heart Toggle with Pulse */}
           <button
             type="button"
             onClick={handleWishlistClick}
-            className={`absolute top-4 right-4 p-2.5 rounded-full backdrop-blur-md transition-all cursor-pointer ${
+            className={`absolute top-4 right-4 p-2.5 rounded-full backdrop-blur-md transition-all cursor-pointer z-10 ${
               isFavorited
-                ? 'bg-[#861F32] text-white border border-[#C6A15B]'
-                : 'bg-black/50 text-[#B7AAA1] hover:text-white hover:bg-black/80 border border-white/10'
+                ? 'bg-[#861F32] text-[#D5B15C] border border-[#D5B15C] shadow-lg shadow-[#861F32]/60'
+                : 'bg-black/60 text-[#B7AAA1] hover:text-white hover:bg-black/85 border border-white/15'
             } ${heartPulsing ? 'scale-125' : 'hover:scale-110'}`}
-            aria-label={isFavorited ? 'Remove from wishlist' : 'Add to wishlist'}
+            title={isFavorited ? 'Remove from cellar wishlist' : 'Save to cellar wishlist'}
+            aria-label={isFavorited ? 'Remove from cellar wishlist' : 'Save to cellar wishlist'}
           >
-            <Heart className={`w-4 h-4 ${isFavorited ? 'fill-current' : ''}`} />
+            <Heart className={`w-4 h-4 transition-transform ${isFavorited ? 'fill-[#D5B15C] text-[#D5B15C]' : ''}`} />
           </button>
 
           {/* Quick View Button */}
@@ -167,19 +167,17 @@ export const ProductCard: React.FC<ProductCardProps> = ({
           className="relative aspect-4/3 overflow-hidden bg-[#18090C] cursor-pointer"
           onClick={handleCardClick}
         >
-          {/* Subtle Floating Wine Bottle in Cellar */}
+          {/* Subtle Floating Wine Bottle in Cellar with Lazy Loading & Blur-Up */}
           <div className={`w-full h-full ${floatAnimationClass}`}>
-            <img
-              src={getWineImageUrl(product.image)}
+            <LazyWineImage
+              src={product.image}
               alt={product.name}
-              onError={handleImageError}
               className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-700 ease-out text-transparent"
-              referrerPolicy="no-referrer"
             />
           </div>
           <div className="absolute inset-0 bg-gradient-to-t from-[#12070A] via-transparent to-black/40 pointer-events-none" />
 
-          <div className="absolute top-3 left-3">
+          <div className="absolute top-3 left-3 z-10">
             <span className="text-[10px] font-semibold tracking-widest text-[#C6A15B] uppercase bg-black/75 px-2.5 py-1 rounded backdrop-blur-md border border-[#C6A15B]/30">
               Vault Reserve · {product.vintage}
             </span>
@@ -188,14 +186,15 @@ export const ProductCard: React.FC<ProductCardProps> = ({
           <button
             type="button"
             onClick={handleWishlistClick}
-            className={`absolute top-3 right-3 p-2 rounded-lg backdrop-blur-md transition-all cursor-pointer ${
+            className={`absolute top-3 right-3 p-2.5 rounded-lg backdrop-blur-md transition-all cursor-pointer z-10 ${
               isFavorited
-                ? 'bg-[#861F32] text-white border border-[#C6A15B]'
-                : 'bg-black/50 text-[#B7AAA1] hover:text-white hover:bg-black/80 border border-white/10'
+                ? 'bg-[#861F32] text-[#D5B15C] border border-[#D5B15C] shadow-lg shadow-[#861F32]/60'
+                : 'bg-black/60 text-[#B7AAA1] hover:text-white hover:bg-black/85 border border-white/15'
             } ${heartPulsing ? 'scale-125' : 'hover:scale-110'}`}
-            aria-label={isFavorited ? 'Remove from wishlist' : 'Add to wishlist'}
+            title={isFavorited ? 'Remove from cellar wishlist' : 'Save to cellar wishlist'}
+            aria-label={isFavorited ? 'Remove from cellar wishlist' : 'Save to cellar wishlist'}
           >
-            <Heart className={`w-4 h-4 ${isFavorited ? 'fill-current' : ''}`} />
+            <Heart className={`w-4 h-4 transition-transform ${isFavorited ? 'fill-[#D5B15C] text-[#D5B15C]' : ''}`} />
           </button>
         </div>
 
@@ -254,20 +253,18 @@ export const ProductCard: React.FC<ProductCardProps> = ({
         className="relative aspect-4/3 overflow-hidden bg-gradient-to-b from-[#2A0E13] to-[#130B0D] cursor-pointer"
         onClick={handleCardClick}
       >
-        {/* Subtle Floating Wine Bottle in Cellar */}
+        {/* Subtle Floating Wine Bottle in Cellar with Lazy Loading & Blur-Up */}
         <div className={`w-full h-full ${floatAnimationClass}`}>
-          <img
-            src={getWineImageUrl(product.image)}
+          <LazyWineImage
+            src={product.image}
             alt={product.name}
-            onError={handleImageError}
             className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-700 ease-out text-transparent"
-            referrerPolicy="no-referrer"
           />
         </div>
         <div className="absolute inset-0 bg-gradient-to-t from-[#130B0D] via-transparent to-black/30 opacity-70 group-hover:opacity-40 transition-opacity pointer-events-none" />
 
         {/* Vintage & Wine Type Metadata (Zero-Pill Discipline) */}
-        <div className="absolute top-3 left-3 flex items-center gap-1.5 drop-shadow-md">
+        <div className="absolute top-3 left-3 flex items-center gap-1.5 drop-shadow-md z-10">
           <span className="text-[11px] font-semibold tracking-[0.2em] text-[#C6A15B] uppercase">
             {product.vintage} · {product.wine_type} · 750ml
           </span>
@@ -286,14 +283,15 @@ export const ProductCard: React.FC<ProductCardProps> = ({
         <button
           type="button"
           onClick={handleWishlistClick}
-          className={`absolute top-3 right-3 p-2 rounded-lg backdrop-blur-md transition-all cursor-pointer ${
+          className={`absolute top-3 right-3 p-2 rounded-lg backdrop-blur-md transition-all cursor-pointer z-10 ${
             isFavorited
-              ? 'bg-[#861F32] text-white border border-[#C6A15B]'
-              : 'bg-black/50 text-[#B7AAA1] hover:text-white hover:bg-black/80 border border-white/10'
+              ? 'bg-[#861F32] text-[#D5B15C] border border-[#D5B15C] shadow-lg shadow-[#861F32]/60'
+              : 'bg-black/60 text-[#B7AAA1] hover:text-white hover:bg-black/85 border border-white/15'
           } ${heartPulsing ? 'scale-125' : 'hover:scale-110'}`}
-          aria-label={isFavorited ? 'Remove from wishlist' : 'Add to wishlist'}
+          title={isFavorited ? 'Remove from cellar wishlist' : 'Save to cellar wishlist'}
+          aria-label={isFavorited ? 'Remove from cellar wishlist' : 'Save to cellar wishlist'}
         >
-          <Heart className={`w-4 h-4 ${isFavorited ? 'fill-current' : ''}`} />
+          <Heart className={`w-4 h-4 transition-transform ${isFavorited ? 'fill-[#D5B15C] text-[#D5B15C]' : ''}`} />
         </button>
 
         {/* Quick View Button (Reveals on hover) */}

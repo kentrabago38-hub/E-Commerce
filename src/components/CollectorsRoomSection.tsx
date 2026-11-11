@@ -3,6 +3,7 @@ import { useWineStore } from '../context/WineStoreContext';
 import { formatPeso } from '../utils/formatCurrency';
 import { Award, ArrowRight, ShieldCheck, Lock, Eye, ShoppingBag } from 'lucide-react';
 import { getWineImageUrl, handleImageError } from '../utils/imageUtils';
+import { LazyWineImage } from './LazyWineImage';
 
 export const CollectorsRoomSection: React.FC = () => {
   const { products, setSelectedProduct, setQuickViewProduct, addToCart, setActiveTab } = useWineStore();
@@ -75,12 +76,10 @@ export const CollectorsRoomSection: React.FC = () => {
                 className="relative aspect-4/3 overflow-hidden bg-[#18090C] cursor-pointer"
                 onClick={() => handleOpenWine(wine)}
               >
-                <img
-                  src={getWineImageUrl(wine.image)}
+                <LazyWineImage
+                  src={wine.image}
                   alt={wine.name}
-                  onError={handleImageError}
                   className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-700 ease-out"
-                  referrerPolicy="no-referrer"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-[#12070A] via-transparent to-black/40" />
 
