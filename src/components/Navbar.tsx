@@ -64,9 +64,26 @@ export const Navbar: React.FC = () => {
   };
 
   useEffect(() => {
+    let ticking = false;
     const handleScroll = () => {
-      setIsScrolled(window.scrollY > 40);
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          const y = window.scrollY;
+          setIsScrolled((prev) => {
+            // Asymmetric hysteresis thresholds:
+            // Scroll down past 75px to activate floating pill style
+            // Scroll up to within 20px of the top to return to banner state
+            // Completely eliminates scroll-up layout jitter and oscillation
+            if (!prev && y > 75) return true;
+            if (prev && y < 20) return false;
+            return prev;
+          });
+          ticking = false;
+        });
+        ticking = true;
+      }
     };
+
     window.addEventListener('scroll', handleScroll, { passive: true });
     handleScroll();
     return () => window.removeEventListener('scroll', handleScroll);
@@ -141,37 +158,31 @@ export const Navbar: React.FC = () => {
 
   return (
     <>
-      <div className="sticky top-0 z-40 w-full transition-all duration-500 pointer-events-none">
-        {/* Top announcement bar (only when at the very top) */}
-        {!isScrolled && (
-          <div className="pointer-events-auto bg-[#130B0D] py-2 px-4 text-center border-b border-[#351116]/60 text-xs font-semibold tracking-wider text-[#E5D7B7] flex items-center justify-between transition-all duration-300">
-            <div className="hidden sm:block text-white/80 font-normal">
-              Complimentary climate-controlled delivery across Davao on allocations over ₱5,000
-            </div>
-            <div className="mx-auto sm:mx-0 flex items-center gap-2.5 text-white">
-              <span className="flex items-center gap-1.5 text-[#E5D7B7] font-semibold">
-                <MapPin className="w-3.5 h-3.5 text-[#D5B15C]" />
-                5 Private Cellars in Davao
-              </span>
-              <span className="text-white/40">·</span>
-              <span className="text-white/80 font-normal">Lanang · Bajada · Matina · Azuela Cove · SM Premier</span>
-            </div>
-          </div>
-        )}
+      {/* Top announcement bar: in natural document flow so it scrolls away naturally without layout shift */}
+      <div className="bg-[#130B0D] py-2 px-4 text-center border-b border-[#351116]/60 text-xs font-semibold tracking-wider text-[#E5D7B7] flex items-center justify-between select-none">
+        <div className="hidden sm:block text-white/80 font-normal">
+          Complimentary climate-controlled delivery across Davao on allocations over ₱5,000
+        </div>
+        <div className="mx-auto sm:mx-0 flex items-center gap-2.5 text-white">
+          <span className="flex items-center gap-1.5 text-[#E5D7B7] font-semibold">
+            <MapPin className="w-3.5 h-3.5 text-[#D5B15C]" />
+            5 Private Cellars in Davao
+          </span>
+          <span className="text-white/40">·</span>
+          <span className="text-white/80 font-normal">Lanang · Bajada · Matina · Azuela Cove · SM Premier</span>
+        </div>
+      </div>
 
-        {/* Floating Modern Header Island */}
+      {/* Sticky Floating Modern Header Island */}
+      <div className="sticky top-0 z-40 w-full pointer-events-none py-2 px-3 sm:px-6">
         <header
-          className={`pointer-events-auto transition-all duration-500 ease-out ${
+          className={`pointer-events-auto mx-auto transition-[max-width,border-radius,background-color,border-color,box-shadow] duration-300 ease-out ${
             isScrolled
-              ? 'mt-3 max-w-6xl mx-auto rounded-full dark-luxury-glass px-6 sm:px-8 shadow-[0_20px_50px_rgba(0,0,0,0.85)] border border-white/15'
-              : 'w-full bg-[#210D12]/90 backdrop-blur-md border-b border-white/10 px-4 sm:px-6 lg:px-8'
+              ? 'max-w-6xl rounded-full dark-luxury-glass px-6 sm:px-8 shadow-[0_20px_50px_rgba(0,0,0,0.85)] border border-white/15'
+              : 'max-w-7xl rounded-2xl bg-[#210D12]/95 backdrop-blur-md border border-white/10 px-4 sm:px-6 lg:px-8 shadow-xl'
           }`}
         >
-          <div
-            className={`flex items-center justify-between gap-6 transition-all duration-300 ${
-              isScrolled ? 'h-15' : 'h-20'
-            }`}
-          >
+          <div className="flex items-center justify-between gap-6 h-16 sm:h-18">
             {/* Zone 1: Minimal Brand Wordmark */}
             <div className="flex items-center gap-3 shrink-0">
               <button
@@ -180,7 +191,7 @@ export const Navbar: React.FC = () => {
                 className="group flex items-center gap-3 text-left cursor-pointer"
                 title="VÍNEA Fine Wine Merchant"
               >
-                <VineaLogoIcon sizePx={isScrolled ? 34 : 40} className="group-hover:scale-105 transition-transform duration-300" />
+                <VineaLogoIcon sizePx={36} className="group-hover:scale-105 transition-transform duration-300" />
                 <div>
                   <span className="font-serif text-2xl tracking-wider text-white font-medium leading-none block drop-shadow-sm group-hover:text-[#D5B15C] transition-colors">
                     VÍNEA

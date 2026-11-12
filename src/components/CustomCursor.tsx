@@ -115,14 +115,14 @@ export const CustomCursor: React.FC = () => {
       {/* Precision center dot */}
       <div
         ref={dotRef}
-        className="fixed top-0 left-0 -ml-1 -mt-1 w-2 h-2 rounded-full bg-[#C6A15B] transition-opacity duration-150 will-change-transform"
+        className="pointer-events-none fixed top-0 left-0 -ml-1 -mt-1 w-2 h-2 rounded-full bg-[#C6A15B] transition-opacity duration-150 will-change-transform"
         style={{ opacity: hasText ? 0 : 0.9 }}
       />
 
       {/* Fluid outer ring with contextual micro-labels */}
       <div
         ref={cursorRef}
-        className={`fixed top-0 left-0 flex items-center justify-center rounded-full transition-[width,height,background-color,border-color] duration-300 ease-out will-change-transform ${
+        className={`pointer-events-none fixed top-0 left-0 flex items-center justify-center rounded-full transition-[width,height,background-color,border-color] duration-300 ease-out will-change-transform ${
           hasText
             ? '-ml-7 -mt-7 w-14 h-14 bg-[#210D12]/85 border border-[#C6A15B] backdrop-blur-sm shadow-[0_0_20px_rgba(198,161,91,0.35)]'
             : isHovered
@@ -131,7 +131,7 @@ export const CustomCursor: React.FC = () => {
         }`}
       >
         {hasText && (
-          <span className="text-[9px] font-sans font-semibold tracking-wider text-[#C6A15B] uppercase animate-fade-in">
+          <span className="text-[9px] font-sans font-semibold tracking-wider text-[#C6A15B] uppercase animate-fade-in pointer-events-none">
             {cursorText}
           </span>
         )}
