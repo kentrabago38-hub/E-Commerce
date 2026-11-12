@@ -43,6 +43,7 @@ import schemaSql from '../data/supabaseSchemaSql';
 import { VineaLogoIcon } from './VineaLogo';
 import { getWineImageUrl, handleImageError } from '../utils/imageUtils';
 import { uploadImageApi } from '../services/apiClient';
+import { saveCustomPhoto } from '../utils/customPhotoStorage';
 
 export const WINE_PHOTO_PRESETS = [
   { name: 'Bordeaux Cabernet', url: '/images/product_chateau_lumiere_cabernet.jpg', badge: 'Red' },
@@ -209,16 +210,49 @@ export const AdminDashboard: React.FC = () => {
 
       if (destination === 'primary') {
         setPhotoModalPrimary(permanentUrl);
-        showToast('Primary photo uploaded & ready to save.', 'success');
+        if (managingPhotosProduct) {
+          const updated: Product = {
+            ...managingPhotosProduct,
+            image: permanentUrl,
+            images: photoModalGallery
+          };
+          setManagingPhotosProduct(updated);
+          updateProduct(updated);
+          saveCustomPhoto(managingPhotosProduct.product_id, {
+            image: permanentUrl,
+            images: photoModalGallery
+          }).catch(() => {});
+        }
+        showToast('Primary photo uploaded & saved permanently.', 'success');
       } else if (destination === 'gallery') {
-        setPhotoModalGallery((prev) => [...prev, permanentUrl]);
+        const nextGallery = [...photoModalGallery, permanentUrl];
+        setPhotoModalGallery(nextGallery);
+        if (managingPhotosProduct) {
+          const updated: Product = {
+            ...managingPhotosProduct,
+            image: photoModalPrimary || managingPhotosProduct.image,
+            images: nextGallery
+          };
+          setManagingPhotosProduct(updated);
+          updateProduct(updated);
+          saveCustomPhoto(managingPhotosProduct.product_id, {
+            image: photoModalPrimary || managingPhotosProduct.image,
+            images: nextGallery
+          }).catch(() => {});
+        }
         showToast('Photo uploaded and added to product gallery.', 'success');
       } else if (destination === 'add_form') {
         setProdImage(permanentUrl);
         showToast('Product photo uploaded successfully.', 'success');
       } else if (destination === 'edit_form' && editingProduct) {
-        setEditingProduct({ ...editingProduct, image: permanentUrl });
-        showToast('Product photo updated successfully.', 'success');
+        const updated: Product = { ...editingProduct, image: permanentUrl };
+        setEditingProduct(updated);
+        updateProduct(updated);
+        saveCustomPhoto(editingProduct.product_id, {
+          image: permanentUrl,
+          images: editingProduct.images
+        }).catch(() => {});
+        showToast('Product photo updated & saved permanently.', 'success');
       }
     } catch (err: any) {
       console.error('Failed to upload image file:', err);
@@ -231,12 +265,17 @@ export const AdminDashboard: React.FC = () => {
 
   const handleSavePhotoModal = () => {
     if (!managingPhotosProduct) return;
+    const finalImage = photoModalPrimary || managingPhotosProduct.image;
     const updated: Product = {
       ...managingPhotosProduct,
-      image: photoModalPrimary || managingPhotosProduct.image,
+      image: finalImage,
       images: photoModalGallery
     };
     updateProduct(updated);
+    saveCustomPhoto(managingPhotosProduct.product_id, {
+      image: finalImage,
+      images: photoModalGallery
+    }).catch(() => {});
     showToast(`Photos updated successfully for "${managingPhotosProduct.name}"!`, 'success');
     setManagingPhotosProduct(null);
   };

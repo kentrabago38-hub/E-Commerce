@@ -217,11 +217,15 @@ export const WineStoreProvider: React.FC<{ children: ReactNode }> = ({ children 
         base = base.map((p: Product) => {
           const custom = customPhotos[p.product_id];
           if (custom && custom.image) {
-            return {
-              ...p,
-              image: custom.image,
-              images: custom.images && custom.images.length > 0 ? custom.images : p.images
-            };
+            const isBaseUploaded = p.image && (p.image.includes('/images/uploads/') || p.image.startsWith('data:'));
+            const isCustomUploaded = custom.image.includes('/images/uploads/') || custom.image.startsWith('data:');
+            if (isCustomUploaded || !isBaseUploaded) {
+              return {
+                ...p,
+                image: custom.image,
+                images: custom.images && custom.images.length > 0 ? custom.images : p.images
+              };
+            }
           }
           return p;
         });
@@ -527,34 +531,48 @@ export const WineStoreProvider: React.FC<{ children: ReactNode }> = ({ children 
               if (savedProds) localProds = JSON.parse(savedProds);
             } catch {}
 
-            const mergedProducts = pgProducts.map((p) => {
+            const mergedProducts: Product[] = pgProducts.map((p) => {
               const customInfo = dbPhotos[p.product_id] || getAllCustomPhotosSync()[p.product_id];
               const localMatch = localProds.find(lp => lp.product_id === p.product_id);
 
-              // 1. Highest priority: user custom photo
-              if (customInfo && customInfo.image) {
-                return {
-                  ...p,
-                  image: customInfo.image,
-                  images: customInfo.images && customInfo.images.length > 0 ? customInfo.images : p.images
-                };
+              // Determine authoritative image & gallery:
+              const isBackendUploaded = Boolean(p.image && (p.image.includes('/images/uploads/') || p.image.startsWith('data:')));
+              const isCustomUploaded = Boolean(customInfo?.image && (customInfo.image.includes('/images/uploads/') || customInfo.image.startsWith('data:')));
+              const isLocalUploaded = Boolean(localMatch?.image && (localMatch.image.includes('/images/uploads/') || localMatch.image.startsWith('data:')));
+
+              let resolvedImage = p.image;
+              let resolvedImages = p.images || [];
+
+              if (isBackendUploaded) {
+                resolvedImage = p.image;
+                resolvedImages = p.images && p.images.length > 0 ? p.images : resolvedImages;
+              } else if (isCustomUploaded) {
+                resolvedImage = customInfo!.image!;
+                resolvedImages = customInfo!.images && customInfo!.images.length > 0 ? customInfo!.images : resolvedImages;
+              } else if (isLocalUploaded) {
+                resolvedImage = localMatch!.image!;
+                resolvedImages = localMatch!.images && localMatch!.images.length > 0 ? localMatch!.images : resolvedImages;
+              } else if (customInfo?.image) {
+                resolvedImage = customInfo.image;
+                resolvedImages = customInfo.images && customInfo.images.length > 0 ? customInfo.images : resolvedImages;
+              } else if (localMatch?.image) {
+                resolvedImage = localMatch.image;
+                resolvedImages = localMatch.images && localMatch.images.length > 0 ? localMatch.images : resolvedImages;
               }
 
-              // 2. Uploaded photo in backend
-              if (p.image && p.image.includes('/images/uploads/')) {
-                return p;
+              // Keep cache synchronized with active photo
+              if (resolvedImage && (resolvedImage.includes('/images/uploads/') || resolvedImage.startsWith('data:'))) {
+                saveCustomPhoto(p.product_id, {
+                  image: resolvedImage,
+                  images: resolvedImages
+                }).catch(() => {});
               }
 
-              // 3. Local match photo
-              if (localMatch?.image && localMatch.image !== p.image) {
-                return {
-                  ...p,
-                  image: localMatch.image,
-                  images: localMatch.images && localMatch.images.length > 0 ? localMatch.images : p.images
-                };
-              }
-
-              return p;
+              return {
+                ...p,
+                image: resolvedImage,
+                images: resolvedImages
+              };
             });
 
             // Also preserve any custom products created locally
@@ -572,20 +590,11 @@ export const WineStoreProvider: React.FC<{ children: ReactNode }> = ({ children 
               mergedProducts.push(...missingFromCatalog);
             }
 
-            // Final guarantee pass: all custom photos remain applied
-            const finalMerged = mergedProducts.map((p) => {
-              const custom = dbPhotos[p.product_id] || getAllCustomPhotosSync()[p.product_id];
-              if (custom && custom.image) {
-                return {
-                  ...p,
-                  image: custom.image,
-                  images: custom.images && custom.images.length > 0 ? custom.images : p.images
-                };
-              }
-              return p;
-            });
+            try {
+              localStorage.setItem('vinea_products', JSON.stringify(mergedProducts));
+            } catch {}
 
-            setProducts(finalMerged);
+            setProducts(mergedProducts);
           } else {
             // When backend is unavailable (e.g. static host/Vercel without Express),
             // ensure any photos from IndexedDB are actively applied
@@ -1101,6 +1110,13 @@ export const WineStoreProvider: React.FC<{ children: ReactNode }> = ({ children 
       reviews_count: 1
     };
 
+    if (newProduct.image) {
+      saveCustomPhoto(newId, {
+        image: newProduct.image,
+        images: newProduct.images || []
+      }).catch(err => console.warn('[PhotoStorage] write note:', err));
+    }
+
     try {
       let customMap: Record<string, { image?: string; images?: string[] }> = {};
       const saved = localStorage.getItem('vinea_product_custom_images');
@@ -1112,13 +1128,27 @@ export const WineStoreProvider: React.FC<{ children: ReactNode }> = ({ children 
       localStorage.setItem('vinea_product_custom_images', JSON.stringify(customMap));
     } catch {}
 
-    setProducts(prev => [newProduct, ...prev]);
+    setProducts(prev => {
+      const next = [newProduct, ...prev];
+      try {
+        localStorage.setItem('vinea_products', JSON.stringify(next));
+      } catch {}
+      return next;
+    });
     saveProductToSupabase(newProduct).catch(() => {});
     createProductApi(newProduct).catch((e: unknown) => console.warn('Product add note:', e));
     showToast(`Product "${newProduct.name}" added to catalog.`, 'success');
   };
 
   const updateProduct = (updated: Product) => {
+    // 1. Immediately update multi-tiered custom photo storage (Memory + LocalStorage + IndexedDB)
+    if (updated.image) {
+      saveCustomPhoto(updated.product_id, {
+        image: updated.image,
+        images: updated.images || []
+      }).catch(err => console.warn('[PhotoStorage] write note:', err));
+    }
+
     try {
       let customMap: Record<string, { image?: string; images?: string[] }> = {};
       const saved = localStorage.getItem('vinea_product_custom_images');
@@ -1130,13 +1160,22 @@ export const WineStoreProvider: React.FC<{ children: ReactNode }> = ({ children 
       localStorage.setItem('vinea_product_custom_images', JSON.stringify(customMap));
     } catch {}
 
-    setProducts(prev => prev.map(p => (p.product_id === updated.product_id ? updated : p)));
+    // 2. Update React products state and localStorage 'vinea_products' immediately
+    setProducts(prev => {
+      const next = prev.map(p => (p.product_id === updated.product_id ? updated : p));
+      try {
+        localStorage.setItem('vinea_products', JSON.stringify(next));
+      } catch {}
+      return next;
+    });
+
     saveProductToSupabase(updated).catch(() => {});
     updateProductApi(updated).catch((e: unknown) => console.warn('Product update note:', e));
     showToast(`Updated "${updated.name}".`, 'success');
   };
 
   const deleteProduct = (productId: string) => {
+    deleteCustomPhoto(productId).catch(() => {});
     try {
       const saved = localStorage.getItem('vinea_product_custom_images');
       if (saved) {
@@ -1147,7 +1186,13 @@ export const WineStoreProvider: React.FC<{ children: ReactNode }> = ({ children 
     } catch {}
 
     const prod = products.find(p => p.product_id === productId);
-    setProducts(prev => prev.filter(p => p.product_id !== productId));
+    setProducts(prev => {
+      const next = prev.filter(p => p.product_id !== productId);
+      try {
+        localStorage.setItem('vinea_products', JSON.stringify(next));
+      } catch {}
+      return next;
+    });
     deleteProductFromSupabase(productId).catch(() => {});
     deleteProductApi(productId).catch((e: unknown) => console.warn('Product delete note:', e));
     showToast(`Deleted "${prod?.name || 'Wine'}" from catalog.`, 'info');

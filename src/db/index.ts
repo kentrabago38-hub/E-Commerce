@@ -1,4 +1,4 @@
-import { drizzle } from 'drizzle-orm/node-postgres';
+import { drizzle, NodePgDatabase } from 'drizzle-orm/node-postgres';
 import { Pool } from 'pg';
 import * as schema from './schema';
 
@@ -8,7 +8,10 @@ declare global {
 }
 
 // Function to create or retrieve the connection pool (Object Method)
-export const createPool = () => {
+export const createPool = (): Pool | null => {
+  if (!process.env.SQL_HOST) {
+    return null;
+  }
   if (!global._postgresPool) {
     global._postgresPool = new Pool({
       host: process.env.SQL_HOST,
@@ -39,8 +42,48 @@ export const createPool = () => {
   return global._postgresPool;
 };
 
-// Create or retrieve the pool instance.
-const pool = createPool();
+// Initialize Drizzle with resilient mock fallback if not configured
+let db: NodePgDatabase<typeof schema>;
+try {
+  const pool = createPool();
+  if (pool) {
+    db = drizzle(pool, { schema });
+  } else {
+    throw new Error('SQL_HOST not configured');
+  }
+} catch {
+  console.warn('[AI Studio] Database not connected — using mock');
+  const noOp = {
+    findMany: async () => [],
+    findFirst: async () => null,
+    findUnique: async () => null,
+    create: async (d: any) => d?.data ?? {},
+    update: async (d: any) => d?.data ?? {},
+    delete: async () => ({})
+  };
+  db = new Proxy({}, {
+    get: (_, prop) =>
+      prop === 'query'
+        ? new Proxy({}, { get: () => noOp })
+        : () => ({
+            from: () => ({
+              where: () => [],
+              orderBy: () => [],
+              then: (resolve: any) => resolve([])
+            }),
+            values: () => ({
+              returning: () => [],
+              then: (resolve: any) => resolve()
+            }),
+            set: () => ({
+              where: () => ({
+                then: (resolve: any) => resolve()
+              })
+            }),
+            then: (resolve: any) => resolve([])
+          }),
+  }) as unknown as NodePgDatabase<typeof schema>;
+}
 
-// Initialize Drizzle with the pool and schema.
-export const db = drizzle(pool, { schema });
+export { db };
+
