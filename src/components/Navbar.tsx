@@ -17,6 +17,7 @@ import {
 } from 'lucide-react';
 import { VineaLogoIcon } from './VineaLogo';
 import { getWineImageUrl, handleImageError } from '../utils/imageUtils';
+import { loadUserAvatarFromDb } from '../utils/customPhotoStorage';
 
 export const Navbar: React.FC = () => {
   const {
@@ -41,6 +42,24 @@ export const Navbar: React.FC = () => {
   const [megaMenuOpen, setMegaMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const megaMenuTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const [avatarImgError, setAvatarImgError] = useState(false);
+  const [fallbackAvatar, setFallbackAvatar] = useState<string | null>(null);
+
+  useEffect(() => {
+    setAvatarImgError(false);
+    setFallbackAvatar(null);
+  }, [user?.avatar, user?.user_id]);
+
+  const handleAvatarLoadError = async () => {
+    if (!fallbackAvatar && user) {
+      const stored = await loadUserAvatarFromDb(user.user_id, user.email).catch(() => null);
+      if (stored?.fallbackDataUrl && stored.fallbackDataUrl !== user.avatar) {
+        setFallbackAvatar(stored.fallbackDataUrl);
+        return;
+      }
+    }
+    setAvatarImgError(true);
+  };
 
   // Secret 5-click easter egg on the brand logo for the owner to access admin
   const [logoClickCount, setLogoClickCount] = useState(0);
@@ -441,15 +460,13 @@ export const Navbar: React.FC = () => {
                 aria-label="Customer Account Profile"
                 title={user ? `Signed in as ${user.name}` : 'Sign In / Register (21+)'}
               >
-                {user?.avatar ? (
+                {user && (fallbackAvatar || user.avatar) && !avatarImgError ? (
                   <img
-                    src={user.avatar}
+                    src={fallbackAvatar || user.avatar}
                     alt={user.name}
                     className="w-5 h-5 sm:w-6 sm:h-6 rounded-full object-cover border border-[#D5B15C]"
                     referrerPolicy="no-referrer"
-                    onError={(e) => {
-                      e.currentTarget.style.display = 'none';
-                    }}
+                    onError={handleAvatarLoadError}
                   />
                 ) : (
                   <UserIcon className="w-5 h-5" />
@@ -615,12 +632,13 @@ export const Navbar: React.FC = () => {
               className="p-4 rounded-2xl bg-gradient-to-r from-[#210D12] via-[#160A0D] to-[#210D12] border border-[#D5B15C]/40 mb-2 flex items-center justify-between cursor-pointer hover:border-[#D5B15C] transition-colors shadow-lg"
             >
               <div className="flex items-center gap-3">
-                {user?.avatar ? (
+                {user && (fallbackAvatar || user.avatar) && !avatarImgError ? (
                   <img
-                    src={user.avatar}
+                    src={fallbackAvatar || user.avatar}
                     alt={user.name}
                     className="w-10 h-10 rounded-full object-cover border border-[#D5B15C]"
-                    onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                    referrerPolicy="no-referrer"
+                    onError={handleAvatarLoadError}
                   />
                 ) : (
                   <div className="w-10 h-10 rounded-full bg-[#861F32] text-[#D5B15C] flex items-center justify-center font-bold text-sm border border-[#D5B15C]/60 shadow-md">

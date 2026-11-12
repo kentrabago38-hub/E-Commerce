@@ -233,6 +233,155 @@ export async function optimizeImageClientSide(
   });
 }
 
+const CLIENT_SESSION_ID_KEY = 'vinea_sid';
+
+export function getClientSessionId(): string | null {
+  if (typeof window === 'undefined') return null;
+  try {
+    return localStorage.getItem(CLIENT_SESSION_ID_KEY) || sessionStorage.getItem(CLIENT_SESSION_ID_KEY);
+  } catch {
+    return null;
+  }
+}
+
+export function getOrCreateClientSessionId(): string {
+  const existing = getClientSessionId();
+  if (existing) return existing;
+
+  const generated =
+    typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function'
+      ? crypto.randomUUID()
+      : `sid_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
+
+  if (typeof window !== 'undefined') {
+    try {
+      localStorage.setItem(CLIENT_SESSION_ID_KEY, generated);
+    } catch {}
+    try {
+      sessionStorage.setItem(CLIENT_SESSION_ID_KEY, generated);
+    } catch {}
+  }
+  return generated;
+}
+
+export async function fetchSessionApi(): Promise<User | null> {
+  try {
+    const sid = getClientSessionId();
+    const headers: Record<string, string> = {};
+    if (sid) headers['x-vinea-session-id'] = sid;
+    const res = await fetch('/api/session', {
+      headers,
+      credentials: 'include'
+    });
+    if (!res.ok) return null;
+    const contentType = res.headers.get('content-type') || '';
+    if (!contentType.includes('application/json')) return null;
+    const data = await res.json();
+    if (data?.authenticated && data.user) {
+      return data.user as User;
+    }
+    return null;
+  } catch {
+    return null;
+  }
+}
+
+export async function saveSessionApi(user: User): Promise<void> {
+  try {
+    const sid = getOrCreateClientSessionId();
+    const res = await fetch('/api/session', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-vinea-session-id': sid
+      },
+      credentials: 'include',
+      body: JSON.stringify({ user })
+    });
+    if (res.ok) {
+      const data = await res.json().catch(() => null);
+      if (data?.sessionId && typeof window !== 'undefined') {
+        try {
+          localStorage.setItem(CLIENT_SESSION_ID_KEY, data.sessionId);
+        } catch {}
+        try {
+          sessionStorage.setItem(CLIENT_SESSION_ID_KEY, data.sessionId);
+        } catch {}
+      }
+    }
+  } catch (err) {
+    console.warn('[apiClient] POST /api/session notice:', err);
+  }
+}
+
+export async function clearSessionApi(): Promise<void> {
+  try {
+    const sid = getClientSessionId();
+    const headers: Record<string, string> = {};
+    if (sid) headers['x-vinea-session-id'] = sid;
+    await fetch('/api/session', {
+      method: 'DELETE',
+      headers,
+      credentials: 'include'
+    });
+  } catch (err) {
+    console.warn('[apiClient] DELETE /api/session notice:', err);
+  }
+}
+
+/**
+ * Compresses a user profile avatar to a compact 400px JPEG (~15-35KB).
+ */
+export async function optimizeAvatarClientSide(fileOrDataUrl: File | string): Promise<string> {
+  return optimizeImageClientSide(fileOrDataUrl, 400, 0.84);
+}
+
+/**
+ * Uploads an avatar image to the server and also returns a compact client-side dataUrl fallback
+ * for IndexedDB persistence across ephemeral restarts or offline refreshes.
+ */
+export async function uploadAvatarApi(
+  fileOrDataUrl: File | string,
+  filename?: string
+): Promise<{ url: string; dataUrl: string }> {
+  if (typeof fileOrDataUrl === 'string' && (fileOrDataUrl.startsWith('/images/') || fileOrDataUrl.startsWith('http'))) {
+    return { url: fileOrDataUrl, dataUrl: fileOrDataUrl };
+  }
+
+  let fname = filename || 'user_avatar';
+  if (fileOrDataUrl instanceof File) {
+    fname = fileOrDataUrl.name;
+  }
+
+  const compactDataUrl = await optimizeAvatarClientSide(fileOrDataUrl);
+
+  try {
+    const res = await fetch('/api/upload', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ image: compactDataUrl, filename: fname }),
+    });
+
+    if (!res.ok) {
+      throw new Error(`Upload server responded with HTTP ${res.status}`);
+    }
+
+    const contentType = res.headers.get('content-type') || '';
+    if (!contentType.includes('application/json')) {
+      throw new Error('Upload response was not JSON');
+    }
+
+    const data = await res.json();
+    if (data.url && typeof data.url === 'string') {
+      return { url: data.url, dataUrl: compactDataUrl };
+    }
+    throw new Error('Upload server did not return a valid file URL');
+  } catch {
+    console.info('[apiClient] Backend avatar upload fallback: using compact client-side photo data');
+    return { url: compactDataUrl, dataUrl: compactDataUrl };
+  }
+}
+
 /**
  * Upload an image (File or Base64 data URL) to the backend server.
  * Returns the permanent public image URL (e.g. /images/uploads/wine_...) or optimized persistent data URL.

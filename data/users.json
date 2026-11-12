@@ -1,0 +1,51 @@
+[
+  {
+    "user_id": "usr-kent-rabago",
+    "name": "Kent Jorich Rabago",
+    "email": "kentrabago38@gmail.com",
+    "phone": "09178463201",
+    "password": "KentRabago2026!",
+    "role": "customer",
+    "avatar": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80",
+    "member_since": "Nov 2024",
+    "date_of_birth": "1996-08-14",
+    "favorite_davao_branch": "VÍNEA Davao Flagship Cellar (Lanang)",
+    "membership_tier": "Sommelier Reserve",
+    "loyalty_points": 9450,
+    "lifetime_points": 14200,
+    "bio": "Sommelier and fine wine collector based in Davao City. Collecting Left Bank Bordeaux, Super Tuscans, and rare vintage Champagne.",
+    "delivery_instructions": "Handle with extreme cold-chain care. Ring doorbell and deliver to front concierge.",
+    "preferred_wine_types": [
+      "Red",
+      "Sparkling"
+    ],
+    "flavor_preference": "Bold, structured, mineral-driven with velvet tannins",
+    "saved_addresses": [
+      {
+        "street": "Penthouse Suite 14, Lanang Premiere Luxury Residences, J.P. Laurel Avenue",
+        "city": "Davao City",
+        "state": "Davao del Sur",
+        "postalCode": "8000",
+        "country": "Philippines"
+      }
+    ],
+    "rewards_history": [
+      {
+        "id": "hist-01",
+        "date": "Oct 28, 2026",
+        "title": "Sommelier Reserve Tier Elevation",
+        "description": "Unlocked Sommelier Reserve status with lifetime allocation perks and 2.0x points multiplier.",
+        "points": 5000,
+        "type": "bonus"
+      },
+      {
+        "id": "hist-02",
+        "date": "Nov 02, 2026",
+        "title": "Bordeaux Premier Cru Allocation",
+        "description": "Château Margaux & Sassicaia private cellar allocation order completed.",
+        "points": 4450,
+        "type": "order"
+      }
+    ]
+  }
+]

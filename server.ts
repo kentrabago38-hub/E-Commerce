@@ -2,6 +2,7 @@ import express, { Request, Response } from 'express';
 import path from 'path';
 import fs from 'fs';
 import { fileURLToPath } from 'url';
+import crypto from 'crypto';
 import * as dotenv from 'dotenv';
 import {
   getAllProducts,
@@ -69,6 +70,7 @@ const CATEGORIES_FILE = path.join(DATA_DIR, 'categories.json');
 const ORDERS_FILE = path.join(DATA_DIR, 'orders.json');
 const USERS_FILE = path.join(DATA_DIR, 'users.json');
 const REVIEWS_FILE = path.join(DATA_DIR, 'reviews.json');
+const SESSIONS_FILE = path.join(DATA_DIR, 'sessions.json');
 
 function loadJsonFile<T>(filePath: string, fallback: T): T {
   try {
@@ -76,6 +78,21 @@ function loadJsonFile<T>(filePath: string, fallback: T): T {
       const content = fs.readFileSync(filePath, 'utf-8');
       const parsed = JSON.parse(content);
       if (Array.isArray(fallback) && Array.isArray(parsed) && parsed.length > 0) {
+        return parsed as T;
+      }
+    }
+  } catch (err) {
+    console.warn(`[Storage] Failed to read ${filePath}:`, err);
+  }
+  return fallback;
+}
+
+function loadObjectJsonFile<T extends Record<string, any>>(filePath: string, fallback: T): T {
+  try {
+    if (fs.existsSync(filePath)) {
+      const content = fs.readFileSync(filePath, 'utf-8');
+      const parsed = JSON.parse(content);
+      if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
         return parsed as T;
       }
     }
@@ -99,6 +116,7 @@ let inMemoryCategories = loadJsonFile(CATEGORIES_FILE, [...INITIAL_CATEGORIES]);
 let inMemoryOrders = loadJsonFile(ORDERS_FILE, [...INITIAL_ORDERS]);
 let inMemoryUsers = loadJsonFile(USERS_FILE, [...INITIAL_REGISTERED_USERS]);
 let inMemoryReviews = loadJsonFile(REVIEWS_FILE, [...INITIAL_REVIEWS]);
+const inMemorySessions: Record<string, { user: any; updatedAt: number }> = loadObjectJsonFile(SESSIONS_FILE, {});
 
 // Ensure all catalog products from INITIAL_PRODUCTS are present in inMemoryProducts
 const existingProdIds = new Set(inMemoryProducts.map((p: any) => p.product_id));
@@ -130,6 +148,44 @@ if (!fs.existsSync(CATEGORIES_FILE)) saveJsonFile(CATEGORIES_FILE, inMemoryCateg
 if (!fs.existsSync(ORDERS_FILE)) saveJsonFile(ORDERS_FILE, inMemoryOrders);
 if (!fs.existsSync(USERS_FILE)) saveJsonFile(USERS_FILE, inMemoryUsers);
 if (!fs.existsSync(REVIEWS_FILE)) saveJsonFile(REVIEWS_FILE, inMemoryReviews);
+if (!fs.existsSync(SESSIONS_FILE)) saveJsonFile(SESSIONS_FILE, inMemorySessions);
+
+const SESSION_COOKIE_NAME = 'vinea_sid';
+
+function isDefaultAvatarUrl(url?: string): boolean {
+  return !url || url.includes('images.unsplash.com/photo-1534528741775-53994a69daeb');
+}
+
+function getSessionIdFromReq(req: Request): string | null {
+  const headerSid = req.headers['x-vinea-session-id'];
+  if (typeof headerSid === 'string' && headerSid.trim()) {
+    return headerSid.trim();
+  }
+  const cookieHeader = req.headers.cookie;
+  if (cookieHeader) {
+    const parts = cookieHeader.split(';');
+    for (const part of parts) {
+      const [rawKey, ...rawVal] = part.trim().split('=');
+      if (rawKey === SESSION_COOKIE_NAME) {
+        const val = decodeURIComponent(rawVal.join('=')).trim();
+        if (val) return val;
+      }
+    }
+  }
+  return null;
+}
+
+function buildSessionCookieHeader(req: Request, sid: string, maxAgeSeconds: number): string {
+  const isHttps = req.secure || req.headers['x-forwarded-proto'] === 'https';
+  const attrs = [
+    `${SESSION_COOKIE_NAME}=${encodeURIComponent(sid)}`,
+    'Path=/',
+    `Max-Age=${maxAgeSeconds}`,
+    'HttpOnly',
+    isHttps ? 'SameSite=None; Secure' : 'SameSite=Lax'
+  ];
+  return attrs.join('; ');
+}
 
 // High limit to handle high-resolution image uploads from cameras and phones
 app.use(express.json({ limit: '50mb' }));
@@ -326,17 +382,120 @@ app.post('/api/users', async (req: Request, res: Response) => {
     if (hasPostgres) {
       await upsertUserRecord(req.body);
     }
-    const idx = inMemoryUsers.findIndex((u) => u.user_id === req.body.user_id || u.email === req.body.email);
+    const reqEmail = req.body.email?.toLowerCase();
+    const idx = inMemoryUsers.findIndex(
+      (u) => u.user_id === req.body.user_id || (reqEmail && u.email?.toLowerCase() === reqEmail)
+    );
+    let savedUser = req.body;
     if (idx >= 0) {
-      inMemoryUsers[idx] = { ...inMemoryUsers[idx], ...req.body };
+      const existing = inMemoryUsers[idx];
+      const mergedAvatar = !isDefaultAvatarUrl(req.body.avatar)
+        ? req.body.avatar
+        : (!isDefaultAvatarUrl(existing.avatar) ? existing.avatar : (req.body.avatar || existing.avatar));
+      savedUser = { ...existing, ...req.body, avatar: mergedAvatar };
+      inMemoryUsers[idx] = savedUser;
     } else {
-      inMemoryUsers.push(req.body);
+      inMemoryUsers.push(savedUser);
     }
     saveJsonFile(USERS_FILE, inMemoryUsers);
-    res.json({ success: true, user: req.body });
+
+    // Keep any active sessions for this user synchronized
+    let sessionsUpdated = false;
+    for (const [sid, entry] of Object.entries(inMemorySessions)) {
+      if (
+        entry?.user &&
+        (entry.user.user_id === savedUser.user_id ||
+          (reqEmail && entry.user.email?.toLowerCase() === reqEmail))
+      ) {
+        inMemorySessions[sid] = { user: { ...entry.user, ...savedUser }, updatedAt: Date.now() };
+        sessionsUpdated = true;
+      }
+    }
+    if (sessionsUpdated) {
+      saveJsonFile(SESSIONS_FILE, inMemorySessions);
+    }
+
+    res.json({ success: true, user: savedUser });
   } catch (error: any) {
     console.error('API Error in POST /api/users:', error);
     res.status(500).json({ error: error.message || 'Failed to upsert user' });
+  }
+});
+
+// 5b. Durable Customer Session API (survives page refreshes & browser storage resets)
+app.get('/api/session', (req: Request, res: Response) => {
+  try {
+    const sid = getSessionIdFromReq(req);
+    if (!sid || !inMemorySessions[sid]?.user) {
+      return res.json({ authenticated: false, user: null });
+    }
+    const sessionUser = inMemorySessions[sid].user;
+    const sessionEmail = sessionUser.email?.toLowerCase();
+    const freshRecord = inMemoryUsers.find(
+      (u) => u.user_id === sessionUser.user_id || (sessionEmail && u.email?.toLowerCase() === sessionEmail)
+    );
+    const mergedAvatar = !isDefaultAvatarUrl(sessionUser.avatar)
+      ? sessionUser.avatar
+      : (!isDefaultAvatarUrl(freshRecord?.avatar) ? freshRecord?.avatar : (sessionUser.avatar || freshRecord?.avatar));
+    const mergedUser = freshRecord
+      ? { ...freshRecord, ...sessionUser, avatar: mergedAvatar }
+      : sessionUser;
+    return res.json({ authenticated: true, sessionId: sid, user: mergedUser });
+  } catch (error: any) {
+    console.warn('API Warning in GET /api/session:', error);
+    return res.json({ authenticated: false, user: null });
+  }
+});
+
+app.post('/api/session', (req: Request, res: Response) => {
+  try {
+    const userPayload = req.body?.user;
+    if (!userPayload || (!userPayload.user_id && !userPayload.email)) {
+      return res.status(400).json({ error: 'Valid user payload is required.' });
+    }
+    const sid = getSessionIdFromReq(req) || crypto.randomUUID();
+    inMemorySessions[sid] = {
+      user: userPayload,
+      updatedAt: Date.now()
+    };
+    saveJsonFile(SESSIONS_FILE, inMemorySessions);
+
+    // Also keep inMemoryUsers up to date
+    const userEmail = userPayload.email?.toLowerCase();
+    const idx = inMemoryUsers.findIndex(
+      (u) => u.user_id === userPayload.user_id || (userEmail && u.email?.toLowerCase() === userEmail)
+    );
+    if (idx >= 0) {
+      const existing = inMemoryUsers[idx];
+      const mergedAvatar = !isDefaultAvatarUrl(userPayload.avatar)
+        ? userPayload.avatar
+        : (!isDefaultAvatarUrl(existing.avatar) ? existing.avatar : (userPayload.avatar || existing.avatar));
+      inMemoryUsers[idx] = { ...existing, ...userPayload, avatar: mergedAvatar };
+    } else {
+      inMemoryUsers.push(userPayload);
+    }
+    saveJsonFile(USERS_FILE, inMemoryUsers);
+
+    res.setHeader('Set-Cookie', buildSessionCookieHeader(req, sid, 30 * 24 * 60 * 60));
+    return res.json({ success: true, sessionId: sid, user: userPayload });
+  } catch (error: any) {
+    console.error('API Error in POST /api/session:', error);
+    return res.status(500).json({ error: error.message || 'Failed to persist session' });
+  }
+});
+
+app.delete('/api/session', (req: Request, res: Response) => {
+  try {
+    const sid = getSessionIdFromReq(req);
+    if (sid && inMemorySessions[sid]) {
+      delete inMemorySessions[sid];
+      saveJsonFile(SESSIONS_FILE, inMemorySessions);
+    }
+    res.setHeader('Set-Cookie', buildSessionCookieHeader(req, '', 0));
+    return res.json({ success: true });
+  } catch (error: any) {
+    console.error('API Error in DELETE /api/session:', error);
+    return res.status(500).json({ error: error.message || 'Failed to clear session' });
   }
 });
 

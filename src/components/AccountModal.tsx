@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useWineStore } from '../context/WineStoreContext';
 import { OrderStatus, DeliveryAddress, WineType } from '../types/wine';
 import { formatPeso } from '../utils/formatCurrency';
@@ -34,7 +34,8 @@ import {
 import { DAVAO_BRANCHES } from '../data/mockData';
 import { VineaRewardsSection } from './VineaRewardsSection';
 import { getWineImageUrl, handleImageError } from '../utils/imageUtils';
-import { uploadImageApi } from '../services/apiClient';
+import { uploadAvatarApi } from '../services/apiClient';
+import { loadUserAvatarFromDb } from '../utils/customPhotoStorage';
 import { validatePhone11Digit, validateAddress } from '../utils/validation';
 import { downloadVineaReceipt } from '../utils/receiptGenerator';
 import { OrderTracking } from './OrderTracking';
@@ -130,6 +131,35 @@ export const AccountModal: React.FC = () => {
   const [showAddAddress, setShowAddAddress] = useState(false);
   const [profilePhoneError, setProfilePhoneError] = useState('');
   const [addressError, setAddressError] = useState('');
+  const [avatarFallback, setAvatarFallback] = useState<string | null>(null);
+  const [avatarError, setAvatarError] = useState(false);
+
+  useEffect(() => {
+    setAvatarError(false);
+    setAvatarFallback(null);
+    if (user) {
+      setEditName(user.name || '');
+      setEditPhone(user.phone || '');
+      setEditDob(user.date_of_birth || '');
+      setEditBranch(user.favorite_davao_branch || DAVAO_BRANCHES[0]?.name || '');
+      setEditBio(user.bio || '');
+      setEditDeliveryNotes(user.delivery_instructions || '');
+      setSelectedAvatarUrl(user.avatar || AVATAR_PRESETS[0].url);
+      setPreferredTypes(user.preferred_wine_types || ['Red']);
+      setFlavorPreference(user.flavor_preference || 'Dry, bold reds with oak complexity');
+    }
+  }, [user, isAccountOpen]);
+
+  const handleAvatarImgError = async () => {
+    if (!avatarFallback && user) {
+      const stored = await loadUserAvatarFromDb(user.user_id, user.email).catch(() => null);
+      if (stored?.fallbackDataUrl && stored.fallbackDataUrl !== (selectedAvatarUrl || user.avatar)) {
+        setAvatarFallback(stored.fallbackDataUrl);
+        return;
+      }
+    }
+    setAvatarError(true);
+  };
 
   if (!isAccountOpen) return null;
 
@@ -213,7 +243,15 @@ export const AccountModal: React.FC = () => {
   };
 
   const handleSaveAvatar = () => {
-    updateUserProfile({ avatar: selectedAvatarUrl });
+    const avatarToSave = customAvatarInput.trim() || selectedAvatarUrl;
+    if (!avatarToSave) return;
+    setAvatarError(false);
+    setAvatarFallback(null);
+    setSelectedAvatarUrl(avatarToSave);
+    updateUserProfile({ avatar: avatarToSave });
+    if (customAvatarInput.trim()) {
+      setCustomAvatarInput('');
+    }
   };
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -225,13 +263,17 @@ export const AccountModal: React.FC = () => {
       }
       try {
         showToast('Uploading profile image...', 'info');
-        const permanentUrl = await uploadImageApi(file, file.name);
-        setSelectedAvatarUrl(permanentUrl);
-        updateUserProfile({ avatar: permanentUrl });
+        const { url, dataUrl } = await uploadAvatarApi(file, file.name);
+        setAvatarError(false);
+        setAvatarFallback(dataUrl);
+        setSelectedAvatarUrl(url);
+        updateUserProfile({ avatar: url }, { fallbackAvatarDataUrl: dataUrl, silent: true });
         showToast('Profile photo uploaded and saved successfully!', 'success');
       } catch (err) {
         console.error('Avatar upload failed:', err);
         showToast('Failed to upload image. Please try another.', 'error');
+      } finally {
+        e.target.value = '';
       }
     }
   };
@@ -332,10 +374,11 @@ export const AccountModal: React.FC = () => {
             {/* User Profile Card */}
             <div className="flex items-center gap-3.5 mb-6 pb-6 border-b border-[#392126]">
               <div className="relative group shrink-0">
-                {user.avatar ? (
+                {(avatarFallback || user.avatar) && !avatarError ? (
                   <img
-                    src={user.avatar}
+                    src={avatarFallback || user.avatar}
                     alt={user.name}
+                    onError={handleAvatarImgError}
                     className="w-14 h-14 rounded-full object-cover border-2 border-[#D5B15C]/60 shadow-lg"
                     referrerPolicy="no-referrer"
                   />
@@ -724,8 +767,9 @@ export const AccountModal: React.FC = () => {
               {/* Current Preview */}
               <div className="p-5 rounded-xl bg-[#100809] border border-[#392126] mb-6 flex items-center gap-5">
                 <img
-                  src={selectedAvatarUrl || user.avatar}
+                  src={avatarFallback || selectedAvatarUrl || user.avatar}
                   alt="Avatar Preview"
+                  onError={handleAvatarImgError}
                   className="w-20 h-20 rounded-full object-cover border-2 border-[#D5B15C] shadow-xl"
                   referrerPolicy="no-referrer"
                 />

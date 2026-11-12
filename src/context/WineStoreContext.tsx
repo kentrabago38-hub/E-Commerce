@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, useRef, ReactNode } from 'react';
 import { Product, Category, CartItem, Order, User, Review, GuideArticle, OrderStatus, DeliveryAddress, LoyaltyHistoryItem } from '../types/wine';
 import {
   INITIAL_CATEGORIES,
@@ -25,7 +25,10 @@ import {
   fetchUsersApi,
   saveUserApi,
   fetchReviewsApi,
-  createReviewApi
+  createReviewApi,
+  fetchSessionApi,
+  saveSessionApi,
+  clearSessionApi
 } from '../services/apiClient';
 import { isSupabaseConfigured } from '../lib/supabase';
 import {
@@ -61,7 +64,14 @@ import {
   saveCustomPhoto,
   deleteCustomPhoto,
   getAllCustomPhotosSync,
-  loadAllCustomPhotosFromDb
+  loadAllCustomPhotosFromDb,
+  safeSaveCurrentUserToLocalStorage,
+  setExplicitLogoutFlag,
+  isExplicitlyLoggedOut,
+  saveCurrentUserToDb,
+  loadCurrentUserFromDb,
+  saveUserAvatarToDb,
+  loadUserAvatarFromDb
 } from '../utils/customPhotoStorage';
 
 
@@ -141,7 +151,10 @@ interface WineStoreContextType {
     saved_addresses?: DeliveryAddress[];
   }) => { success: boolean; error?: string };
   logoutCustomer: () => void;
-  updateUserProfile: (updates: Partial<User>) => { success: boolean; error?: string };
+  updateUserProfile: (
+    updates: Partial<User>,
+    options?: { fallbackAvatarDataUrl?: string; silent?: boolean }
+  ) => { success: boolean; error?: string };
   changeCustomerPassword: (currentPassword: string, newPassword: string) => { success: boolean; error?: string };
   redeemPerk: (perkId: string, pointCost: number, perkTitle: string) => { success: boolean; code?: string; message: string };
   requireAuthForAction: (reason?: string) => boolean;
@@ -197,6 +210,76 @@ interface WineStoreContextType {
 }
 
 const WineStoreContext = createContext<WineStoreContextType | undefined>(undefined);
+
+const DEFAULT_AVATAR_MARKER = 'images.unsplash.com/photo-1534528741775-53994a69daeb';
+
+function isDefaultAvatarUrl(url?: string | null): boolean {
+  if (!url || typeof url !== 'string' || !url.trim()) return true;
+  return url.includes(DEFAULT_AVATAR_MARKER);
+}
+
+function getPerUserAvatarFromLocalStorage(email?: string, userId?: string): string | undefined {
+  if (typeof window === 'undefined' || !window.localStorage) return undefined;
+  try {
+    const byEmail = email ? localStorage.getItem(`vinea_user_avatar_${email.toLowerCase().trim()}`) : null;
+    if (byEmail && !isDefaultAvatarUrl(byEmail)) return byEmail;
+    const byId = userId ? localStorage.getItem(`vinea_user_avatar_${userId}`) : null;
+    if (byId && !isDefaultAvatarUrl(byId)) return byId;
+    return byEmail || byId || undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+function resolveBestAvatar(
+  primary?: string,
+  secondary?: string,
+  email?: string,
+  userId?: string
+): string | undefined {
+  if (primary && !isDefaultAvatarUrl(primary)) return primary;
+  if (secondary && !isDefaultAvatarUrl(secondary)) return secondary;
+  const lsAvatar = getPerUserAvatarFromLocalStorage(email, userId);
+  if (lsAvatar && !isDefaultAvatarUrl(lsAvatar)) return lsAvatar;
+  return primary || secondary || lsAvatar;
+}
+
+function safeSaveProductsToLocalStorage(list: Product[]): void {
+  if (typeof window === 'undefined' || !window.localStorage) return;
+  try {
+    const compact = list.map((p) => {
+      const next = { ...p };
+      if (typeof next.image === 'string' && next.image.startsWith('data:') && next.image.length > 60000) {
+        next.image = '';
+      }
+      if (Array.isArray(next.images)) {
+        next.images = next.images.filter((img) => !(typeof img === 'string' && img.startsWith('data:') && img.length > 60000));
+      }
+      return next;
+    });
+    localStorage.setItem('vinea_products', JSON.stringify(compact));
+  } catch (e) {
+    console.warn('[ProductsStorage] LocalStorage cache write skipped:', e);
+  }
+}
+
+function safeSaveUsersToLocalStorage(list: User[]): void {
+  if (typeof window === 'undefined' || !window.localStorage) return;
+  try {
+    const compact = list.map((u) => {
+      if (typeof u.avatar === 'string' && u.avatar.startsWith('data:') && u.avatar.length > 50000) {
+        return { ...u, avatar: undefined };
+      }
+      return u;
+    });
+    localStorage.setItem('vinea_registered_users', JSON.stringify(compact));
+  } catch (e) {
+    console.warn('[UsersStorage] LocalStorage cache write skipped:', e);
+  }
+}
+
+const VALID_NAV_TABS: NavTab[] = ['home', 'shop', 'red', 'white', 'rose', 'sparkling', 'collections', 'branches', 'about', 'guide', 'account'];
+const VALID_ACCOUNT_SUB_TABS = ['orders', 'tracking', 'rewards', 'profile', 'avatar', 'password', 'preferences', 'wishlist', 'addresses'] as const;
 
 export const WineStoreProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   // 1. Storage hydration
@@ -338,18 +421,14 @@ export const WineStoreProvider: React.FC<{ children: ReactNode }> = ({ children 
 
   const [user, setUser] = useState<User | null>(() => {
     try {
+      if (isExplicitlyLoggedOut()) return null;
       const saved = localStorage.getItem('vinea_current_user');
       if (saved) {
         const parsed = JSON.parse(saved);
         if (parsed && typeof parsed === 'object') {
-          // Restore and preserve user's avatar/profile photo across browser sessions
-          const backupAvatar =
-            parsed.avatar ||
-            localStorage.getItem(`vinea_user_avatar_${parsed.email?.toLowerCase()}`) ||
-            localStorage.getItem(`vinea_user_avatar_${parsed.user_id}`) ||
-            localStorage.getItem('vinea_saved_avatar');
-          if (backupAvatar) {
-            parsed.avatar = backupAvatar;
+          const bestAvatar = resolveBestAvatar(parsed.avatar, undefined, parsed.email, parsed.user_id);
+          if (bestAvatar) {
+            parsed.avatar = bestAvatar;
           }
           return parsed;
         }
@@ -360,10 +439,31 @@ export const WineStoreProvider: React.FC<{ children: ReactNode }> = ({ children 
     }
   });
 
+  const userRef = useRef<User | null>(user);
+  userRef.current = user;
+
+  const persistActiveUserSession = (activeUser: User) => {
+    setExplicitLogoutFlag(false);
+    safeSaveCurrentUserToLocalStorage(activeUser);
+    saveCurrentUserToDb(activeUser).catch(() => {});
+    saveSessionApi(activeUser).catch(() => {});
+    if (activeUser.avatar && !isDefaultAvatarUrl(activeUser.avatar)) {
+      saveUserAvatarToDb(activeUser.user_id, activeUser.email, activeUser.avatar).catch(() => {});
+    }
+  };
+
   const [isAuthModalOpen, setIsAuthModalOpen] = useState<boolean>(false);
   const [authModalMode, setAuthModalMode] = useState<'login' | 'register'>('login');
   const [authRedirectReason, setAuthRedirectReason] = useState<string | null>(null);
-  const [accountActiveSubTab, setAccountActiveSubTab] = useState<'orders' | 'tracking' | 'rewards' | 'profile' | 'avatar' | 'password' | 'preferences' | 'wishlist' | 'addresses'>('orders');
+  const [accountActiveSubTab, setAccountActiveSubTab] = useState<'orders' | 'tracking' | 'rewards' | 'profile' | 'avatar' | 'password' | 'preferences' | 'wishlist' | 'addresses'>(() => {
+    try {
+      const saved = sessionStorage.getItem('vinea_account_sub_tab') as any;
+      if (saved && (VALID_ACCOUNT_SUB_TABS as readonly string[]).includes(saved)) {
+        return saved;
+      }
+    } catch {}
+    return 'orders';
+  });
 
   const openWishlist = () => {
     setAccountActiveSubTab('wishlist');
@@ -382,7 +482,15 @@ export const WineStoreProvider: React.FC<{ children: ReactNode }> = ({ children 
   const [underageBlocked, setUnderageBlocked] = useState<boolean>(false);
 
   // App UI state
-  const [activeTab, setActiveTab] = useState<NavTab>('home');
+  const [activeTab, setActiveTab] = useState<NavTab>(() => {
+    try {
+      const saved = sessionStorage.getItem('vinea_active_tab') as NavTab | null;
+      if (saved && VALID_NAV_TABS.includes(saved)) {
+        return saved;
+      }
+    } catch {}
+    return 'home';
+  });
   const [isAdminMode, setIsAdminMode] = useState<boolean>(false);
 
   const checkAdminRoute = (): boolean => {
@@ -590,9 +698,7 @@ export const WineStoreProvider: React.FC<{ children: ReactNode }> = ({ children 
               mergedProducts.push(...missingFromCatalog);
             }
 
-            try {
-              localStorage.setItem('vinea_products', JSON.stringify(mergedProducts));
-            } catch {}
+            safeSaveProductsToLocalStorage(mergedProducts);
 
             setProducts(mergedProducts);
           } else {
@@ -618,30 +724,91 @@ export const WineStoreProvider: React.FC<{ children: ReactNode }> = ({ children 
           if (pgOrders && pgOrders.length > 0) {
             setOrders(pgOrders);
           }
-          if (pgUsers && pgUsers.length > 0) {
-            const mergedUsers = pgUsers.map(pu => {
-              const savedAvatar =
-                pu.avatar ||
-                localStorage.getItem(`vinea_user_avatar_${pu.email.toLowerCase()}`) ||
-                localStorage.getItem(`vinea_user_avatar_${pu.user_id}`);
-              return savedAvatar ? { ...pu, avatar: savedAvatar } : pu;
-            });
-            setRegisteredUsers(mergedUsers);
 
-            // Re-merge current user session so their avatar and details remain intact
-            if (user) {
-              const currentMatch = mergedUsers.find(
-                mu => mu.user_id === user.user_id || mu.email.toLowerCase() === user.email.toLowerCase()
-              );
-              if (currentMatch) {
-                const preservedAvatar = user.avatar || currentMatch.avatar || localStorage.getItem('vinea_saved_avatar');
-                if (preservedAvatar && preservedAvatar !== currentMatch.avatar) {
-                  setUser({ ...currentMatch, avatar: preservedAvatar });
-                }
+          // Restore active user session from IndexedDB or backend /api/session if localStorage was empty/evicted
+          if (!isExplicitlyLoggedOut()) {
+            const [dbSessionUser, apiSessionUser] = await Promise.all([
+              loadCurrentUserFromDb<User>().catch(() => null),
+              fetchSessionApi().catch(() => null)
+            ]);
+
+            if (!isMounted) return;
+
+            if (!userRef.current) {
+              const recovered = apiSessionUser || dbSessionUser;
+              if (recovered) {
+                const storedAvatar = await loadUserAvatarFromDb(recovered.user_id, recovered.email).catch(() => null);
+                const bestAvatar = resolveBestAvatar(
+                  storedAvatar?.avatar && !isDefaultAvatarUrl(storedAvatar.avatar) ? storedAvatar.avatar : recovered.avatar,
+                  recovered.avatar,
+                  recovered.email,
+                  recovered.user_id
+                );
+                const restoredUser: User = bestAvatar ? { ...recovered, avatar: bestAvatar } : recovered;
+                userRef.current = restoredUser;
+                setUser(restoredUser);
+                safeSaveCurrentUserToLocalStorage(restoredUser);
+                saveCurrentUserToDb(restoredUser).catch(() => {});
+              }
+            } else {
+              // Ensure custom avatar from IndexedDB restores if current session has missing/default avatar
+              const activeUser = userRef.current;
+              const storedAvatar = await loadUserAvatarFromDb(activeUser.user_id, activeUser.email).catch(() => null);
+              if (storedAvatar?.avatar && !isDefaultAvatarUrl(storedAvatar.avatar) && isDefaultAvatarUrl(activeUser.avatar)) {
+                const hydrated = { ...activeUser, avatar: storedAvatar.avatar };
+                userRef.current = hydrated;
+                setUser(hydrated);
+                persistActiveUserSession(hydrated);
+              } else {
+                // Keep backend & IndexedDB sessions warm for future refreshes
+                saveCurrentUserToDb(activeUser).catch(() => {});
+                saveSessionApi(activeUser).catch(() => {});
               }
             }
           }
-          if (pgReviews && pgReviews.length > 0) {
+
+          if (pgUsers && pgUsers.length > 0 && isMounted) {
+            setRegisteredUsers(prev => {
+              const prevByEmail = new Map(prev.map(u => [u.email.toLowerCase(), u]));
+              return pgUsers.map(pu => {
+                const localExisting = prevByEmail.get(pu.email.toLowerCase());
+                const bestAvatar = resolveBestAvatar(
+                  localExisting?.avatar,
+                  pu.avatar,
+                  pu.email,
+                  pu.user_id
+                );
+                return bestAvatar ? { ...pu, avatar: bestAvatar } : pu;
+              });
+            });
+
+            // Non-destructive sync with active customer session (never clobber custom avatar or newer local edits)
+            const activeUser = userRef.current;
+            if (activeUser) {
+              const currentMatch = pgUsers.find(
+                mu => mu.user_id === activeUser.user_id || mu.email.toLowerCase() === activeUser.email.toLowerCase()
+              );
+              const storedAvatar = await loadUserAvatarFromDb(activeUser.user_id, activeUser.email).catch(() => null);
+              const customDbAvatar = storedAvatar?.avatar && !isDefaultAvatarUrl(storedAvatar.avatar) ? storedAvatar.avatar : undefined;
+              const preservedAvatar = resolveBestAvatar(
+                activeUser.avatar,
+                customDbAvatar || currentMatch?.avatar,
+                activeUser.email,
+                activeUser.user_id
+              );
+
+              if (preservedAvatar && preservedAvatar !== activeUser.avatar && isMounted) {
+                const updatedActive = { ...activeUser, avatar: preservedAvatar };
+                userRef.current = updatedActive;
+                setUser(updatedActive);
+                persistActiveUserSession(updatedActive);
+              } else if (currentMatch && preservedAvatar && isDefaultAvatarUrl(currentMatch.avatar) && !isDefaultAvatarUrl(preservedAvatar)) {
+                // Server had default placeholder while client has custom avatar; sync custom avatar back up
+                saveUserApi({ ...activeUser, avatar: preservedAvatar }).catch(() => {});
+              }
+            }
+          }
+          if (pgReviews && pgReviews.length > 0 && isMounted) {
             setReviews(pgReviews);
           }
         }
@@ -651,13 +818,17 @@ export const WineStoreProvider: React.FC<{ children: ReactNode }> = ({ children 
           const remoteUsers = await fetchUsersFromSupabase().catch(() => null);
           if (remoteUsers && remoteUsers.length > 0 && isMounted) {
             setRegisteredUsers(prev => {
+              const prevByEmail = new Map(prev.map(u => [u.email.toLowerCase(), u]));
               const map = new Map<string, User>();
               remoteUsers.forEach(u => {
-                const savedAvatar =
-                  u.avatar ||
-                  localStorage.getItem(`vinea_user_avatar_${u.email.toLowerCase()}`) ||
-                  localStorage.getItem(`vinea_user_avatar_${u.user_id}`);
-                map.set(u.email.toLowerCase(), savedAvatar ? { ...u, avatar: savedAvatar } : u);
+                const localExisting = prevByEmail.get(u.email.toLowerCase());
+                const bestAvatar = resolveBestAvatar(
+                  localExisting?.avatar,
+                  u.avatar,
+                  u.email,
+                  u.user_id
+                );
+                map.set(u.email.toLowerCase(), bestAvatar ? { ...u, avatar: bestAvatar } : u);
               });
               prev.forEach(u => {
                 if (!map.has(u.email.toLowerCase())) {
@@ -761,13 +932,9 @@ export const WineStoreProvider: React.FC<{ children: ReactNode }> = ({ children 
     return () => window.removeEventListener('hashchange', handleHash);
   }, []);
 
-  // Sync to localStorage
+  // Sync to localStorage & sessionStorage cleanly
   useEffect(() => {
-    try {
-      localStorage.setItem('vinea_products', JSON.stringify(products));
-    } catch (e) {
-      console.error(e);
-    }
+    safeSaveProductsToLocalStorage(products);
   }, [products]);
 
   useEffect(() => {
@@ -817,24 +984,29 @@ export const WineStoreProvider: React.FC<{ children: ReactNode }> = ({ children 
   }, [reviews]);
 
   useEffect(() => {
-    try {
-      localStorage.setItem('vinea_registered_users', JSON.stringify(registeredUsers));
-    } catch (e) {
-      console.error(e);
-    }
+    safeSaveUsersToLocalStorage(registeredUsers);
   }, [registeredUsers]);
 
   useEffect(() => {
-    try {
-      if (user) {
-        localStorage.setItem('vinea_current_user', JSON.stringify(user));
-      } else {
-        localStorage.removeItem('vinea_current_user');
-      }
-    } catch (e) {
-      console.error(e);
+    userRef.current = user;
+    if (user) {
+      safeSaveCurrentUserToLocalStorage(user);
     }
   }, [user]);
+
+  useEffect(() => {
+    try {
+      if (activeTab && activeTab !== 'admin') {
+        sessionStorage.setItem('vinea_active_tab', activeTab);
+      }
+    } catch {}
+  }, [activeTab]);
+
+  useEffect(() => {
+    try {
+      sessionStorage.setItem('vinea_account_sub_tab', accountActiveSubTab);
+    } catch {}
+  }, [accountActiveSubTab]);
 
   // Toast helper
   const showToast = (message: string, type: 'success' | 'info' | 'error' = 'success') => {
@@ -1015,6 +1187,7 @@ export const WineStoreProvider: React.FC<{ children: ReactNode }> = ({ children 
     };
 
     setUser(updatedUserWithPoints);
+    persistActiveUserSession(updatedUserWithPoints);
     setRegisteredUsers(prev => prev.map(u => (u.user_id === user.user_id ? updatedUserWithPoints : u)));
     saveUserToSupabase(updatedUserWithPoints).catch(() => {});
     saveUserApi(updatedUserWithPoints).catch(() => {});
@@ -1117,22 +1290,9 @@ export const WineStoreProvider: React.FC<{ children: ReactNode }> = ({ children 
       }).catch(err => console.warn('[PhotoStorage] write note:', err));
     }
 
-    try {
-      let customMap: Record<string, { image?: string; images?: string[] }> = {};
-      const saved = localStorage.getItem('vinea_product_custom_images');
-      if (saved) customMap = JSON.parse(saved);
-      customMap[newId] = {
-        image: newProduct.image,
-        images: newProduct.images || []
-      };
-      localStorage.setItem('vinea_product_custom_images', JSON.stringify(customMap));
-    } catch {}
-
     setProducts(prev => {
       const next = [newProduct, ...prev];
-      try {
-        localStorage.setItem('vinea_products', JSON.stringify(next));
-      } catch {}
+      safeSaveProductsToLocalStorage(next);
       return next;
     });
     saveProductToSupabase(newProduct).catch(() => {});
@@ -1149,23 +1309,10 @@ export const WineStoreProvider: React.FC<{ children: ReactNode }> = ({ children 
       }).catch(err => console.warn('[PhotoStorage] write note:', err));
     }
 
-    try {
-      let customMap: Record<string, { image?: string; images?: string[] }> = {};
-      const saved = localStorage.getItem('vinea_product_custom_images');
-      if (saved) customMap = JSON.parse(saved);
-      customMap[updated.product_id] = {
-        image: updated.image,
-        images: updated.images || []
-      };
-      localStorage.setItem('vinea_product_custom_images', JSON.stringify(customMap));
-    } catch {}
-
-    // 2. Update React products state and localStorage 'vinea_products' immediately
+    // 2. Update React products state and quota-safe localStorage 'vinea_products' immediately
     setProducts(prev => {
       const next = prev.map(p => (p.product_id === updated.product_id ? updated : p));
-      try {
-        localStorage.setItem('vinea_products', JSON.stringify(next));
-      } catch {}
+      safeSaveProductsToLocalStorage(next);
       return next;
     });
 
@@ -1176,21 +1323,11 @@ export const WineStoreProvider: React.FC<{ children: ReactNode }> = ({ children 
 
   const deleteProduct = (productId: string) => {
     deleteCustomPhoto(productId).catch(() => {});
-    try {
-      const saved = localStorage.getItem('vinea_product_custom_images');
-      if (saved) {
-        const customMap = JSON.parse(saved);
-        delete customMap[productId];
-        localStorage.setItem('vinea_product_custom_images', JSON.stringify(customMap));
-      }
-    } catch {}
 
     const prod = products.find(p => p.product_id === productId);
     setProducts(prev => {
       const next = prev.filter(p => p.product_id !== productId);
-      try {
-        localStorage.setItem('vinea_products', JSON.stringify(next));
-      } catch {}
+      safeSaveProductsToLocalStorage(next);
       return next;
     });
     deleteProductFromSupabase(productId).catch(() => {});
@@ -1317,15 +1454,25 @@ export const WineStoreProvider: React.FC<{ children: ReactNode }> = ({ children 
       };
     }
 
-    // Restore and lock in customer profile photo from local storage backup keys
-    const savedAvatar =
-      matched.avatar ||
-      localStorage.getItem(`vinea_user_avatar_${email}`) ||
-      localStorage.getItem(`vinea_user_avatar_${matched.user_id}`) ||
-      localStorage.getItem('vinea_saved_avatar');
-
+    // Restore and lock in customer profile photo from per-user storage & IndexedDB
+    const savedAvatar = resolveBestAvatar(matched.avatar, undefined, email, matched.user_id);
     const userToSet = savedAvatar ? { ...matched, avatar: savedAvatar } : matched;
+    userRef.current = userToSet;
     setUser(userToSet);
+    persistActiveUserSession(userToSet);
+
+    // Asynchronously hydrate any custom avatar stored in IndexedDB if current is default/missing
+    loadUserAvatarFromDb(matched.user_id, email)
+      .then((stored) => {
+        if (stored?.avatar && !isDefaultAvatarUrl(stored.avatar) && isDefaultAvatarUrl(userToSet.avatar)) {
+          const hydrated = { ...userToSet, avatar: stored.avatar };
+          userRef.current = hydrated;
+          setUser(hydrated);
+          persistActiveUserSession(hydrated);
+          setRegisteredUsers(prev => prev.map(u => (u.user_id === hydrated.user_id ? hydrated : u)));
+        }
+      })
+      .catch(() => {});
 
     // Restore user session wishlist
     try {
@@ -1459,9 +1606,9 @@ export const WineStoreProvider: React.FC<{ children: ReactNode }> = ({ children 
     };
 
     setRegisteredUsers(prev => [newUser, ...prev]);
+    userRef.current = newUser;
     setUser(newUser);
-
-    showToast(`Welcome to VÍNEA Cellar, ${data.name}!`, 'success');
+    persistActiveUserSession(newUser);
 
     if (isSupabaseConfigured) {
       saveUserToSupabase(newUser)
@@ -1487,6 +1634,11 @@ export const WineStoreProvider: React.FC<{ children: ReactNode }> = ({ children 
   };
 
   const logoutCustomer = () => {
+    setExplicitLogoutFlag(true);
+    userRef.current = null;
+    safeSaveCurrentUserToLocalStorage(null);
+    saveCurrentUserToDb(null).catch(() => {});
+    clearSessionApi().catch(() => {});
     setUser(null);
     setIsAccountOpen(false);
     if (isSupabaseConfigured) {
@@ -1495,7 +1647,10 @@ export const WineStoreProvider: React.FC<{ children: ReactNode }> = ({ children 
     showToast('You have signed out of your account.', 'info');
   };
 
-  const updateUserProfile = (updates: Partial<User>): { success: boolean; error?: string } => {
+  const updateUserProfile = (
+    updates: Partial<User>,
+    options?: { fallbackAvatarDataUrl?: string; silent?: boolean }
+  ): { success: boolean; error?: string } => {
     if (!user) return { success: false, error: 'User is not logged in.' };
 
     // Validate phone number if updated
@@ -1522,28 +1677,28 @@ export const WineStoreProvider: React.FC<{ children: ReactNode }> = ({ children 
 
     const updatedUser: User = { ...user, ...updates };
 
-    // Explicitly lock in and persist custom avatar to prevent loss
+    // Explicitly lock in and persist custom avatar across IndexedDB, localStorage, and server session
     if (updates.avatar) {
-      try {
-        localStorage.setItem(`vinea_user_avatar_${user.email.toLowerCase()}`, updates.avatar);
-        localStorage.setItem(`vinea_user_avatar_${user.user_id}`, updates.avatar);
-        localStorage.setItem('vinea_saved_avatar', updates.avatar);
-      } catch (err) {
-        console.warn('Avatar storage note:', err);
-      }
+      saveUserAvatarToDb(
+        user.user_id,
+        user.email,
+        updates.avatar,
+        options?.fallbackAvatarDataUrl
+      ).catch((err) => console.warn('Avatar IndexedDB note:', err));
     }
 
+    userRef.current = updatedUser;
     setUser(updatedUser);
-    try {
-      localStorage.setItem('vinea_current_user', JSON.stringify(updatedUser));
-    } catch {}
+    persistActiveUserSession(updatedUser);
 
     setRegisteredUsers(prev =>
       prev.map(u => (u.user_id === user.user_id ? updatedUser : u))
     );
     saveUserToSupabase(updatedUser).catch((e: unknown) => console.warn('Supabase profile sync note:', e));
     saveUserApi(updatedUser).catch((e: unknown) => console.warn('User profile sync note:', e));
-    showToast('Your customer profile details have been saved.', 'success');
+    if (!options?.silent) {
+      showToast('Your customer profile details have been saved.', 'success');
+    }
     return { success: true };
   };
 
@@ -1565,10 +1720,14 @@ export const WineStoreProvider: React.FC<{ children: ReactNode }> = ({ children 
     }
 
     const updatedUser: User = { ...user, password: newPassword.trim() };
+    userRef.current = updatedUser;
     setUser(updatedUser);
+    persistActiveUserSession(updatedUser);
     setRegisteredUsers(prev =>
       prev.map(u => (u.user_id === user.user_id ? updatedUser : u))
     );
+    saveUserToSupabase(updatedUser).catch((e: unknown) => console.warn('Supabase password sync note:', e));
+    saveUserApi(updatedUser).catch((e: unknown) => console.warn('User password sync note:', e));
     showToast('Your account password has been updated securely.', 'success');
     return { success: true };
   };
@@ -1609,7 +1768,9 @@ export const WineStoreProvider: React.FC<{ children: ReactNode }> = ({ children 
       rewards_history: [redemptionRecord, ...(user.rewards_history || [])]
     };
 
+    userRef.current = updatedUser;
     setUser(updatedUser);
+    persistActiveUserSession(updatedUser);
     setRegisteredUsers(prev => prev.map(u => (u.user_id === user.user_id ? updatedUser : u)));
     saveUserToSupabase(updatedUser).catch(() => {});
     saveUserApi(updatedUser).catch(() => {});

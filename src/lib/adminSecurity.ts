@@ -111,6 +111,10 @@ export function authorizeGateSession(candidatePassword: string): { success: bool
     const token = createSignature(now, getExpectedAdminGateKey());
     sessionStorage.setItem(SESSION_TOKEN_KEY, token);
     sessionStorage.setItem(SESSION_TIMESTAMP_KEY, now.toString());
+    try {
+      localStorage.setItem(SESSION_TOKEN_KEY, token);
+      localStorage.setItem(SESSION_TIMESTAMP_KEY, now.toString());
+    } catch {}
     return { success: true };
   } catch {
     return { success: true };
@@ -123,8 +127,8 @@ export function authorizeGateSession(candidatePassword: string): { success: bool
  */
 export function isGateSessionVerified(): boolean {
   try {
-    const token = sessionStorage.getItem(SESSION_TOKEN_KEY);
-    const timestampStr = sessionStorage.getItem(SESSION_TIMESTAMP_KEY);
+    const token = sessionStorage.getItem(SESSION_TOKEN_KEY) || localStorage.getItem(SESSION_TOKEN_KEY);
+    const timestampStr = sessionStorage.getItem(SESSION_TIMESTAMP_KEY) || localStorage.getItem(SESSION_TIMESTAMP_KEY);
 
     if (!token || !timestampStr) {
       return false;
@@ -137,7 +141,19 @@ export function isGateSessionVerified(): boolean {
     }
 
     const expectedToken = createSignature(timestamp, getExpectedAdminGateKey());
-    return token === expectedToken;
+    if (token !== expectedToken) {
+      return false;
+    }
+
+    // Keep sessionStorage warm if restored from localStorage after a reload/new tab
+    try {
+      if (!sessionStorage.getItem(SESSION_TOKEN_KEY)) {
+        sessionStorage.setItem(SESSION_TOKEN_KEY, token);
+        sessionStorage.setItem(SESSION_TIMESTAMP_KEY, timestampStr);
+      }
+    } catch {}
+
+    return true;
   } catch {
     return false;
   }
@@ -150,6 +166,12 @@ export function revokeGateSession(): void {
   try {
     sessionStorage.removeItem(SESSION_TOKEN_KEY);
     sessionStorage.removeItem(SESSION_TIMESTAMP_KEY);
+  } catch {
+    // Ignore
+  }
+  try {
+    localStorage.removeItem(SESSION_TOKEN_KEY);
+    localStorage.removeItem(SESSION_TIMESTAMP_KEY);
   } catch {
     // Ignore
   }
