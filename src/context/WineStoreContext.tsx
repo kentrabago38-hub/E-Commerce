@@ -196,7 +196,15 @@ export const WineStoreProvider: React.FC<{ children: ReactNode }> = ({ children 
   const [products, setProducts] = useState<Product[]>(() => {
     try {
       const saved = localStorage.getItem('vinea_products');
-      let base: Product[] = saved ? JSON.parse(saved) : INITIAL_PRODUCTS;
+      let base: Product[] = INITIAL_PRODUCTS;
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          const existingIds = new Set(parsed.map((p: Product) => p.product_id));
+          const missing = INITIAL_PRODUCTS.filter((p: Product) => !existingIds.has(p.product_id));
+          base = [...parsed, ...missing];
+        }
+      }
       const customImages = localStorage.getItem('vinea_product_custom_images');
       if (customImages) {
         const customMap = JSON.parse(customImages);
@@ -261,18 +269,22 @@ export const WineStoreProvider: React.FC<{ children: ReactNode }> = ({ children 
   const [orders, setOrders] = useState<Order[]>(() => {
     try {
       const saved = localStorage.getItem('vinea_orders');
+      let base: Order[] = INITIAL_ORDERS;
       if (saved) {
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed)) {
-          return parsed.filter(
+          const filtered = parsed.filter(
             (o: Order) =>
               o.email !== 'maria.santos@vinea.ph' &&
               o.order_id !== 'VN-98421' &&
               o.order_id !== 'VN-96104'
           );
+          const existingOrderIds = new Set(filtered.map((o: Order) => o.order_id));
+          const missing = INITIAL_ORDERS.filter((o: Order) => !existingOrderIds.has(o.order_id));
+          base = [...filtered, ...missing];
         }
       }
-      return INITIAL_ORDERS;
+      return base;
     } catch {
       return INITIAL_ORDERS;
     }
@@ -290,20 +302,24 @@ export const WineStoreProvider: React.FC<{ children: ReactNode }> = ({ children 
   const [registeredUsers, setRegisteredUsers] = useState<User[]>(() => {
     try {
       const saved = localStorage.getItem('vinea_registered_users');
+      let base: User[] = INITIAL_REGISTERED_USERS;
       if (saved) {
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed)) {
           // Remove legacy demo accounts, preserving authentic user-created accounts
-          return parsed.filter(
+          const filtered = parsed.filter(
             (u: User) =>
               u.email !== 'maria.santos@vinea.ph' &&
               u.email !== 'roberto.tan@vinea.ph' &&
               u.user_id !== 'usr-101' &&
               u.user_id !== 'usr-102'
           );
+          const existingEmails = new Set(filtered.map((u: User) => u.email.toLowerCase()));
+          const missing = INITIAL_REGISTERED_USERS.filter((u: User) => !existingEmails.has(u.email.toLowerCase()));
+          base = [...filtered, ...missing];
         }
       }
-      return INITIAL_REGISTERED_USERS;
+      return base;
     } catch {
       return INITIAL_REGISTERED_USERS;
     }

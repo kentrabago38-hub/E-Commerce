@@ -31,6 +31,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
   const [heartPulsing, setHeartPulsing] = useState(false);
   const isFavorited = isInWishlist(product.product_id);
   const isOutOfStock = product.stock <= 0;
+  const isCriticallyLowStock = product.stock > 0 && product.stock < 5;
   const isLowStock = product.stock > 0 && product.stock <= 10;
 
   // Staggered cellar float so cards in a grid float with natural, gentle rhythm
@@ -82,11 +83,26 @@ export const ProductCard: React.FC<ProductCardProps> = ({
           </div>
           <div className="absolute inset-0 bg-gradient-to-t from-[#18090C] via-transparent to-black/30 opacity-70 group-hover:opacity-40 transition-opacity pointer-events-none" />
 
-          {/* Editorial Top Stamp */}
-          <div className="absolute top-4 left-4 z-10">
+          {/* Editorial Top Stamp & Low Stock Indicator */}
+          <div className="absolute top-4 left-4 z-10 flex flex-col gap-1.5 items-start">
             <span className="text-[10px] font-semibold tracking-[0.25em] text-[#C6A15B] uppercase bg-black/75 px-3 py-1 rounded backdrop-blur-md border border-[#C6A15B]/30">
               {product.vintage} · {product.region}
             </span>
+            {isCriticallyLowStock && (
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#1A080C]/95 backdrop-blur-md border border-amber-500/80 text-amber-200 text-[10px] font-bold uppercase tracking-wider shadow-xl shadow-black/80">
+                <span className="relative flex h-2 w-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-amber-500"></span>
+                </span>
+                <span className="animate-pulse">Only {product.stock} {product.stock === 1 ? 'Allocation' : 'Allocations'} Left</span>
+              </span>
+            )}
+            {isOutOfStock && (
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-black/90 backdrop-blur-md border border-rose-500/80 text-rose-300 text-[10px] font-bold uppercase tracking-wider shadow-xl">
+                <span className="w-1.5 h-1.5 rounded-full bg-rose-500"></span>
+                <span>Allocation Exhausted</span>
+              </span>
+            )}
           </div>
 
           {/* Wishlist Heart Toggle with Pulse */}
@@ -177,10 +193,19 @@ export const ProductCard: React.FC<ProductCardProps> = ({
           </div>
           <div className="absolute inset-0 bg-gradient-to-t from-[#12070A] via-transparent to-black/40 pointer-events-none" />
 
-          <div className="absolute top-3 left-3 z-10">
+          <div className="absolute top-3 left-3 z-10 flex flex-col gap-1.5 items-start">
             <span className="text-[10px] font-semibold tracking-widest text-[#C6A15B] uppercase bg-black/75 px-2.5 py-1 rounded backdrop-blur-md border border-[#C6A15B]/30">
               Vault Reserve · {product.vintage}
             </span>
+            {isCriticallyLowStock && (
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-[#1A080C]/95 backdrop-blur-md border border-amber-500/80 text-amber-200 text-[9px] font-bold uppercase tracking-wider shadow-lg shadow-black/80">
+                <span className="relative flex h-2 w-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-amber-500"></span>
+                </span>
+                <span className="animate-pulse">Rare · Only {product.stock} Left</span>
+              </span>
+            )}
           </div>
 
           <button
@@ -263,14 +288,23 @@ export const ProductCard: React.FC<ProductCardProps> = ({
         </div>
         <div className="absolute inset-0 bg-gradient-to-t from-[#130B0D] via-transparent to-black/30 opacity-70 group-hover:opacity-40 transition-opacity pointer-events-none" />
 
-        {/* Vintage & Wine Type Metadata (Zero-Pill Discipline) */}
-        <div className="absolute top-3 left-3 flex items-center gap-1.5 drop-shadow-md z-10">
+        {/* Vintage & Low Stock Notification System (Pulsing Badge for < 5 bottles) */}
+        <div className="absolute top-3 left-3 flex flex-col gap-1.5 z-10 items-start drop-shadow-md">
           <span className="text-[11px] font-semibold tracking-[0.2em] text-[#C6A15B] uppercase">
             {product.vintage} · {product.wine_type} · 750ml
           </span>
-          {isOutOfStock ? (
-            <span className="text-[10px] uppercase font-bold tracking-wider text-rose-400">
-              · Sold Out
+          {isCriticallyLowStock ? (
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-[#1A080C]/95 backdrop-blur-md border border-amber-500/80 text-amber-200 text-[10px] font-bold uppercase tracking-wider shadow-lg shadow-black/80">
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-amber-500"></span>
+              </span>
+              <span className="animate-pulse">Only {product.stock} Left</span>
+            </span>
+          ) : isOutOfStock ? (
+            <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-black/90 backdrop-blur-md border border-rose-500/80 text-rose-300 text-[10px] font-bold uppercase tracking-wider">
+              <span className="w-1.5 h-1.5 rounded-full bg-rose-500"></span>
+              <span>Sold Out</span>
             </span>
           ) : isLowStock ? (
             <span className="text-[10px] uppercase font-semibold tracking-wider text-amber-300">

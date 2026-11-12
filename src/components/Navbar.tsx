@@ -98,7 +98,8 @@ export const Navbar: React.FC = () => {
     { label: 'Shop', tab: 'shop', hasMegaMenu: true },
     { label: 'Collections', tab: 'collections' },
     { label: 'Wine Guide', tab: 'guide' },
-    { label: 'About', tab: 'about' }
+    { label: 'About', tab: 'about' },
+    { label: 'Account', tab: 'account' }
   ];
 
   const handleMouseEnterShop = () => {
@@ -597,6 +598,38 @@ export const Navbar: React.FC = () => {
           </button>
 
           <div className="space-y-4">
+            {/* Direct Account Dashboard Access Card */}
+            <div
+              onClick={() => handleNavClick('account')}
+              className="p-4 rounded-2xl bg-gradient-to-r from-[#210D12] via-[#160A0D] to-[#210D12] border border-[#D5B15C]/40 mb-2 flex items-center justify-between cursor-pointer hover:border-[#D5B15C] transition-colors shadow-lg"
+            >
+              <div className="flex items-center gap-3">
+                {user?.avatar ? (
+                  <img
+                    src={user.avatar}
+                    alt={user.name}
+                    className="w-10 h-10 rounded-full object-cover border border-[#D5B15C]"
+                    onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                  />
+                ) : (
+                  <div className="w-10 h-10 rounded-full bg-[#861F32] text-[#D5B15C] flex items-center justify-center font-bold text-sm border border-[#D5B15C]/60 shadow-md">
+                    {user ? user.name.charAt(0) : <UserIcon className="w-5 h-5" />}
+                  </div>
+                )}
+                <div>
+                  <span className="text-sm font-serif font-bold text-white block">
+                    {user ? user.name : 'Customer Account & Orders'}
+                  </span>
+                  <span className="text-[10px] text-[#D5B15C] uppercase tracking-wider block font-medium">
+                    {user ? `${user.membership_tier || 'Connoisseur'} · View Cellar` : 'Tap to sign in or view orders'}
+                  </span>
+                </div>
+              </div>
+              <span className="py-1 px-2.5 rounded-lg bg-[#861F32] text-white text-[11px] font-semibold uppercase tracking-wider border border-[#D5B15C]/40">
+                Open
+              </span>
+            </div>
+
             <span className="text-[10px] uppercase tracking-[0.25em] text-[#C6A15B] font-semibold block mb-4">
               VÍNEA Directory
             </span>

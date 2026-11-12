@@ -80,12 +80,12 @@ export const generateVineaReceiptHtml = (order: Order): string => {
       -webkit-font-smoothing: antialiased;
     }
     .receipt-container {
-      max-width: 780px;
+      max-width: 640px;
       margin: 0 auto;
       background: #210D12;
       border: 1px solid #C6A15B;
-      border-radius: 18px;
-      box-shadow: 0 30px 70px rgba(0, 0, 0, 0.85);
+      border-radius: 14px;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.85);
       position: relative;
       overflow: hidden;
     }
@@ -95,11 +95,11 @@ export const generateVineaReceiptHtml = (order: Order): string => {
       top: 0;
       left: 0;
       right: 0;
-      height: 4px;
+      height: 3px;
       background: linear-gradient(90deg, #C6A15B 0%, #F5EFE7 50%, #C6A15B 100%);
     }
     .header {
-      padding: 36px 36px 24px;
+      padding: 24px 24px 16px;
       border-bottom: 1px solid rgba(72, 21, 31, 0.8);
       background: linear-gradient(180deg, rgba(72, 21, 31, 0.35) 0%, rgba(33, 13, 18, 0) 100%);
       display: flex;

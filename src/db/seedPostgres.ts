@@ -25,42 +25,47 @@ export async function seedPostgresIfEmpty(): Promise<void> {
   }
   try {
     const existingProducts = await getAllProducts();
-    if (existingProducts.length === 0) {
-      console.log('Seeding initial VÍNEA wine catalog into PostgreSQL...');
-      for (const prod of INITIAL_PRODUCTS) {
+    const existingIds = new Set(existingProducts.map(p => p.product_id));
+    for (const prod of INITIAL_PRODUCTS) {
+      if (!existingIds.has(prod.product_id)) {
+        console.log(`Seeding wine ${prod.product_id} (${prod.name}) into PostgreSQL...`);
         await insertProduct(prod);
       }
     }
 
     const existingCats = await getAllCategories();
-    if (existingCats.length === 0) {
-      for (const cat of INITIAL_CATEGORIES) {
+    const existingCatIds = new Set(existingCats.map(c => c.category_id));
+    for (const cat of INITIAL_CATEGORIES) {
+      if (!existingCatIds.has(cat.category_id)) {
         await insertCategory(cat);
       }
     }
 
     const existingUsers = await getAllUsers();
-    if (existingUsers.length === 0) {
-      for (const usr of INITIAL_REGISTERED_USERS) {
+    const existingEmails = new Set(existingUsers.map(u => u.email.toLowerCase()));
+    for (const usr of INITIAL_REGISTERED_USERS) {
+      if (!existingEmails.has(usr.email.toLowerCase())) {
         await upsertUserRecord(usr);
       }
     }
 
     const existingOrders = await getAllOrders();
-    if (existingOrders.length === 0) {
-      for (const ord of INITIAL_ORDERS) {
+    const existingOrderIds = new Set(existingOrders.map(o => o.order_id));
+    for (const ord of INITIAL_ORDERS) {
+      if (!existingOrderIds.has(ord.order_id)) {
         await insertOrder(ord);
       }
     }
 
     const existingReviews = await getAllReviews();
-    if (existingReviews.length === 0) {
-      for (const rev of INITIAL_REVIEWS) {
+    const existingReviewIds = new Set(existingReviews.map(r => r.review_id));
+    for (const rev of INITIAL_REVIEWS) {
+      if (!existingReviewIds.has(rev.review_id)) {
         await insertReviewRecord(rev);
       }
     }
 
-    console.log('PostgreSQL database seeded successfully.');
+    console.log('PostgreSQL database synchronization check complete.');
   } catch (error) {
     console.warn('Note on PostgreSQL seeding:', error);
   }

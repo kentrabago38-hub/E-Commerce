@@ -100,6 +100,30 @@ let inMemoryOrders = loadJsonFile(ORDERS_FILE, [...INITIAL_ORDERS]);
 let inMemoryUsers = loadJsonFile(USERS_FILE, [...INITIAL_REGISTERED_USERS]);
 let inMemoryReviews = loadJsonFile(REVIEWS_FILE, [...INITIAL_REVIEWS]);
 
+// Ensure all 22 catalog products are present in inMemoryProducts
+const existingProdIds = new Set(inMemoryProducts.map((p: any) => p.product_id));
+const missingProds = INITIAL_PRODUCTS.filter(p => !existingProdIds.has(p.product_id));
+if (missingProds.length > 0) {
+  inMemoryProducts = [...inMemoryProducts, ...missingProds];
+  saveJsonFile(PRODUCTS_FILE, inMemoryProducts);
+}
+
+// Ensure initial users are present
+const existingUserEmails = new Set(inMemoryUsers.map((u: any) => u.email?.toLowerCase()));
+const missingUsers = INITIAL_REGISTERED_USERS.filter(u => !existingUserEmails.has(u.email?.toLowerCase()));
+if (missingUsers.length > 0) {
+  inMemoryUsers = [...inMemoryUsers, ...missingUsers];
+  saveJsonFile(USERS_FILE, inMemoryUsers);
+}
+
+// Ensure initial orders are present
+const existingOrderIds = new Set(inMemoryOrders.map((o: any) => o.order_id));
+const missingOrders = INITIAL_ORDERS.filter(o => !existingOrderIds.has(o.order_id));
+if (missingOrders.length > 0) {
+  inMemoryOrders = [...inMemoryOrders, ...missingOrders];
+  saveJsonFile(ORDERS_FILE, inMemoryOrders);
+}
+
 // If files did not exist, write initial data to disk
 if (!fs.existsSync(PRODUCTS_FILE)) saveJsonFile(PRODUCTS_FILE, inMemoryProducts);
 if (!fs.existsSync(CATEGORIES_FILE)) saveJsonFile(CATEGORIES_FILE, inMemoryCategories);

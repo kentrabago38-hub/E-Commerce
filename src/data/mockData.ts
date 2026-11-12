@@ -474,6 +474,714 @@ export const INITIAL_PRODUCTS: Product[] = [
     food_pairings: ['Multi-Course Tasting Menu', 'Holiday Celebrations', 'Executive Gifting'],
     serving_temp: 'Assorted (see enclosed sommelier cards)',
     decanting: 'Individual instructions enclosed'
+  },
+  {
+    product_id: 'prod-013',
+    name: 'Château Margaux Premier Grand Cru Classé',
+    winery: 'Château Margaux',
+    country: 'France',
+    region: 'Margaux, Bordeaux',
+    vintage: 2015,
+    wine_type: 'Red',
+    grape_variety: '87% Cabernet Sauvignon, 8% Merlot, 3% Cabernet Franc, 2% Petit Verdot',
+    alcohol_percentage: 13.5,
+    sweetness: 'Dry',
+    body: 'Full',
+    price: 68500,
+    original_price: 74000,
+    stock: 3, // Low stock: 3 bottles left
+    image: '/images/product_chateau_lumiere_cabernet.jpg',
+    images: [
+      '/images/region_bordeaux_chateau.jpg',
+      '/images/sommelier_reserve_bottle_1793457418720.jpg'
+    ],
+    bottle_color: '#380a13',
+    accent_color: '#dfbe76',
+    description: 'An ethereal Premier Grand Cru blending profound violet perfume, silky cassis, crushed graphite, and seamless fine-grained tannins aged in 100% new French oak for 22 months.',
+    rating: 5.0,
+    reviews_count: 29,
+    featured: true,
+    category_id: 'cat-red',
+    tasting_notes: {
+      aroma: ['Crushed Violets', 'Blackcurrant Compote', 'French Cedar', 'Cuban Cigar Box'],
+      palate: 'Silky, aristocratic velvet texture with immense purity of black fruit and aristocratic poise.',
+      finish: 'Extremely long, echoing with graphite minerality and dark cocoa for minutes.'
+    },
+    food_pairings: ['Prime Wagyu Tenderloin', 'Roasted Squab with Truffles', 'Aged Comté 36-Month'],
+    serving_temp: '17–18°C (62–64°F)',
+    decanting: 'Decant for 90 minutes before tasting'
+  },
+  {
+    product_id: 'prod-014',
+    name: 'Tenuta San Guido Sassicaia Bolgheri',
+    winery: 'Tenuta San Guido',
+    country: 'Italy',
+    region: 'Bolgheri, Tuscany',
+    vintage: 2019,
+    wine_type: 'Red',
+    grape_variety: '85% Cabernet Sauvignon, 15% Cabernet Franc',
+    alcohol_percentage: 14.0,
+    sweetness: 'Dry',
+    body: 'Full',
+    price: 26800,
+    original_price: 29500,
+    stock: 4, // Low stock: 4 bottles left
+    image: '/images/product_san_pietro_brunello.jpg',
+    images: [
+      '/images/region_tuscany_hills.jpg',
+      '/images/pairing_prime_ribeye_steak.jpg'
+    ],
+    bottle_color: '#420d18',
+    accent_color: '#c9a050',
+    description: 'The quintessential Super Tuscan benchmark. Pure aristocratic black cherry, wild rosemary, Mediterranean scrub, and finely chiseled mineral tannins with vibrant Tuscan freshness.',
+    rating: 4.9,
+    reviews_count: 42,
+    featured: true,
+    category_id: 'cat-red',
+    tasting_notes: {
+      aroma: ['Wild Black Cherry', 'Rosemary Scrub', 'Cured Leather', 'Balsamic Juniper'],
+      palate: 'Taut, tensile Tuscan acidity balancing plush dark plums and fine graphite tannins.',
+      finish: 'Sustained, structured finish with marine salinity and toasted walnut.'
+    },
+    food_pairings: ['Bistecca alla Fiorentina', 'Wild Boar Ragù Pappardelle', 'Pecorino di Pienza'],
+    serving_temp: '16–18°C (60–64°F)',
+    decanting: 'Decant for 60 minutes'
+  },
+  {
+    product_id: 'prod-015',
+    name: 'Dom Pérignon Vintage Brut Prestige',
+    winery: 'Moët & Chandon / Dom Pérignon',
+    country: 'France',
+    region: 'Épernay, Champagne',
+    vintage: 2013,
+    wine_type: 'Sparkling',
+    grape_variety: 'Pinot Noir & Chardonnay',
+    alcohol_percentage: 12.5,
+    sweetness: 'Bone Dry',
+    body: 'Medium',
+    price: 17800,
+    stock: 2, // Low stock: 2 bottles left
+    image: '/images/product_domaine_reine_champagne.jpg',
+    images: [
+      '/images/region_champagne_france.jpg',
+      '/images/wine_pouring_crystal_glass_1793460097087.jpg'
+    ],
+    bottle_color: '#1a1005',
+    accent_color: '#dfbe76',
+    description: 'Luminous vintage champagne radiating roasted hazelnuts, mirabelle plum, crushed oyster shells, and an energetic crystalline salinity that stretches endlessly on the palate.',
+    rating: 4.9,
+    reviews_count: 53,
+    featured: true,
+    category_id: 'cat-sparkling',
+    tasting_notes: {
+      aroma: ['Mirabelle Plum', 'Roasted Hazelnuts', 'Cardamom Smoke', 'Toasted Brioche'],
+      palate: 'Crystalline precision with microscopic effervescence, flint minerality, and racy citrus zest.',
+      finish: 'Taut, saline, and smoke-tinged persistence.'
+    },
+    food_pairings: ['Beluga Caviar & Blinis', 'Butter-Poached Davao Rock Lobster', 'Seared Sea Scallops'],
+    serving_temp: '9–11°C (48–52°F)',
+    decanting: 'Open 15 minutes before pouring'
+  },
+  {
+    product_id: 'prod-016',
+    name: 'Egon Müller Scharzhofberger Riesling Kabinett',
+    winery: 'Weingut Egon Müller',
+    country: 'Germany',
+    region: 'Saar, Mosel',
+    vintage: 2021,
+    wine_type: 'White',
+    grape_variety: '100% Riesling',
+    alcohol_percentage: 8.5,
+    sweetness: 'Semi-Dry',
+    body: 'Light',
+    price: 14500,
+    stock: 12,
+    image: '/images/product_schloss_johannisberg_riesling.jpg',
+    images: [
+      '/images/category_white_wine_curated.jpg'
+    ],
+    bottle_color: '#0e1d14',
+    accent_color: '#e5d7b7',
+    description: 'From the hallowed blue slate slopes of the Scharzhofberg. Dazzling balance between lime blossom delicacy, white peach, electric slate minerality, and feathery acidity.',
+    rating: 4.9,
+    reviews_count: 18,
+    featured: false,
+    category_id: 'cat-white',
+    tasting_notes: {
+      aroma: ['Lime Blossom', 'White Peach', 'Slate Shingle', 'Lemon Verbena'],
+      palate: 'Feathery light yet incredibly concentrated with dancing laser acidity and natural fruit sweetness.',
+      finish: 'Intensely stony, mouthwatering, and pristine.'
+    },
+    food_pairings: ['Spicy King Crab Legs', 'Crispy Pork Belly with Apple Sauce', 'Thai Lemongrass Prawns'],
+    serving_temp: '8–10°C (46–50°F)',
+    decanting: 'Not required, serve chilled'
+  },
+  {
+    product_id: 'prod-017',
+    name: 'Gaja Barbaresco Riserva DOCG',
+    winery: 'Gaja Winery',
+    country: 'Italy',
+    region: 'Barbaresco, Piedmont',
+    vintage: 2018,
+    wine_type: 'Red',
+    grape_variety: '100% Nebbiolo',
+    alcohol_percentage: 14.5,
+    sweetness: 'Bone Dry',
+    body: 'Full',
+    price: 23500,
+    original_price: 26000,
+    stock: 3, // Low stock: 3 bottles left
+    image: '/images/product_monteverde_pinot_noir.jpg',
+    images: [
+      '/images/region_tuscany_hills.jpg'
+    ],
+    bottle_color: '#350912',
+    accent_color: '#d4af37',
+    description: 'Angelo Gaja’s flagship Nebbiolo. Scented with dried rose petals, orange peel, white truffles, and tobacco leaf wrapped in austere, aristocratic structure with 30-year cellaring potential.',
+    rating: 4.8,
+    reviews_count: 22,
+    featured: true,
+    category_id: 'cat-red',
+    tasting_notes: {
+      aroma: ['Dried Rose Petals', 'Alba Truffles', 'Tar', 'Seville Orange Peel'],
+      palate: 'Gripping, youthful chalky tannins backed by wild red berries, liquorice, and earthy undertones.',
+      finish: 'Towering, architectural structure that softens into crushed violets and spice.'
+    },
+    food_pairings: ['Truffled Risotto', 'Roasted Rack of Venison', 'Braised Beef Shank in Nebbiolo'],
+    serving_temp: '16–18°C (60–64°F)',
+    decanting: 'Decant for 2 hours before serving'
+  },
+  {
+    product_id: 'prod-018',
+    name: 'Opus One Proprietary Red',
+    winery: 'Opus One Winery',
+    country: 'USA',
+    region: 'Oakville, Napa Valley',
+    vintage: 2019,
+    wine_type: 'Red',
+    grape_variety: '78% Cabernet Sauvignon, 8% Merlot, 6% Petit Verdot, 6% Cabernet Franc, 2% Malbec',
+    alcohol_percentage: 14.5,
+    sweetness: 'Dry',
+    body: 'Full',
+    price: 34900,
+    original_price: 38000,
+    stock: 1, // Low stock: ONLY 1 bottle remaining!
+    image: '/images/product_st_helena_napa_cabernet.jpg',
+    images: [
+      '/images/region_napa_valley.jpg',
+      '/images/pairing_prime_ribeye_steak.jpg'
+    ],
+    bottle_color: '#2e070e',
+    accent_color: '#dfbe76',
+    description: 'The historic joint venture between Baron Philippe de Rothschild and Robert Mondavi. Silky cassis, dark mocha, pencil lead, and broad, polished velvet tannins that glide across the palate.',
+    rating: 5.0,
+    reviews_count: 67,
+    featured: true,
+    category_id: 'cat-red',
+    tasting_notes: {
+      aroma: ['Crushed Cassis', 'French Roast Coffee', 'Black Olives', 'Vanilla Pod'],
+      palate: 'Opulent layers of black cherry, graphite, and espresso nibs with exceptionally fine tannins.',
+      finish: 'Monumental persistence with seamless warm spice.'
+    },
+    food_pairings: ['Dry-Aged Tomahawk Steak', 'Roast Leg of Lamb with Garlic & Rosemary', 'Dark Cocoa Venison'],
+    serving_temp: '17–19°C (62–66°F)',
+    decanting: 'Decant for 75 minutes'
+  },
+  {
+    product_id: 'prod-019',
+    name: 'Domaine Leflaive Puligny-Montrachet Premier Cru',
+    winery: 'Domaine Leflaive',
+    country: 'France',
+    region: 'Côte de Beaune, Burgundy',
+    vintage: 2020,
+    wine_type: 'White',
+    grape_variety: '100% Chardonnay',
+    alcohol_percentage: 13.5,
+    sweetness: 'Dry',
+    body: 'Medium',
+    price: 19800,
+    stock: 8,
+    image: '/images/product_maison_etoile_chardonnay.jpg',
+    images: [
+      '/images/region_burgundy_slopes.jpg'
+    ],
+    bottle_color: '#151e10',
+    accent_color: '#e5d7b7',
+    description: 'Biodynamic mastery from Burgundy’s most revered white wine address. Citrus oil, toasted brioche, white truffle, and a profound limestone-driven finish with crystalline acidity.',
+    rating: 4.9,
+    reviews_count: 19,
+    featured: false,
+    category_id: 'cat-white',
+    tasting_notes: {
+      aroma: ['Meyer Lemon Curd', 'Crushed Chalk', 'Honeysuckle', 'Fresh Hazelnut'],
+      palate: 'Chiseled minerality married with rich, creamy textures and vibrant citrus tension.',
+      finish: 'Pulsing with energy, lime zest, and wet stone minerality.'
+    },
+    food_pairings: ['Turbot with Beurre Blanc', 'Pan-Roasted Langoustines', 'Davao Farm Roast Chicken with Herbs'],
+    serving_temp: '11–13°C (52–55°F)',
+    decanting: 'Open 30 minutes prior to serving'
+  },
+  {
+    product_id: 'prod-020',
+    name: 'Clarendon Hills Astralis Syrah',
+    winery: 'Clarendon Hills',
+    country: 'Australia',
+    region: 'Blewitt Springs, McLaren Vale',
+    vintage: 2017,
+    wine_type: 'Red',
+    grape_variety: 'Old Vine Syrah (1920 Plantings)',
+    alcohol_percentage: 15.0,
+    sweetness: 'Dry',
+    body: 'Full',
+    price: 28900,
+    stock: 4, // Low stock: 4 bottles left
+    image: '/images/product_bodega_solaria_rioja.jpg',
+    images: [
+      '/images/sommelier_reserve_bottle_1793457418720.jpg'
+    ],
+    bottle_color: '#320b12',
+    accent_color: '#d4af37',
+    description: 'Ungrafted 1920s bush-vine Syrah yielding immense aromatic complexity of smoked meats, star anise, roasted espresso, and colossal yet seamless dark fruit tannins.',
+    rating: 4.8,
+    reviews_count: 15,
+    featured: true,
+    category_id: 'cat-red',
+    tasting_notes: {
+      aroma: ['Smoked Meat', 'Star Anise', 'Blueberry Coulis', 'Dark Cocoa'],
+      palate: 'Viscous, full-throttle palate of dense black fruits, cracked black pepper, and polished fine-grain tannins.',
+      finish: 'Towering, concentrated finish that coats every corner of the palate.'
+    },
+    food_pairings: ['Wood-Fired Ribeye Cap', 'Slow-Roasted Lamb Shoulder', 'Smoked Duck Breast'],
+    serving_temp: '17–19°C (62–66°F)',
+    decanting: 'Decant for 90 minutes'
+  },
+  {
+    product_id: 'prod-021',
+    name: 'Clos Erasmus Priorat DOCa',
+    winery: 'Clos i Terrasses (Daphne Glorian)',
+    country: 'Spain',
+    region: 'Priorat, Catalunya',
+    vintage: 2018,
+    wine_type: 'Red',
+    grape_variety: '85% Garnacha, 15% Syrah',
+    alcohol_percentage: 15.0,
+    sweetness: 'Dry',
+    body: 'Full',
+    price: 21500,
+    stock: 6,
+    image: '/images/product_bodega_solaria_rioja.jpg',
+    images: [
+      '/images/region_rioja_spain.jpg'
+    ],
+    bottle_color: '#330811',
+    accent_color: '#c9a050',
+    description: 'From dizzying llicorella slate terraces. Intense wild blueberries, crushed granite, wild mountain herbs, and a majestic velvet texture that coats the palate with Mediterranean warmth.',
+    rating: 4.9,
+    reviews_count: 24,
+    featured: false,
+    category_id: 'cat-red',
+    tasting_notes: {
+      aroma: ['Llicorella Slate Dust', 'Wild Blueberries', 'Rosemary Oil', 'Kirsch'],
+      palate: 'Monumental depth with intense mineral spine, licorice, and seamless rounded tannins.',
+      finish: 'Warm, savory, slate-dusted finish that endures beautifully.'
+    },
+    food_pairings: ['Charcoal Grilled Lamb Chops', 'Ibérico Pork Secreto', 'Aged Manchego Curado'],
+    serving_temp: '16–18°C (60–64°F)',
+    decanting: 'Decant for 60 minutes'
+  },
+  {
+    product_id: 'prod-022',
+    name: 'Château d’Yquem Premier Cru Supérieur',
+    winery: 'Château d’Yquem',
+    country: 'France',
+    region: 'Sauternes, Bordeaux',
+    vintage: 2016,
+    wine_type: 'Dessert',
+    grape_variety: '75% Sémillon, 25% Sauvignon Blanc',
+    alcohol_percentage: 14.0,
+    sweetness: 'Sweet',
+    body: 'Full',
+    price: 38500,
+    original_price: 42000,
+    stock: 2, // Low stock: 2 bottles left
+    image: '/images/product_schloss_johannisberg_riesling.jpg',
+    images: [
+      '/images/category_collections_vault_curated.jpg',
+      '/images/sommelier_reserve_bottle_1793457418720.jpg'
+    ],
+    bottle_color: '#281c06',
+    accent_color: '#dfbe76',
+    description: 'The only Sauternes awarded Premier Cru Supérieur in the 1855 classification. Golden amber hue with candied saffron, dried apricot, honeycomb, and eternal balancing acidity.',
+    rating: 5.0,
+    reviews_count: 36,
+    featured: true,
+    category_id: 'cat-collections',
+    tasting_notes: {
+      aroma: ['Candied Saffron', 'Wild Honeycomb', 'Dried Apricot', 'Orange Marmalade'],
+      palate: 'Unctuous richness cut through by vibrant botrytis acidity, candied ginger, and vanilla cream.',
+      finish: 'Centuries-worthy finish lingering on the palate for minutes.'
+    },
+    food_pairings: ['Seared Foie Gras with Brioche', 'Roquefort Blue Cheese', 'Crème Brûlée with Madagascar Vanilla'],
+    serving_temp: '10–12°C (50–54°F)',
+    decanting: 'Uncork 30 minutes before serving'
+  },
+  {
+    product_id: 'prod-023',
+    name: 'Château Cheval Blanc Premier Grand Cru Classé A',
+    winery: 'Château Cheval Blanc',
+    country: 'France',
+    region: 'Saint-Émilion, Bordeaux',
+    vintage: 2016,
+    wine_type: 'Red',
+    grape_variety: '58% Cabernet Franc, 38% Merlot, 4% Cabernet Sauvignon',
+    alcohol_percentage: 14.0,
+    sweetness: 'Dry',
+    body: 'Full',
+    price: 78500,
+    original_price: 84000,
+    stock: 2, // Low stock: 2 bottles left
+    image: '/images/product_chateau_lumiere_cabernet.jpg',
+    images: [
+      '/images/region_bordeaux_chateau.jpg',
+      '/images/sommelier_reserve_bottle_1793457418720.jpg'
+    ],
+    bottle_color: '#380a14',
+    accent_color: '#dfbe76',
+    description: 'The pinnacle of Right Bank Bordeaux. An extraordinary fusion of crushed black raspberries, Turkish rose petals, dark graphite, and silken cashmere tannins.',
+    rating: 5.0,
+    reviews_count: 31,
+    featured: true,
+    category_id: 'cat-red',
+    tasting_notes: {
+      aroma: ['Black Raspberries', 'Turkish Rose', 'Cranberry Confit', 'Graphite Shavings'],
+      palate: 'Profound architectural harmony with velvety mouthfeel and cool mineral freshness.',
+      finish: 'Sustained, noble persistence extending for minutes.'
+    },
+    food_pairings: ['Roast Duck Breast with Cherry Glaze', 'Wagyu Ribeye Cap', 'Aged Comté'],
+    serving_temp: '16–18°C (60–64°F)',
+    decanting: 'Decant for 90 minutes before serving'
+  },
+  {
+    product_id: 'prod-024',
+    name: 'Marchesi Antinori Tignanello Toscana IGT',
+    winery: 'Marchesi Antinori',
+    country: 'Italy',
+    region: 'Tuscany',
+    vintage: 2020,
+    wine_type: 'Red',
+    grape_variety: '80% Sangiovese, 15% Cabernet Sauvignon, 5% Cabernet Franc',
+    alcohol_percentage: 14.0,
+    sweetness: 'Dry',
+    body: 'Full',
+    price: 16800,
+    original_price: 18500,
+    stock: 8,
+    image: '/images/product_san_pietro_brunello.jpg',
+    images: [
+      '/images/region_tuscany_hills.jpg',
+      '/images/pairing_prime_ribeye_steak.jpg'
+    ],
+    bottle_color: '#3d0d17',
+    accent_color: '#dfbe76',
+    description: 'The trailblazing Super Tuscan aged in French barriques. Ripe red plums, licorice root, roasted espresso bean, and chiseled Mediterranean tannins.',
+    rating: 4.9,
+    reviews_count: 47,
+    featured: true,
+    category_id: 'cat-red',
+    tasting_notes: {
+      aroma: ['Ripe Red Plums', 'Licorice Root', 'Espresso Cream', 'Mediterranean Thyme'],
+      palate: 'Supple, taut texture with lively Sangiovese acidity cutting through opulent dark fruit.',
+      finish: 'Spicy, mineral-driven finish.'
+    },
+    food_pairings: ['Truffled Pappardelle', 'Grilled Florentine T-Bone Steak', 'Parmigiano-Reggiano 30-Month'],
+    serving_temp: '16–18°C (60–64°F)',
+    decanting: 'Decant for 45 minutes'
+  },
+  {
+    product_id: 'prod-025',
+    name: 'Krug Grande Cuvée 170ème Édition Brut',
+    winery: 'Maison Krug',
+    country: 'France',
+    region: 'Reims, Champagne',
+    vintage: 2014,
+    wine_type: 'Sparkling',
+    grape_variety: '51% Pinot Noir, 38% Chardonnay, 11% Meunier',
+    alcohol_percentage: 12.5,
+    sweetness: 'Bone Dry',
+    body: 'Full',
+    price: 21500,
+    original_price: 23900,
+    stock: 3, // Low stock: 3 bottles left
+    image: '/images/product_domaine_reine_champagne.jpg',
+    images: [
+      '/images/region_champagne_france.jpg',
+      '/images/wine_pouring_crystal_glass_1793460097087.jpg'
+    ],
+    bottle_color: '#1c1206',
+    accent_color: '#dfbe76',
+    description: 'The archetype of Haute Champagne prestige. A breathtaking blend of 195 wines from 12 vintages, resting over 7 years on lees for hazelnut, nougat, and gingerbread complexity.',
+    rating: 5.0,
+    reviews_count: 38,
+    featured: true,
+    category_id: 'cat-sparkling',
+    tasting_notes: {
+      aroma: ['Toasted Brioche', 'Roasted Hazelnuts', 'Nougat', 'Candied Citrus'],
+      palate: 'Explosive, creamy effervescence with vibrant lemon curd and chalky limestone tension.',
+      finish: 'Infinitely broad, dry, and aristocratic.'
+    },
+    food_pairings: ['Gillardeau Oysters', 'Ibérico Bellota Ham', 'Pan-Seared Davao White Sea Bass'],
+    serving_temp: '9–11°C (48–52°F)',
+    decanting: 'Open 15 minutes before pouring'
+  },
+  {
+    product_id: 'prod-026',
+    name: 'Domaine Dujac Clos de la Roche Grand Cru',
+    winery: 'Domaine Dujac',
+    country: 'France',
+    region: 'Morey-Saint-Denis, Burgundy',
+    vintage: 2019,
+    wine_type: 'Red',
+    grape_variety: '100% Pinot Noir',
+    alcohol_percentage: 13.5,
+    sweetness: 'Dry',
+    body: 'Medium',
+    price: 62000,
+    original_price: 68000,
+    stock: 2, // Low stock: 2 bottles left
+    image: '/images/product_monteverde_pinot_noir.jpg',
+    images: [
+      '/images/region_burgundy_slopes.jpg',
+      '/images/sommelier_reserve_bottle_1793457418720.jpg'
+    ],
+    bottle_color: '#2d0811',
+    accent_color: '#dfbe76',
+    description: 'Mythic Grand Cru Pinot Noir crafted with whole-cluster fermentation. Exquisite wild strawberries, sous-bois forest floor, blood orange, and weightless power.',
+    rating: 5.0,
+    reviews_count: 19,
+    featured: true,
+    category_id: 'cat-red',
+    tasting_notes: {
+      aroma: ['Wild Strawberries', 'Sous-Bois Forest Floor', 'Peony Blossoms', 'Blood Orange'],
+      palate: 'Ethereal, floating texture with intense internal energy and lace-like mineral tannins.',
+      finish: 'Symphonic finish with lingering crushed stones and rose hip.'
+    },
+    food_pairings: ['Slow-Roasted Pigeon', 'Burgundian Beef Bourguignon', 'Truffled Brie de Meaux'],
+    serving_temp: '15–16°C (59–61°F)',
+    decanting: 'Decant for 60 minutes'
+  },
+  {
+    product_id: 'prod-027',
+    name: 'Vega Sicilia Único Ribera del Duero',
+    winery: 'Bodegas Vega Sicilia',
+    country: 'Spain',
+    region: 'Ribera del Duero',
+    vintage: 2012,
+    wine_type: 'Red',
+    grape_variety: '95% Tinto Fino (Tempranillo), 5% Cabernet Sauvignon',
+    alcohol_percentage: 14.5,
+    sweetness: 'Dry',
+    body: 'Full',
+    price: 34500,
+    original_price: 38000,
+    stock: 3, // Low stock: 3 bottles left
+    image: '/images/product_bodega_solaria_rioja.jpg',
+    images: [
+      '/images/region_rioja_spain.jpg',
+      '/images/pairing_prime_ribeye_steak.jpg'
+    ],
+    bottle_color: '#380a12',
+    accent_color: '#dfbe76',
+    description: 'Spain’s most legendary benchmark wine, aged for 10 full years in wood and bottle before release. Black fig, tobacco leaf, roasted cedar, and timeless velvet structure.',
+    rating: 4.9,
+    reviews_count: 33,
+    featured: true,
+    category_id: 'cat-red',
+    tasting_notes: {
+      aroma: ['Black Fig', 'Sweet Havana Cigar', 'Cedar Wood', 'Crushed Damson Plum'],
+      palate: 'Monumental weight delivered with astonishing freshness and aristocratic Spanish polish.',
+      finish: 'Profound savory leather and dark cacao persistence.'
+    },
+    food_pairings: ['Roast Suckling Pig (Cochinillo)', 'Prime Ribeye with Truffle Butter', 'Queso Manchego Curado'],
+    serving_temp: '17–18°C (62–64°F)',
+    decanting: 'Decant for 75 minutes'
+  },
+  {
+    product_id: 'prod-028',
+    name: 'Cloudy Bay Te Koko Sauvignon Blanc',
+    winery: 'Cloudy Bay Vineyards',
+    country: 'New Zealand',
+    region: 'Marlborough',
+    vintage: 2020,
+    wine_type: 'White',
+    grape_variety: '100% Sauvignon Blanc',
+    alcohol_percentage: 13.5,
+    sweetness: 'Dry',
+    body: 'Medium',
+    price: 5450,
+    stock: 14,
+    image: '/images/product_cloud_valley_sauvignon.jpg',
+    images: [
+      '/images/region_marlborough_nz.jpg',
+      '/images/pairing_seared_scallops_lobster.jpg'
+    ],
+    bottle_color: '#1f2516',
+    accent_color: '#c9a050',
+    description: 'An iconoclastic wild-ferment Sauvignon Blanc aged in French oak barrels. White peach, lime blossom, beeswax, and savory mineral complexity.',
+    rating: 4.8,
+    reviews_count: 41,
+    featured: false,
+    category_id: 'cat-white',
+    tasting_notes: {
+      aroma: ['White Nectarine', 'Lime Blossom', 'Honeycomb', 'Roasted Almond'],
+      palate: 'Rich and textural with creamy lees texture balanced by razor-sharp Marlborough acidity.',
+      finish: 'Crisp, saline, and smoke-dusted citrus.'
+    },
+    food_pairings: ['Pan-Seared Davao Scallops', 'Lemongrass Salmon Tartare', 'Goat Cheese Crostini'],
+    serving_temp: '10–12°C (50–54°F)',
+    decanting: 'No decanting required'
+  },
+  {
+    product_id: 'prod-029',
+    name: 'Penfolds Grange Bin 95 Shiraz',
+    winery: 'Penfolds',
+    country: 'Australia',
+    region: 'Barossa Valley & McLaren Vale, South Australia',
+    vintage: 2018,
+    wine_type: 'Red',
+    grape_variety: '97% Shiraz, 3% Cabernet Sauvignon',
+    alcohol_percentage: 14.5,
+    sweetness: 'Dry',
+    body: 'Full',
+    price: 48900,
+    original_price: 53500,
+    stock: 3, // Low stock: 3 bottles left
+    image: '/images/product_st_helena_napa_cabernet.jpg',
+    images: [
+      '/images/category_red_wine_curated.jpg',
+      '/images/pairing_prime_ribeye_steak.jpg'
+    ],
+    bottle_color: '#33080e',
+    accent_color: '#dfbe76',
+    description: 'Australia’s indisputable national treasure. 100% new American oak hogsheads aging deliver an intoxicating wave of black licorice, mocha, blackberry reduction, and formidable longevity.',
+    rating: 5.0,
+    reviews_count: 28,
+    featured: true,
+    category_id: 'cat-red',
+    tasting_notes: {
+      aroma: ['Blackberry Reduction', 'Anise Seed', 'Dark Mocha', 'Toasted American Oak'],
+      palate: 'Tremendous density of fruit held in a vice-like grip of ripe, graphite-laced tannins.',
+      finish: 'Colossal finish echoing with espresso and sweet spice.'
+    },
+    food_pairings: ['Charcoal-Grilled Wagyu Tomahawk', 'Braised Short Ribs', 'Venison with Black Cherry Sauce'],
+    serving_temp: '16–18°C (60–64°F)',
+    decanting: 'Decant for 120 minutes'
+  },
+  {
+    product_id: 'prod-030',
+    name: 'Domaine Tempier Bandol Rosé',
+    winery: 'Domaine Tempier',
+    country: 'France',
+    region: 'Bandol, Provence',
+    vintage: 2022,
+    wine_type: 'Rosé',
+    grape_variety: '55% Mourvèdre, 25% Grenache, 20% Cinsault',
+    alcohol_percentage: 13.0,
+    sweetness: 'Bone Dry',
+    body: 'Medium',
+    price: 4950,
+    stock: 9,
+    image: '/images/product_villa_rose_provencal.jpg',
+    images: [
+      '/images/category_rose_wine_curated.jpg',
+      '/images/pairing_oysters_and_caviar.jpg'
+    ],
+    bottle_color: '#381614',
+    accent_color: '#dfbe76',
+    description: 'The world gold standard of age-worthy gastronomy rosé. Mourvèdre provides muscular structure with blood orange, garrigue herbs, pomegranate, and Mediterranean sea salt.',
+    rating: 4.9,
+    reviews_count: 35,
+    featured: false,
+    category_id: 'cat-rose',
+    tasting_notes: {
+      aroma: ['Blood Orange Rind', 'Pomegranate', 'Wild Thyme', 'Crushed Marine Shells'],
+      palate: 'Firm, vinous, textured rosé with bracing minerality and savory herbal depth.',
+      finish: 'Dry, salivating, and exceptionally long.'
+    },
+    food_pairings: ['Bouillabaisse Seafood Stew', 'Charcoal-Grilled Davao Tuna Belly', 'Provençal Roasted Lamb'],
+    serving_temp: '11–13°C (52–55°F)',
+    decanting: 'Serve cellar-cool in red wine glasses'
+  },
+  {
+    product_id: 'prod-031',
+    name: 'Ornellaia Bolgheri Superiore DOC',
+    winery: 'Tenuta dell’Ornellaia',
+    country: 'Italy',
+    region: 'Bolgheri, Tuscany',
+    vintage: 2019,
+    wine_type: 'Red',
+    grape_variety: '62% Cabernet Sauvignon, 31% Merlot, 4% Petit Verdot, 3% Cabernet Franc',
+    alcohol_percentage: 14.5,
+    sweetness: 'Dry',
+    body: 'Full',
+    price: 24800,
+    original_price: 27500,
+    stock: 4, // Low stock: 4 bottles left
+    image: '/images/product_san_pietro_brunello.jpg',
+    images: [
+      '/images/region_tuscany_hills.jpg',
+      '/images/pairing_prime_ribeye_steak.jpg'
+    ],
+    bottle_color: '#3a0913',
+    accent_color: '#dfbe76',
+    description: 'The aristocrat of the Tuscan coast. Harmonious black currant, dark chocolate, balsamic rosemary, and silky Mediterranean tannins shaped by sea breezes.',
+    rating: 4.9,
+    reviews_count: 39,
+    featured: true,
+    category_id: 'cat-red',
+    tasting_notes: {
+      aroma: ['Cassis', 'Dark Chocolate Ganache', 'Balsamic Eucalyptus', 'Warm Cedar'],
+      palate: 'Opulent and multi-layered with silky tannins wrapped around ripe black fruit and mineral tension.',
+      finish: 'Long, polished, and noble.'
+    },
+    food_pairings: ['Bistecca alla Fiorentina', 'Roast Squab with Porcini', 'Pecorino Toscano Stagionato'],
+    serving_temp: '16–18°C (60–64°F)',
+    decanting: 'Decant for 60 minutes'
+  },
+  {
+    product_id: 'prod-032',
+    name: 'Schrader Cellars Beckstoffer To Kalon Cabernet Sauvignon',
+    winery: 'Schrader Cellars',
+    country: 'USA',
+    region: 'Oakville, Napa Valley, California',
+    vintage: 2019,
+    wine_type: 'Red',
+    grape_variety: '100% Cabernet Sauvignon',
+    alcohol_percentage: 14.8,
+    sweetness: 'Dry',
+    body: 'Full',
+    price: 42000,
+    original_price: 46500,
+    stock: 2, // Low stock: 2 bottles left
+    image: '/images/product_st_helena_napa_cabernet.jpg',
+    images: [
+      '/images/region_napa_valley.jpg',
+      '/images/pairing_prime_ribeye_steak.jpg'
+    ],
+    bottle_color: '#350a11',
+    accent_color: '#dfbe76',
+    description: 'Cult Napa Valley perfection from the legendary Beckstoffer To Kalon vineyard. Inky purple with crusted boysenberry, crème de cassis, graphite, and awe-inspiring power.',
+    rating: 5.0,
+    reviews_count: 22,
+    featured: true,
+    category_id: 'cat-red',
+    tasting_notes: {
+      aroma: ['Crème de Cassis', 'Boysenberry Compote', 'Violets', 'Pencil Lead'],
+      palate: 'Monumental purity of fruit with velvety, multi-layered tannins that glide effortlessly across the palate.',
+      finish: 'Profoundly long with echoes of black fruit and volcanic graphite.'
+    },
+    food_pairings: ['Dry-Aged Bone-in Ribeye', 'Venison Chop with Juniper', 'Roquefort Cheese'],
+    serving_temp: '17–18°C (62–64°F)',
+    decanting: 'Decant for 90 minutes'
   }
 ];
 
@@ -619,9 +1327,104 @@ export const DAVAO_BRANCHES: DavaoBranch[] = [
 
 export const INITIAL_USER: User | null = null;
 
-export const INITIAL_REGISTERED_USERS: User[] = [];
+export const INITIAL_REGISTERED_USERS: User[] = [
+  {
+    user_id: 'usr-kent-rabago',
+    name: 'Kent Jorich Rabago',
+    email: 'kentrabago38@gmail.com',
+    phone: '09178463201',
+    password: 'KentRabago2026!',
+    role: 'customer',
+    avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80',
+    member_since: 'Nov 2024',
+    date_of_birth: '1996-08-14',
+    favorite_davao_branch: 'VÍNEA Davao Flagship Cellar (Lanang)',
+    membership_tier: 'Sommelier Reserve',
+    loyalty_points: 9450,
+    lifetime_points: 14200,
+    bio: 'Sommelier and fine wine collector based in Davao City. Collecting Left Bank Bordeaux, Super Tuscans, and rare vintage Champagne.',
+    delivery_instructions: 'Handle with extreme cold-chain care. Ring doorbell and deliver to front concierge.',
+    preferred_wine_types: ['Red', 'Sparkling'],
+    flavor_preference: 'Bold, structured, mineral-driven with velvet tannins',
+    saved_addresses: [
+      {
+        street: 'Penthouse Suite 14, Lanang Premiere Luxury Residences, J.P. Laurel Avenue',
+        city: 'Davao City',
+        state: 'Davao del Sur',
+        postalCode: '8000',
+        country: 'Philippines'
+      }
+    ],
+    rewards_history: [
+      {
+        id: 'hist-01',
+        date: 'Oct 28, 2026',
+        title: 'Sommelier Reserve Tier Elevation',
+        description: 'Unlocked Sommelier Reserve status with lifetime allocation perks and 2.0x points multiplier.',
+        points: 5000,
+        type: 'bonus'
+      },
+      {
+        id: 'hist-02',
+        date: 'Nov 02, 2026',
+        title: 'Bordeaux Premier Cru Allocation',
+        description: 'Château Margaux & Sassicaia private cellar allocation order completed.',
+        points: 4450,
+        type: 'order'
+      }
+    ]
+  }
+];
 
-export const INITIAL_ORDERS: Order[] = [];
+export const INITIAL_ORDERS: Order[] = [
+  {
+    order_id: 'VNX-DVO-98421',
+    user_id: 'usr-kent-rabago',
+    customer_name: 'Kent Jorich Rabago',
+    email: 'kentrabago38@gmail.com',
+    phone: '09178463201',
+    order_date: 'November 11, 2026',
+    subtotal: 95300,
+    shipping: 0,
+    discount: 0,
+    total_amount: 95300,
+    payment_method: 'Credit/Debit Card',
+    delivery_address: {
+      street: 'Penthouse Suite 14, Lanang Premiere Luxury Residences, J.P. Laurel Avenue',
+      city: 'Davao City',
+      state: 'Davao del Sur',
+      postalCode: '8000',
+      country: 'Philippines'
+    },
+    status: 'Shipped',
+    tracking_number: 'VNX-DVO-98421',
+    estimated_delivery: 'Today by 5:30 PM (Climate-Controlled Van #03)',
+    items: [
+      {
+        order_item_id: 'item-kent-01',
+        product_id: 'prod-013',
+        name: 'Château Margaux Premier Grand Cru Classé',
+        winery: 'Château Margaux',
+        vintage: 2015,
+        quantity: 1,
+        price: 68500,
+        image: '/images/product_chateau_lumiere_cabernet.jpg',
+        wine_type: 'Red'
+      },
+      {
+        order_item_id: 'item-kent-02',
+        product_id: 'prod-014',
+        name: 'Tenuta San Guido Sassicaia Bolgheri',
+        winery: 'Tenuta San Guido',
+        vintage: 2019,
+        quantity: 1,
+        price: 26800,
+        image: '/images/product_san_pietro_brunello.jpg',
+        wine_type: 'Red'
+      }
+    ]
+  }
+];
 
 export const INITIAL_REVIEWS: Review[] = [
   {
