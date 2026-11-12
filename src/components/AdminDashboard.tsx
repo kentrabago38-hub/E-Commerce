@@ -914,7 +914,7 @@ export const AdminDashboard: React.FC = () => {
                   </div>
                   <h4 className="font-serif text-lg text-white mb-1">Seed Catalog to Cloud</h4>
                   <p className="text-xs text-[#918481] mb-3">
-                    Upload all 12 vintage allocations, pricing, tasting notes, grape varieties, and 6 categories to <code className="text-[#D5B15C]">public.products</code> and <code className="text-[#D5B15C]">public.categories</code>.
+                    Upload all {products.length} verified vintage allocations, pricing, tasting notes, grape varieties, and {categories.length} categories to <code className="text-[#D5B15C]">public.products</code> and <code className="text-[#D5B15C]">public.categories</code>.
                   </p>
                   <div className="text-[11px] text-[#C1B7B4] bg-black/40 p-2.5 rounded border border-[#2b161f] font-mono mb-4">
                     <span>{products.length} Products</span> · <span>{categories.length} Categories</span>

@@ -100,7 +100,7 @@ let inMemoryOrders = loadJsonFile(ORDERS_FILE, [...INITIAL_ORDERS]);
 let inMemoryUsers = loadJsonFile(USERS_FILE, [...INITIAL_REGISTERED_USERS]);
 let inMemoryReviews = loadJsonFile(REVIEWS_FILE, [...INITIAL_REVIEWS]);
 
-// Ensure all 22 catalog products are present in inMemoryProducts
+// Ensure all catalog products from INITIAL_PRODUCTS are present in inMemoryProducts
 const existingProdIds = new Set(inMemoryProducts.map((p: any) => p.product_id));
 const missingProds = INITIAL_PRODUCTS.filter(p => !existingProdIds.has(p.product_id));
 if (missingProds.length > 0) {

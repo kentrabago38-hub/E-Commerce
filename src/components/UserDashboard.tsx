@@ -223,23 +223,6 @@ export const UserDashboard: React.FC = () => {
               Create New Account
             </button>
           </div>
-
-          {/* Quick One-Click Defense Presentation Demo Sign-In */}
-          <div className="pt-6 border-t border-white/10 mt-6 max-w-md mx-auto">
-            <span className="text-[11px] text-[#B7AAA1] block mb-2 font-medium">
-              Evaluator & Defense Demo Access:
-            </span>
-            <button
-              type="button"
-              onClick={() => {
-                loginCustomer('kentrabago38@gmail.com', 'KentRabago2026!');
-              }}
-              className="w-full py-3 px-6 rounded-xl bg-gradient-to-r from-[#2A0E14] via-[#861F32] to-[#2A0E14] hover:brightness-110 text-[#E5D7B7] hover:text-white border border-[#D5B15C]/60 text-xs font-semibold uppercase tracking-wider flex items-center justify-center gap-2 transition-all cursor-pointer shadow-xl shadow-black/80 group"
-            >
-              <Sparkles className="w-4 h-4 text-[#D5B15C] group-hover:rotate-12 transition-transform" />
-              <span>One-Click Sign In as Sommelier Kent Jorich</span>
-            </button>
-          </div>
         </div>
       </div>
     );

@@ -184,7 +184,7 @@ export interface CatalogSyncResult {
 }
 
 /**
- * Uploads/syncs all 12 wines, 6 categories, customer profiles, reviews, and sample orders to Supabase.
+ * Uploads/syncs all luxury wines, categories, customer profiles, reviews, and sample orders to Supabase.
  */
 export async function syncAllCatalogToSupabase(): Promise<CatalogSyncResult> {
   if (!isSupabaseConfigured) {
@@ -269,7 +269,32 @@ export async function syncAllCatalogToSupabase(): Promise<CatalogSyncResult> {
 }
 
 /**
- * Seed initial sample catalog data into Supabase if tables are empty.
+ * Upserts a list of products (defaults to INITIAL_PRODUCTS) into Supabase products table.
+ */
+export async function syncCatalogProductsToSupabase(
+  productsToSync: Product[] = INITIAL_PRODUCTS
+): Promise<{ success: boolean; count: number; error?: string }> {
+  if (!isSupabaseConfigured) {
+    return { success: false, count: 0, error: 'Supabase credentials not configured' };
+  }
+  try {
+    const formatted = productsToSync.map(formatProductForSupabase);
+    const { error } = await supabase
+      .from(PRODUCTS_TABLE)
+      .upsert(formatted, { onConflict: 'product_id' });
+    if (error) throw error;
+    console.log(`[Supabase Catalog Sync] Upserted ${productsToSync.length} luxury wine allocations to Supabase.`);
+    return { success: true, count: productsToSync.length };
+  } catch (err: any) {
+    const msg = err instanceof Error ? err.message : String(err);
+    console.warn('[Supabase Products Upsert Warning]:', msg);
+    return { success: false, count: 0, error: msg };
+  }
+}
+
+/**
+ * Seed initial sample catalog data into Supabase if tables are empty,
+ * or auto-heal partial catalogs (e.g. when only 12 products exist in Supabase).
  */
 export async function seedInitialDataIfEmpty(): Promise<CatalogSyncResult | null> {
   if (!isSupabaseConfigured) {
@@ -280,12 +305,21 @@ export async function seedInitialDataIfEmpty(): Promise<CatalogSyncResult | null
   try {
     const { data: existingProducts, error: prodErr } = await supabase
       .from(PRODUCTS_TABLE)
-      .select('product_id')
-      .limit(1);
+      .select('product_id');
 
-    if (!prodErr && (!existingProducts || existingProducts.length === 0)) {
-      console.log('Database tables detected empty in Supabase. Auto-seeding initial VÍNEA catalog...');
-      return await syncAllCatalogToSupabase();
+    if (!prodErr) {
+      if (!existingProducts || existingProducts.length === 0) {
+        console.log('Database tables detected empty in Supabase. Auto-seeding initial VÍNEA catalog...');
+        return await syncAllCatalogToSupabase();
+      } else if (existingProducts.length < INITIAL_PRODUCTS.length) {
+        // Table exists but only has partial products (e.g. legacy 12 products)
+        const existingSet = new Set((existingProducts as Array<{ product_id: string }>).map((p) => p.product_id));
+        const missing = INITIAL_PRODUCTS.filter((p) => !existingSet.has(p.product_id));
+        if (missing.length > 0) {
+          console.log(`[Supabase Catalog Auto-Heal] Seeding ${missing.length} missing wines to complete catalog...`);
+          await syncCatalogProductsToSupabase(missing);
+        }
+      }
     }
     return null;
   } catch (error) {

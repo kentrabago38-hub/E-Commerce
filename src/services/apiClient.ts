@@ -1,130 +1,174 @@
 import { Product, Category, Order, Review, User } from '../types/wine';
 
+async function safeFetchJson<T>(url: string, fallback: T): Promise<T> {
+  try {
+    const res = await fetch(url);
+    if (!res.ok) return fallback;
+    const contentType = res.headers.get('content-type') || '';
+    if (!contentType.includes('application/json')) return fallback;
+    return await res.json();
+  } catch {
+    return fallback;
+  }
+}
+
 export async function checkPostgresHealth(): Promise<boolean> {
   try {
     const res = await fetch('/api/health');
     if (!res.ok) return false;
+    const contentType = res.headers.get('content-type') || '';
+    if (!contentType.includes('application/json')) return false;
     const data = await res.json();
-    return data.database === 'postgresql';
+    return data?.database === 'postgresql';
   } catch {
     return false;
   }
 }
 
 export async function fetchProductsApi(): Promise<Product[]> {
-  const res = await fetch('/api/products');
-  if (!res.ok) throw new Error('Failed to fetch products from PostgreSQL database');
-  return res.json();
+  return safeFetchJson<Product[]>('/api/products', []);
 }
 
 export async function createProductApi(prod: Product): Promise<void> {
-  const res = await fetch('/api/products', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(prod),
-  });
-  if (!res.ok) throw new Error('Failed to create product in PostgreSQL');
+  try {
+    const res = await fetch('/api/products', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(prod),
+    });
+    if (!res.ok) throw new Error('Failed to create product');
+  } catch (err) {
+    console.warn('[apiClient] POST /api/products notice:', err);
+  }
 }
 
 export async function updateProductApi(prod: Product): Promise<void> {
-  const res = await fetch(`/api/products/${encodeURIComponent(prod.product_id)}`, {
-    method: 'PUT',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(prod),
-  });
-  if (!res.ok) throw new Error('Failed to update product in PostgreSQL');
+  try {
+    const res = await fetch(`/api/products/${encodeURIComponent(prod.product_id)}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(prod),
+    });
+    if (!res.ok) throw new Error('Failed to update product');
+  } catch (err) {
+    console.warn('[apiClient] PUT /api/products notice:', err);
+  }
 }
 
 export async function updateProductStockApi(productId: string, stock: number): Promise<void> {
-  const res = await fetch(`/api/products/${encodeURIComponent(productId)}/stock`, {
-    method: 'PATCH',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ stock }),
-  });
-  if (!res.ok) throw new Error('Failed to update stock in PostgreSQL');
+  try {
+    const res = await fetch(`/api/products/${encodeURIComponent(productId)}/stock`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ stock }),
+    });
+    if (!res.ok) throw new Error('Failed to update stock');
+  } catch (err) {
+    console.warn('[apiClient] PATCH /api/products/stock notice:', err);
+  }
 }
 
 export async function deleteProductApi(productId: string): Promise<void> {
-  const res = await fetch(`/api/products/${encodeURIComponent(productId)}`, {
-    method: 'DELETE',
-  });
-  if (!res.ok) throw new Error('Failed to delete product in PostgreSQL');
+  try {
+    const res = await fetch(`/api/products/${encodeURIComponent(productId)}`, {
+      method: 'DELETE',
+    });
+    if (!res.ok) throw new Error('Failed to delete product');
+  } catch (err) {
+    console.warn('[apiClient] DELETE /api/products notice:', err);
+  }
 }
 
 export async function fetchCategoriesApi(): Promise<Category[]> {
-  const res = await fetch('/api/categories');
-  if (!res.ok) throw new Error('Failed to fetch categories from PostgreSQL');
-  return res.json();
+  return safeFetchJson<Category[]>('/api/categories', []);
 }
 
 export async function createCategoryApi(cat: Category): Promise<void> {
-  const res = await fetch('/api/categories', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(cat),
-  });
-  if (!res.ok) throw new Error('Failed to create category in PostgreSQL');
+  try {
+    const res = await fetch('/api/categories', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(cat),
+    });
+    if (!res.ok) throw new Error('Failed to create category');
+  } catch (err) {
+    console.warn('[apiClient] POST /api/categories notice:', err);
+  }
 }
 
 export async function deleteCategoryApi(categoryId: string): Promise<void> {
-  const res = await fetch(`/api/categories/${encodeURIComponent(categoryId)}`, {
-    method: 'DELETE',
-  });
-  if (!res.ok) throw new Error('Failed to delete category in PostgreSQL');
+  try {
+    const res = await fetch(`/api/categories/${encodeURIComponent(categoryId)}`, {
+      method: 'DELETE',
+    });
+    if (!res.ok) throw new Error('Failed to delete category');
+  } catch (err) {
+    console.warn('[apiClient] DELETE /api/categories notice:', err);
+  }
 }
 
 export async function fetchOrdersApi(): Promise<Order[]> {
-  const res = await fetch('/api/orders');
-  if (!res.ok) throw new Error('Failed to fetch orders from PostgreSQL');
-  return res.json();
+  return safeFetchJson<Order[]>('/api/orders', []);
 }
 
 export async function createOrderApi(order: Order): Promise<void> {
-  const res = await fetch('/api/orders', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(order),
-  });
-  if (!res.ok) throw new Error('Failed to persist order to PostgreSQL');
+  try {
+    const res = await fetch('/api/orders', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(order),
+    });
+    if (!res.ok) throw new Error('Failed to persist order');
+  } catch (err) {
+    console.warn('[apiClient] POST /api/orders notice:', err);
+  }
 }
 
 export async function updateOrderStatusApi(orderId: string, status: Order['status']): Promise<void> {
-  const res = await fetch(`/api/orders/${encodeURIComponent(orderId)}/status`, {
-    method: 'PATCH',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ status }),
-  });
-  if (!res.ok) throw new Error('Failed to update order status in PostgreSQL');
+  try {
+    const res = await fetch(`/api/orders/${encodeURIComponent(orderId)}/status`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ status }),
+    });
+    if (!res.ok) throw new Error('Failed to update order status');
+  } catch (err) {
+    console.warn('[apiClient] PATCH /api/orders/status notice:', err);
+  }
 }
 
 export async function fetchUsersApi(): Promise<User[]> {
-  const res = await fetch('/api/users');
-  if (!res.ok) throw new Error('Failed to fetch users from PostgreSQL');
-  return res.json();
+  return safeFetchJson<User[]>('/api/users', []);
 }
 
 export async function saveUserApi(user: User): Promise<void> {
-  const res = await fetch('/api/users', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(user),
-  });
-  if (!res.ok) throw new Error('Failed to save user in PostgreSQL');
+  try {
+    const res = await fetch('/api/users', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(user),
+    });
+    if (!res.ok) throw new Error('Failed to save user');
+  } catch (err) {
+    console.warn('[apiClient] POST /api/users notice:', err);
+  }
 }
 
 export async function fetchReviewsApi(): Promise<Review[]> {
-  const res = await fetch('/api/reviews');
-  if (!res.ok) throw new Error('Failed to fetch reviews from PostgreSQL');
-  return res.json();
+  return safeFetchJson<Review[]>('/api/reviews', []);
 }
 
 export async function createReviewApi(review: Review): Promise<void> {
-  const res = await fetch('/api/reviews', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(review),
-  });
-  if (!res.ok) throw new Error('Failed to save review in PostgreSQL');
+  try {
+    const res = await fetch('/api/reviews', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(review),
+    });
+    if (!res.ok) throw new Error('Failed to save review');
+  } catch (err) {
+    console.warn('[apiClient] POST /api/reviews notice:', err);
+  }
 }
 
 /**

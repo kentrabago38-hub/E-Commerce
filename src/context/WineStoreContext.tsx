@@ -31,6 +31,7 @@ import { isSupabaseConfigured } from '../lib/supabase';
 import {
   seedInitialDataIfEmpty,
   syncAllCatalogToSupabase,
+  syncCatalogProductsToSupabase,
   CatalogSyncResult,
   subscribeToProducts,
   subscribeToCategories,
@@ -556,6 +557,13 @@ export const WineStoreProvider: React.FC<{ children: ReactNode }> = ({ children 
               extraLocalProds.forEach(ep => createProductApi(ep).catch(() => {}));
             }
 
+            // Ensure catalog is never truncated if backend had only partial items
+            const currentIds = new Set(mergedProducts.map(p => p.product_id));
+            const missingFromCatalog = INITIAL_PRODUCTS.filter(p => !currentIds.has(p.product_id));
+            if (missingFromCatalog.length > 0) {
+              mergedProducts.push(...missingFromCatalog);
+            }
+
             setProducts(mergedProducts);
           }
           if (pgCategories && pgCategories.length > 0) {
@@ -639,7 +647,28 @@ export const WineStoreProvider: React.FC<{ children: ReactNode }> = ({ children 
     if (isSupabaseConfigured) {
       setIsSupabaseConnected(true);
       unsubProducts = subscribeToProducts((fresh) => {
-        if (fresh && fresh.length > 0 && isMounted) setProducts(fresh);
+        if (fresh && fresh.length > 0 && isMounted) {
+          const freshMap = new Map(fresh.map((p) => [p.product_id, p]));
+          // Merge with INITIAL_PRODUCTS so any products not yet in Supabase are preserved
+          const complete = INITIAL_PRODUCTS.map((initProd) => {
+            return freshMap.get(initProd.product_id) || initProd;
+          });
+          // Also append any new custom products created in Supabase
+          fresh.forEach((fp) => {
+            if (!complete.some((m) => m.product_id === fp.product_id)) {
+              complete.push(fp);
+            }
+          });
+          setProducts(complete);
+
+          // Auto-sync missing items up to Supabase if Supabase was only partially seeded (e.g. 12 items)
+          const missing = INITIAL_PRODUCTS.filter((p) => !freshMap.has(p.product_id));
+          if (missing.length > 0) {
+            syncCatalogProductsToSupabase(missing).catch((err) => {
+              console.warn('[Auto-sync missing products to Supabase notice]:', err);
+            });
+          }
+        }
       });
       unsubCats = subscribeToCategories((fresh) => {
         if (fresh && fresh.length > 0 && isMounted) setCategories(fresh);
