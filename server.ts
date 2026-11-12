@@ -180,7 +180,10 @@ app.put('/api/products/:id', async (req: Request, res: Response) => {
     if (hasPostgres) {
       await updateProductRecord(req.body);
     }
-    inMemoryProducts = inMemoryProducts.map((p) => (p.product_id === req.body.product_id ? req.body : p));
+    const targetId = req.params.id || req.body.product_id;
+    inMemoryProducts = inMemoryProducts.map((p) =>
+      p.product_id === targetId ? { ...p, ...req.body } : p
+    );
     saveJsonFile(PRODUCTS_FILE, inMemoryProducts);
     res.json({ success: true, product: req.body });
   } catch (error: any) {

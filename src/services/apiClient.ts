@@ -172,32 +172,86 @@ export async function createReviewApi(review: Review): Promise<void> {
 }
 
 /**
+ * Compresses an image file or base64 data URL to an optimized JPEG (max 1200px, 0.88 quality).
+ * Keeps payload lightweight (~80-120KB) and prevents browser storage quota issues.
+ */
+export async function optimizeImageClientSide(
+  fileOrDataUrl: File | string,
+  maxDimension = 1200,
+  quality = 0.88
+): Promise<string> {
+  if (typeof window === 'undefined' || typeof document === 'undefined') {
+    return typeof fileOrDataUrl === 'string' ? fileOrDataUrl : '';
+  }
+
+  let rawDataUrl = '';
+  if (typeof fileOrDataUrl === 'string') {
+    if (!fileOrDataUrl.startsWith('data:image')) {
+      return fileOrDataUrl;
+    }
+    rawDataUrl = fileOrDataUrl;
+  } else {
+    rawDataUrl = await new Promise<string>((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = () => reject(new Error('Failed to read image file'));
+      reader.readAsDataURL(fileOrDataUrl);
+    });
+  }
+
+  return new Promise<string>((resolve) => {
+    const img = new Image();
+    img.onload = () => {
+      let { width, height } = img;
+      if (width > maxDimension || height > maxDimension) {
+        if (width > height) {
+          height = Math.round((height * maxDimension) / width);
+          width = maxDimension;
+        } else {
+          width = Math.round((width * maxDimension) / height);
+          height = maxDimension;
+        }
+      }
+      const canvas = document.createElement('canvas');
+      canvas.width = width;
+      canvas.height = height;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) {
+        resolve(rawDataUrl);
+        return;
+      }
+      ctx.drawImage(img, 0, 0, width, height);
+      try {
+        const compressed = canvas.toDataURL('image/jpeg', quality);
+        resolve(compressed);
+      } catch {
+        resolve(rawDataUrl);
+      }
+    };
+    img.onerror = () => resolve(rawDataUrl);
+    img.src = rawDataUrl;
+  });
+}
+
+/**
  * Upload an image (File or Base64 data URL) to the backend server.
- * Returns the permanent public image URL (e.g. /images/uploads/wine_...).
+ * Returns the permanent public image URL (e.g. /images/uploads/wine_...) or optimized persistent data URL.
  */
 export async function uploadImageApi(
   fileOrDataUrl: File | string,
   filename?: string
 ): Promise<string> {
-  let base64String = '';
-  let fname = filename || 'wine_photo';
-
-  if (typeof fileOrDataUrl === 'string') {
-    base64String = fileOrDataUrl;
-  } else if (fileOrDataUrl instanceof File) {
-    fname = fileOrDataUrl.name;
-    base64String = await new Promise<string>((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = () => resolve(reader.result as string);
-      reader.onerror = () => reject(new Error('Failed to read file from disk'));
-      reader.readAsDataURL(fileOrDataUrl);
-    });
-  }
-
   // If already a static URL (e.g. /images/...), return as is
-  if (base64String.startsWith('/images/')) {
-    return base64String;
+  if (typeof fileOrDataUrl === 'string' && (fileOrDataUrl.startsWith('/images/') || fileOrDataUrl.startsWith('http'))) {
+    return fileOrDataUrl;
   }
+
+  let fname = filename || 'wine_photo';
+  if (fileOrDataUrl instanceof File) {
+    fname = fileOrDataUrl.name;
+  }
+
+  const base64String = await optimizeImageClientSide(fileOrDataUrl);
 
   try {
     const res = await fetch('/api/upload', {
@@ -210,13 +264,18 @@ export async function uploadImageApi(
       throw new Error(`Upload server responded with HTTP ${res.status}`);
     }
 
+    const contentType = res.headers.get('content-type') || '';
+    if (!contentType.includes('application/json')) {
+      throw new Error('Upload response was not JSON');
+    }
+
     const data = await res.json();
     if (data.url && typeof data.url === 'string') {
       return data.url;
     }
     throw new Error('Upload server did not return a valid file URL');
   } catch (err) {
-    console.warn('Backend image upload notice (using fallback):', err);
+    console.info('[apiClient] Backend upload fallback: using client-side optimized photo data');
     return base64String;
   }
 }

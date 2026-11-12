@@ -57,6 +57,12 @@ import {
   validateAddress,
   validateFullName
 } from '../utils/validation';
+import {
+  saveCustomPhoto,
+  deleteCustomPhoto,
+  getAllCustomPhotosSync,
+  loadAllCustomPhotosFromDb
+} from '../utils/customPhotoStorage';
 
 
 export type NavTab = 'home' | 'shop' | 'red' | 'white' | 'rose' | 'sparkling' | 'collections' | 'branches' | 'about' | 'guide' | 'account' | 'admin';
@@ -206,15 +212,15 @@ export const WineStoreProvider: React.FC<{ children: ReactNode }> = ({ children 
           base = [...parsed, ...missing];
         }
       }
-      const customImages = localStorage.getItem('vinea_product_custom_images');
-      if (customImages) {
-        const customMap = JSON.parse(customImages);
+      const customPhotos = getAllCustomPhotosSync();
+      if (customPhotos && Object.keys(customPhotos).length > 0) {
         base = base.map((p: Product) => {
-          if (customMap[p.product_id]) {
+          const custom = customPhotos[p.product_id];
+          if (custom && custom.image) {
             return {
               ...p,
-              image: customMap[p.product_id].image || p.image,
-              images: customMap[p.product_id].images || p.images
+              image: custom.image,
+              images: custom.images && custom.images.length > 0 ? custom.images : p.images
             };
           }
           return p;
@@ -501,6 +507,9 @@ export const WineStoreProvider: React.FC<{ children: ReactNode }> = ({ children 
           showToast(`Supabase tables were empty: Auto-seeded ${seedResult.productsCount} luxury wines & ${seedResult.categoriesCount} categories!`, 'success');
         }
 
+        // Pre-load durable custom product photos from IndexedDB & Memory
+        const dbPhotos = await loadAllCustomPhotosFromDb();
+
         // Fetch persisted data from PostgreSQL / Supabase backend
         const [pgProducts, pgCategories, pgOrders, pgUsers, pgReviews] = await Promise.all([
           fetchProductsApi(),
@@ -512,12 +521,6 @@ export const WineStoreProvider: React.FC<{ children: ReactNode }> = ({ children 
 
         if (isMounted) {
           if (pgProducts && pgProducts.length > 0) {
-            let customMap: Record<string, { image?: string; images?: string[] }> = {};
-            try {
-              const savedMap = localStorage.getItem('vinea_product_custom_images');
-              if (savedMap) customMap = JSON.parse(savedMap);
-            } catch {}
-
             let localProds: Product[] = [];
             try {
               const savedProds = localStorage.getItem('vinea_products');
@@ -525,27 +528,32 @@ export const WineStoreProvider: React.FC<{ children: ReactNode }> = ({ children 
             } catch {}
 
             const mergedProducts = pgProducts.map((p) => {
-              const customInfo = customMap[p.product_id];
+              const customInfo = dbPhotos[p.product_id] || getAllCustomPhotosSync()[p.product_id];
               const localMatch = localProds.find(lp => lp.product_id === p.product_id);
 
-              // If backend already has uploaded photo, keep it
+              // 1. Highest priority: user custom photo
+              if (customInfo && customInfo.image) {
+                return {
+                  ...p,
+                  image: customInfo.image,
+                  images: customInfo.images && customInfo.images.length > 0 ? customInfo.images : p.images
+                };
+              }
+
+              // 2. Uploaded photo in backend
               if (p.image && p.image.includes('/images/uploads/')) {
                 return p;
               }
 
-              const customImage = customInfo?.image || (localMatch?.image && localMatch.image !== p.image ? localMatch.image : undefined);
-              const customGallery = customInfo?.images || (localMatch?.images && localMatch.images.length > 0 ? localMatch.images : undefined);
-
-              if (customImage || customGallery) {
-                const updated = {
+              // 3. Local match photo
+              if (localMatch?.image && localMatch.image !== p.image) {
+                return {
                   ...p,
-                  image: customImage || p.image,
-                  images: customGallery || p.images
+                  image: localMatch.image,
+                  images: localMatch.images && localMatch.images.length > 0 ? localMatch.images : p.images
                 };
-                // Ensure backend also receives this custom image
-                updateProductApi(updated).catch(() => {});
-                return updated;
               }
+
               return p;
             });
 
@@ -564,7 +572,36 @@ export const WineStoreProvider: React.FC<{ children: ReactNode }> = ({ children 
               mergedProducts.push(...missingFromCatalog);
             }
 
-            setProducts(mergedProducts);
+            // Final guarantee pass: all custom photos remain applied
+            const finalMerged = mergedProducts.map((p) => {
+              const custom = dbPhotos[p.product_id] || getAllCustomPhotosSync()[p.product_id];
+              if (custom && custom.image) {
+                return {
+                  ...p,
+                  image: custom.image,
+                  images: custom.images && custom.images.length > 0 ? custom.images : p.images
+                };
+              }
+              return p;
+            });
+
+            setProducts(finalMerged);
+          } else {
+            // When backend is unavailable (e.g. static host/Vercel without Express),
+            // ensure any photos from IndexedDB are actively applied
+            if (Object.keys(dbPhotos).length > 0) {
+              setProducts(prev => prev.map(p => {
+                const custom = dbPhotos[p.product_id];
+                if (custom && custom.image) {
+                  return {
+                    ...p,
+                    image: custom.image,
+                    images: custom.images && custom.images.length > 0 ? custom.images : p.images
+                  };
+                }
+                return p;
+              }));
+            }
           }
           if (pgCategories && pgCategories.length > 0) {
             setCategories(pgCategories);
@@ -649,16 +686,34 @@ export const WineStoreProvider: React.FC<{ children: ReactNode }> = ({ children 
       unsubProducts = subscribeToProducts((fresh) => {
         if (fresh && fresh.length > 0 && isMounted) {
           const freshMap = new Map(fresh.map((p) => [p.product_id, p]));
+          const customPhotos = getAllCustomPhotosSync();
+
           // Merge with INITIAL_PRODUCTS so any products not yet in Supabase are preserved
           const complete = INITIAL_PRODUCTS.map((initProd) => {
-            return freshMap.get(initProd.product_id) || initProd;
+            const raw = freshMap.get(initProd.product_id) || initProd;
+            const custom = customPhotos[raw.product_id];
+            if (custom && custom.image) {
+              return {
+                ...raw,
+                image: custom.image,
+                images: custom.images && custom.images.length > 0 ? custom.images : raw.images
+              };
+            }
+            return raw;
           });
+
           // Also append any new custom products created in Supabase
           fresh.forEach((fp) => {
             if (!complete.some((m) => m.product_id === fp.product_id)) {
-              complete.push(fp);
+              const custom = customPhotos[fp.product_id];
+              complete.push(
+                custom && custom.image
+                  ? { ...fp, image: custom.image, images: custom.images && custom.images.length > 0 ? custom.images : fp.images }
+                  : fp
+              );
             }
           });
+
           setProducts(complete);
 
           // Auto-sync missing items up to Supabase if Supabase was only partially seeded (e.g. 12 items)
