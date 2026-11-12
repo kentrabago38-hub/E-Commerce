@@ -1,4 +1,4 @@
-import { MemberPerk, LoyaltyTier, LoyaltyHistoryItem } from '../types/wine';
+import { MemberPerk, LoyaltyTier, LoyaltyHistoryItem, User, Order, UserVoucher, VoucherDiscountType } from '../types/wine';
 
 export interface TierInfo {
   tier: LoyaltyTier;
@@ -241,4 +241,123 @@ export function determineTierFromPoints(points: number): LoyaltyTier {
     return 'Grand Cru';
   }
   return 'Connoisseur';
+}
+
+export const PUBLIC_PROMO_VOUCHERS: Record<string, UserVoucher> = {
+  VINEA10: {
+    voucher_id: 'promo-vinea10',
+    code: 'VINEA10',
+    title: 'VÍNEA Cellar 10% Privilege',
+    description: '10% courtesy cellar savings on your fine wine order',
+    discount_type: 'percent',
+    discount_value: 10,
+    status: 'active',
+    created_at: 'Seasonal Privilege',
+    is_public_promo: true
+  },
+  SOMMELIER: {
+    voucher_id: 'promo-sommelier',
+    code: 'SOMMELIER',
+    title: 'Sommelier Reserve ₱1,500 Credit',
+    description: '₱1,500 direct cellar allocation deduction',
+    discount_type: 'fixed',
+    discount_value: 1500,
+    status: 'active',
+    created_at: 'Sommelier Privilege',
+    is_public_promo: true
+  }
+};
+
+export interface PerkBenefit {
+  discountType: VoucherDiscountType;
+  discountValue: number;
+  label: string;
+}
+
+export function getPerkBenefit(perkId: string): PerkBenefit {
+  switch (perkId) {
+    case 'perk-voucher-1000':
+      return { discountType: 'fixed', discountValue: 1000, label: '₱1,000 Off' };
+    case 'perk-voucher-2500':
+      return { discountType: 'fixed', discountValue: 2500, label: '₱2,500 Off' };
+    case 'perk-white-glove-delivery':
+      return { discountType: 'free_shipping', discountValue: 350, label: 'Free Cold-Chain Delivery' };
+    case 'perk-sommelier-tasting':
+      return { discountType: 'perk', discountValue: 0, label: 'Private Tasting Pass (2 Guests)' };
+    case 'perk-en-primeur':
+      return { discountType: 'perk', discountValue: 0, label: 'En Primeur Priority Access' };
+    case 'perk-engraved-crate':
+      return { discountType: 'perk', discountValue: 0, label: 'Monogrammed Wooden Crate' };
+    case 'perk-harvest-gala':
+      return { discountType: 'perk', discountValue: 0, label: 'Harvest Gala VIP Pass' };
+    case 'perk-riedel-glassware':
+      return { discountType: 'perk', discountValue: 0, label: 'Riedel Crystal Stemware Pair' };
+    default:
+      return { discountType: 'perk', discountValue: 0, label: 'VIP Cellar Privilege' };
+  }
+}
+
+export function extractUserVouchers(user: User | null, orders: Order[] = []): UserVoucher[] {
+  if (!user) return [];
+
+  const userOrders = orders.filter(
+    o =>
+      o.user_id === user.user_id ||
+      (o.email && user.email && o.email.toLowerCase() === user.email.toLowerCase())
+  );
+
+  const usedCodesMap = new Map<string, { orderId: string; date: string }>();
+  userOrders.forEach(o => {
+    if (o.discount_code && o.discount_code.trim()) {
+      usedCodesMap.set(o.discount_code.trim().toUpperCase(), {
+        orderId: o.order_id,
+        date: o.order_date
+      });
+    }
+  });
+
+  const voucherMap = new Map<string, UserVoucher>();
+
+  (user.vouchers || []).forEach(v => {
+    if (!v || !v.code) return;
+    const upperCode = v.code.trim().toUpperCase();
+    const orderUse = usedCodesMap.get(upperCode);
+    voucherMap.set(upperCode, {
+      ...v,
+      code: upperCode,
+      status: orderUse ? 'used' : v.status,
+      used_at: orderUse ? orderUse.date : v.used_at,
+      order_id: orderUse ? orderUse.orderId : v.order_id
+    });
+  });
+
+  // Backfill any previously redeemed codes stored in rewards_history
+  (user.rewards_history || []).forEach(item => {
+    if (!item.code || !item.code.trim()) return;
+    const upperCode = item.code.trim().toUpperCase();
+    if (voucherMap.has(upperCode)) return;
+
+    const cleanTitle = item.title.replace(/^(Redeemed|Activated):\s*/i, '').trim();
+    const matchedPerk = MEMBER_PERKS.find(
+      p => p.title.toLowerCase() === cleanTitle.toLowerCase() || cleanTitle.toLowerCase().includes(p.title.toLowerCase())
+    );
+    const benefit = getPerkBenefit(matchedPerk?.id || '');
+    const orderUse = usedCodesMap.get(upperCode);
+
+    voucherMap.set(upperCode, {
+      voucher_id: `vch-${item.id}`,
+      code: upperCode,
+      perk_id: matchedPerk?.id,
+      title: matchedPerk?.title || cleanTitle,
+      description: matchedPerk?.tagline || item.description,
+      discount_type: benefit.discountType,
+      discount_value: benefit.discountValue,
+      status: orderUse ? 'used' : 'active',
+      created_at: item.date,
+      used_at: orderUse?.date,
+      order_id: orderUse?.orderId
+    });
+  });
+
+  return Array.from(voucherMap.values());
 }

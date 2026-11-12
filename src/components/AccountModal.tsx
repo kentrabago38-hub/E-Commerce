@@ -166,8 +166,8 @@ export const AccountModal: React.FC = () => {
   // If user is not logged in, show elegant Login / Sign-up invitation screen
   if (!user) {
     return (
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-md p-4 animate-fade-in text-[#F5EFE7]">
-        <div className="relative max-w-md w-full rounded-2xl bg-[#190D10] border border-[#392126] shadow-2xl p-8 text-center">
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-md p-2.5 sm:p-4 animate-fade-in text-[#F5EFE7]">
+        <div className="relative max-w-md w-full rounded-2xl bg-[#190D10] border border-[#392126] shadow-2xl p-5 sm:p-8 text-center">
           <button
             onClick={() => setIsAccountOpen(false)}
             className="absolute top-4 right-4 p-2 rounded-full bg-white/5 hover:bg-white/10 text-[#C1B7B4] hover:text-[#F5EFE7] transition-colors cursor-pointer"
@@ -357,33 +357,33 @@ export const AccountModal: React.FC = () => {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-md p-4 animate-fade-in text-[#F5EFE7]">
-      <div className="relative max-w-5xl w-full max-h-[92vh] overflow-hidden rounded-2xl bg-[#190D10] border border-[#392126] shadow-2xl flex flex-col md:flex-row">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-md p-2 sm:p-4 animate-fade-in text-[#F5EFE7]">
+      <div className="relative max-w-5xl w-full max-h-[94vh] sm:max-h-[92vh] overflow-hidden rounded-2xl bg-[#190D10] border border-[#392126] shadow-2xl flex flex-col md:flex-row">
         {/* Close Button */}
         <button
           onClick={() => setIsAccountOpen(false)}
-          className="absolute top-4 right-4 z-10 p-2 rounded-full bg-white/5 hover:bg-white/10 text-[#C1B7B4] hover:text-white transition-colors cursor-pointer"
+          className="absolute top-3 right-3 sm:top-4 sm:right-4 z-10 p-2 rounded-full bg-white/5 hover:bg-white/10 text-[#C1B7B4] hover:text-white transition-colors cursor-pointer"
           aria-label="Close account modal"
         >
           <X className="w-5 h-5" />
         </button>
 
         {/* Sidebar Nav */}
-        <div className="w-full md:w-72 bg-[#100809] border-b md:border-b-0 md:border-r border-[#392126] p-6 flex flex-col justify-between shrink-0">
+        <div className="w-full md:w-72 bg-[#100809] border-b md:border-b-0 md:border-r border-[#392126] p-4 sm:p-6 flex flex-col justify-between shrink-0">
           <div>
             {/* User Profile Card */}
-            <div className="flex items-center gap-3.5 mb-6 pb-6 border-b border-[#392126]">
+            <div className="flex items-center gap-3.5 mb-3.5 pb-3.5 md:mb-6 md:pb-6 border-b border-[#392126] pr-9 md:pr-0">
               <div className="relative group shrink-0">
                 {(avatarFallback || user.avatar) && !avatarError ? (
                   <img
                     src={avatarFallback || user.avatar}
                     alt={user.name}
                     onError={handleAvatarImgError}
-                    className="w-14 h-14 rounded-full object-cover border-2 border-[#D5B15C]/60 shadow-lg"
+                    className="w-12 h-12 sm:w-14 sm:h-14 rounded-full object-cover border-2 border-[#D5B15C]/60 shadow-lg"
                     referrerPolicy="no-referrer"
                   />
                 ) : (
-                  <div className="w-14 h-14 rounded-full bg-gradient-to-br from-[#7F1427] to-[#3A1018] border border-[#D5B15C]/40 flex items-center justify-center text-[#D5B15C] text-xl font-serif font-bold shadow-lg">
+                  <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-gradient-to-br from-[#7F1427] to-[#3A1018] border border-[#D5B15C]/40 flex items-center justify-center text-[#D5B15C] text-xl font-serif font-bold shadow-lg">
                     {user.name.charAt(0)}
                   </div>
                 )}
@@ -397,7 +397,7 @@ export const AccountModal: React.FC = () => {
               </div>
 
               <div className="min-w-0 flex-1">
-                <h3 className="font-serif text-lg text-[#F5EFE7] font-normal truncate leading-tight">
+                <h3 className="font-serif text-base sm:text-lg text-[#F5EFE7] font-normal truncate leading-tight">
                   {user.name}
                 </h3>
                 <span className="text-[10px] text-[#D5B15C] uppercase tracking-wider font-semibold block mt-0.5 truncate">
@@ -410,25 +410,25 @@ export const AccountModal: React.FC = () => {
             </div>
 
             {/* Navigation Tabs */}
-            <div className="space-y-1 text-xs font-medium">
+            <div className="flex md:flex-col gap-1.5 overflow-x-auto md:overflow-visible pb-1 md:pb-0 -mx-1 px-1 text-xs font-medium">
               <button
                 onClick={() => { setActiveSubTab('orders'); setSelectedOrderForTracking(null); }}
-                className={`w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg transition-colors cursor-pointer ${
+                className={`shrink-0 whitespace-nowrap md:w-full flex items-center gap-2 px-3 py-2 md:py-2.5 rounded-lg transition-colors cursor-pointer ${
                   activeSubTab === 'orders' ? 'bg-[#2A0D14] text-[#D5B15C] border border-[#D5B15C]/35 font-semibold' : 'text-[#C1B7B4] hover:text-white hover:bg-white/5'
                 }`}
               >
-                <Package className="w-4 h-4" />
+                <Package className="w-4 h-4 shrink-0" />
                 <span>My Orders ({userOrders.length})</span>
               </button>
 
               <button
                 onClick={() => setActiveSubTab('rewards')}
-                className={`w-full flex items-center justify-between px-3 py-2.5 rounded-lg transition-colors cursor-pointer ${
+                className={`shrink-0 whitespace-nowrap md:w-full flex items-center justify-between gap-2 px-3 py-2 md:py-2.5 rounded-lg transition-colors cursor-pointer ${
                   activeSubTab === 'rewards' ? 'bg-[#2A0D14] text-[#D5B15C] border border-[#D5B15C]/35 font-semibold' : 'text-[#C1B7B4] hover:text-white hover:bg-white/5'
                 }`}
               >
-                <div className="flex items-center gap-2.5">
-                  <Award className="w-4 h-4 text-[#D5B15C]" />
+                <div className="flex items-center gap-2">
+                  <Award className="w-4 h-4 text-[#D5B15C] shrink-0" />
                   <span>VÍNEA Rewards</span>
                 </div>
                 <span className="px-2 py-0.5 rounded-full bg-[#7F1427] text-[#D5B15C] text-[10px] font-mono border border-[#D5B15C]/40">
@@ -438,61 +438,61 @@ export const AccountModal: React.FC = () => {
 
               <button
                 onClick={() => setActiveSubTab('profile')}
-                className={`w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg transition-colors cursor-pointer ${
+                className={`shrink-0 whitespace-nowrap md:w-full flex items-center gap-2 px-3 py-2 md:py-2.5 rounded-lg transition-colors cursor-pointer ${
                   activeSubTab === 'profile' ? 'bg-[#2A0D14] text-[#D5B15C] border border-[#D5B15C]/35 font-semibold' : 'text-[#C1B7B4] hover:text-white hover:bg-white/5'
                 }`}
               >
-                <UserIcon className="w-4 h-4" />
+                <UserIcon className="w-4 h-4 shrink-0" />
                 <span>Edit Profile Info</span>
               </button>
 
               <button
                 onClick={() => setActiveSubTab('avatar')}
-                className={`w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg transition-colors cursor-pointer ${
+                className={`shrink-0 whitespace-nowrap md:w-full flex items-center gap-2 px-3 py-2 md:py-2.5 rounded-lg transition-colors cursor-pointer ${
                   activeSubTab === 'avatar' ? 'bg-[#2A0D14] text-[#D5B15C] border border-[#D5B15C]/35 font-semibold' : 'text-[#C1B7B4] hover:text-white hover:bg-white/5'
                 }`}
               >
-                <Camera className="w-4 h-4" />
+                <Camera className="w-4 h-4 shrink-0" />
                 <span>Profile Picture</span>
               </button>
 
               <button
                 onClick={() => setActiveSubTab('password')}
-                className={`w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg transition-colors cursor-pointer ${
+                className={`shrink-0 whitespace-nowrap md:w-full flex items-center gap-2 px-3 py-2 md:py-2.5 rounded-lg transition-colors cursor-pointer ${
                   activeSubTab === 'password' ? 'bg-[#2A0D14] text-[#D5B15C] border border-[#D5B15C]/35 font-semibold' : 'text-[#C1B7B4] hover:text-white hover:bg-white/5'
                 }`}
               >
-                <KeyRound className="w-4 h-4" />
+                <KeyRound className="w-4 h-4 shrink-0" />
                 <span>Change Password</span>
               </button>
 
               <button
                 onClick={() => setActiveSubTab('preferences')}
-                className={`w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg transition-colors cursor-pointer ${
+                className={`shrink-0 whitespace-nowrap md:w-full flex items-center gap-2 px-3 py-2 md:py-2.5 rounded-lg transition-colors cursor-pointer ${
                   activeSubTab === 'preferences' ? 'bg-[#2A0D14] text-[#D5B15C] border border-[#D5B15C]/35 font-semibold' : 'text-[#C1B7B4] hover:text-white hover:bg-white/5'
                 }`}
               >
-                <Sparkles className="w-4 h-4" />
+                <Sparkles className="w-4 h-4 shrink-0" />
                 <span>Tasting Preferences</span>
               </button>
 
               <button
                 onClick={() => setActiveSubTab('addresses')}
-                className={`w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg transition-colors cursor-pointer ${
+                className={`shrink-0 whitespace-nowrap md:w-full flex items-center gap-2 px-3 py-2 md:py-2.5 rounded-lg transition-colors cursor-pointer ${
                   activeSubTab === 'addresses' ? 'bg-[#2A0D14] text-[#D5B15C] border border-[#D5B15C]/35 font-semibold' : 'text-[#C1B7B4] hover:text-white hover:bg-white/5'
                 }`}
               >
-                <MapPin className="w-4 h-4" />
+                <MapPin className="w-4 h-4 shrink-0" />
                 <span>Saved Addresses</span>
               </button>
 
               <button
                 onClick={() => setActiveSubTab('wishlist')}
-                className={`w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg transition-colors cursor-pointer ${
+                className={`shrink-0 whitespace-nowrap md:w-full flex items-center gap-2 px-3 py-2 md:py-2.5 rounded-lg transition-colors cursor-pointer ${
                   activeSubTab === 'wishlist' ? 'bg-[#2A0D14] text-[#D5B15C] border border-[#D5B15C]/35 font-semibold' : 'text-[#C1B7B4] hover:text-white hover:bg-white/5'
                 }`}
               >
-                <Heart className="w-4 h-4" />
+                <Heart className="w-4 h-4 shrink-0" />
                 <span>Wishlist ({wishlist.length})</span>
               </button>
 
@@ -501,25 +501,33 @@ export const AccountModal: React.FC = () => {
                   setIsAccountOpen(false);
                   setActiveTab('branches');
                 }}
-                className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-neutral-300 hover:text-[#dfbe76] hover:bg-white/5 transition-colors cursor-pointer text-xs"
+                className="shrink-0 whitespace-nowrap md:w-full flex items-center gap-2 px-3 py-2 md:py-2.5 rounded-lg text-neutral-300 hover:text-[#dfbe76] hover:bg-white/5 transition-colors cursor-pointer text-xs"
               >
-                <Wine className="w-4 h-4 text-[#dfbe76]" />
+                <Wine className="w-4 h-4 text-[#dfbe76] shrink-0" />
                 <span>5 Davao Branches</span>
+              </button>
+
+              <button
+                onClick={logoutCustomer}
+                className="shrink-0 whitespace-nowrap md:hidden flex items-center gap-1.5 px-3 py-2 rounded-lg text-red-300/90 hover:text-red-300 hover:bg-red-950/30 transition-colors cursor-pointer text-xs border border-red-900/40"
+              >
+                <LogOut className="w-3.5 h-3.5 shrink-0" />
+                <span>Sign Out</span>
               </button>
             </div>
           </div>
 
           <button
             onClick={logoutCustomer}
-            className="flex items-center gap-2 px-3 py-2.5 text-xs text-neutral-400 hover:text-red-400 transition-colors mt-6 pt-6 border-t border-white/10 cursor-pointer"
+            className="hidden md:flex items-center gap-2 px-3 py-2.5 text-xs text-neutral-400 hover:text-red-400 transition-colors mt-6 pt-6 border-t border-white/10 cursor-pointer"
           >
-            <LogOut className="w-4 h-4" />
-            <span>Sign Out ({user.email})</span>
+            <LogOut className="w-4 h-4 shrink-0" />
+            <span className="truncate">Sign Out ({user.email})</span>
           </button>
         </div>
 
         {/* Content Pane */}
-        <div className="flex-1 p-6 md:p-8 overflow-y-auto max-h-[80vh] md:max-h-[92vh]">
+        <div className="flex-1 p-4 sm:p-6 md:p-8 overflow-y-auto max-h-[75vh] md:max-h-[92vh]">
           {/* TAB: MY ORDERS */}
           {activeSubTab === 'orders' && (
             <div>
@@ -739,14 +747,14 @@ export const AccountModal: React.FC = () => {
                   />
                 </div>
 
-                <div className="pt-2 flex items-center justify-between">
+                <div className="pt-2 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
                   <div className="flex items-center gap-2 text-[#918481] text-[11px]">
-                    <ShieldCheck className="w-4 h-4 text-[#D5B15C]" />
+                    <ShieldCheck className="w-4 h-4 text-[#D5B15C] shrink-0" />
                     <span>Member since {user.member_since || 'October 2024'}</span>
                   </div>
                   <button
                     type="submit"
-                    className="py-2.5 px-6 rounded-lg bg-[#7F1427] hover:bg-[#8e192f] text-white font-medium text-xs uppercase tracking-wider border border-[#D5B15C]/40 flex items-center gap-2 cursor-pointer shadow-lg transition-colors"
+                    className="w-full sm:w-auto py-2.5 px-6 rounded-lg bg-[#7F1427] hover:bg-[#8e192f] text-white font-medium text-xs uppercase tracking-wider border border-[#D5B15C]/40 flex items-center justify-center gap-2 cursor-pointer shadow-lg transition-colors"
                   >
                     <Save className="w-4 h-4 text-[#D5B15C]" />
                     <span>Save Changes</span>
@@ -765,7 +773,7 @@ export const AccountModal: React.FC = () => {
               </div>
 
               {/* Current Preview */}
-              <div className="p-5 rounded-xl bg-[#100809] border border-[#392126] mb-6 flex items-center gap-5">
+              <div className="p-4 sm:p-5 rounded-xl bg-[#100809] border border-[#392126] mb-6 flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-5">
                 <img
                   src={avatarFallback || selectedAvatarUrl || user.avatar}
                   alt="Avatar Preview"
@@ -1057,7 +1065,7 @@ export const AccountModal: React.FC = () => {
           {/* TAB: SAVED ADDRESSES */}
           {activeSubTab === 'addresses' && (
             <div>
-              <div className="flex items-center justify-between mb-6 pb-4 border-b border-[#2b151f]">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6 pb-4 border-b border-[#2b151f]">
                 <div>
                   <h3 className="font-serif text-2xl text-white font-normal">Saved Delivery Addresses</h3>
                   <p className="text-xs text-neutral-400">Davao City addresses for adult-signature cold-chain delivery.</p>
@@ -1065,7 +1073,7 @@ export const AccountModal: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setShowAddAddress(!showAddAddress)}
-                  className="py-2 px-3.5 rounded-lg bg-[#2a111a] hover:bg-[#3f1929] border border-[#d4af37]/40 text-[#dfbe76] text-xs font-semibold flex items-center gap-1.5 cursor-pointer"
+                  className="self-start sm:self-auto py-2 px-3.5 rounded-lg bg-[#2a111a] hover:bg-[#3f1929] border border-[#d4af37]/40 text-[#dfbe76] text-xs font-semibold flex items-center gap-1.5 cursor-pointer shrink-0"
                 >
                   <Plus className="w-3.5 h-3.5" />
                   <span>Add Address</span>
@@ -1102,7 +1110,7 @@ export const AccountModal: React.FC = () => {
                       </p>
                     )}
                   </div>
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div>
                       <label className="block text-neutral-400 text-[10px] mb-1">District / Barangay</label>
                       <select

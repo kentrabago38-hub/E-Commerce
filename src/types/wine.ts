@@ -106,6 +106,24 @@ export interface Order {
   tracking_number?: string;
 }
 
+export type VoucherDiscountType = 'fixed' | 'percent' | 'free_shipping' | 'perk';
+
+export interface UserVoucher {
+  voucher_id: string;
+  code: string;
+  perk_id?: string;
+  title: string;
+  description: string;
+  discount_type: VoucherDiscountType;
+  discount_value: number;
+  min_spend?: number;
+  status: 'active' | 'used';
+  created_at: string;
+  used_at?: string;
+  order_id?: string;
+  is_public_promo?: boolean;
+}
+
 export interface User {
   user_id: string;
   name: string;
@@ -128,6 +146,7 @@ export interface User {
   lifetime_points?: number;
   redeemed_perks?: string[];
   rewards_history?: LoyaltyHistoryItem[];
+  vouchers?: UserVoucher[];
 }
 
 export type LoyaltyTier = 'Connoisseur' | 'Grand Cru' | 'Sommelier Reserve';

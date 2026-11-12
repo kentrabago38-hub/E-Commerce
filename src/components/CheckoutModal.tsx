@@ -21,7 +21,10 @@ import {
   KeyRound,
   Eye,
   EyeOff,
-  Sparkles
+  Sparkles,
+  Tag,
+  Ticket,
+  Check
 } from 'lucide-react';
 import { getWineImageUrl, handleImageError } from '../utils/imageUtils';
 import { DAVAO_BRANCHES } from '../data/mockData';
@@ -43,10 +46,17 @@ export const CheckoutModal: React.FC = () => {
     user,
     loginCustomer,
     registerCustomer,
-    placeOrder
+    placeOrder,
+    userVouchers,
+    appliedVoucher,
+    applyVoucherCode,
+    removeAppliedVoucher,
+    calculateOrderTotals
   } = useWineStore();
 
   const [step, setStep] = useState<1 | 2 | 3 | 4>(1);
+  const [voucherInput, setVoucherInput] = useState('');
+  const [voucherError, setVoucherError] = useState('');
 
   // Auth gate mode if not logged in
   const [authMode, setAuthMode] = useState<'login' | 'register'>('login');
@@ -114,8 +124,18 @@ export const CheckoutModal: React.FC = () => {
 
   if (!isCheckoutOpen) return null;
 
-  const shippingCost = cartSubtotal >= 5000 ? 0 : 350;
-  const totalAmount = cartSubtotal + shippingCost;
+  const activeWalletVouchers = userVouchers.filter(v => v.status === 'active');
+  const { shippingCost, discountAmount, shippingDiscount, totalAmount } = calculateOrderTotals(cartSubtotal, appliedVoucher);
+
+  const handleApplyVoucher = () => {
+    setVoucherError('');
+    const res = applyVoucherCode(voucherInput);
+    if (res.success) {
+      setVoucherInput('');
+    } else {
+      setVoucherError(res.message);
+    }
+  };
 
   const handleAuthLogin = (e: React.FormEvent) => {
     e.preventDefault();
@@ -290,7 +310,8 @@ export const CheckoutModal: React.FC = () => {
         phone: phoneRes.normalized || phone.trim(),
         subtotal: cartSubtotal,
         shipping: shippingCost,
-        discount: 0,
+        discount: discountAmount,
+        discount_code: appliedVoucher?.code,
         total_amount: totalAmount,
         payment_method: paymentMethod,
         delivery_address: deliveryAddress,
@@ -304,8 +325,8 @@ export const CheckoutModal: React.FC = () => {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-md p-4 animate-fade-in text-[#F5EFE7]">
-      <div className="relative max-w-2xl w-full max-h-[92vh] overflow-y-auto rounded-2xl bg-[#130B0D] border border-[#48151F] shadow-2xl p-6 sm:p-8">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-md p-2 sm:p-4 animate-fade-in text-[#F5EFE7]">
+      <div className="relative max-w-2xl w-full max-h-[92vh] overflow-y-auto rounded-2xl bg-[#130B0D] border border-[#48151F] shadow-2xl p-4 sm:p-8">
         {/* Close Button */}
         <button
           onClick={() => setIsCheckoutOpen(false)}
@@ -483,7 +504,7 @@ export const CheckoutModal: React.FC = () => {
                   )}
                 </div>
 
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
                     <label className="block text-neutral-300 uppercase tracking-wider text-[10px] font-semibold mb-1">
                       Password (6+ chars) *
@@ -534,7 +555,7 @@ export const CheckoutModal: React.FC = () => {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
                     <label className="block text-neutral-300 uppercase tracking-wider text-[10px] font-semibold mb-1">
                       Date of Birth (21+) *
@@ -602,16 +623,16 @@ export const CheckoutModal: React.FC = () => {
           /* ------------------------------------------------------------- */
           <div>
             {/* Header */}
-            <div className="flex items-center justify-between pb-6 mb-6 border-b border-[#2b161f]">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-5 mb-6 border-b border-[#2b161f] pr-8">
               <div>
-                <span className="text-[10px] tracking-[0.25em] text-[#dfbe76] uppercase font-semibold block">
+                <span className="text-[10px] tracking-[0.22em] text-[#dfbe76] uppercase font-semibold block">
                   VÍNEA Private Allocation Checkout
                 </span>
                 <h2 className="font-serif text-2xl sm:text-3xl text-white font-normal">
                   Reserve & Finalize Order
                 </h2>
               </div>
-              <div className="text-right text-xs">
+              <div className="text-left sm:text-right text-xs">
                 <span className="text-neutral-400 block">Logged In As</span>
                 <span className="text-[#dfbe76] font-semibold">{user.name}</span>
               </div>
@@ -793,7 +814,7 @@ export const CheckoutModal: React.FC = () => {
                     )}
                   </div>
 
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div>
                       <label className="block text-neutral-300 uppercase tracking-wider text-[10px] font-semibold mb-1">
                         City *
@@ -843,7 +864,7 @@ export const CheckoutModal: React.FC = () => {
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div>
                       <div className="flex items-center justify-between mb-1">
                         <label className="block text-neutral-300 uppercase tracking-wider text-[10px] font-semibold">
@@ -1048,7 +1069,7 @@ export const CheckoutModal: React.FC = () => {
                 </div>
 
                 {/* Address & Method Summary */}
-                <div className="grid grid-cols-2 gap-3 p-3.5 rounded-xl bg-[#1a0f14] border border-[#2b161f] text-xs mb-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 p-3.5 rounded-xl bg-[#1a0f14] border border-[#2b161f] text-xs mb-5">
                   <div>
                     <span className="text-neutral-400 uppercase tracking-wider text-[10px] block mb-1">Delivering To</span>
                     <p className="text-white font-medium">{fullName}</p>
@@ -1062,16 +1083,127 @@ export const CheckoutModal: React.FC = () => {
                   </div>
                 </div>
 
+                {/* Vouchers & Privileges */}
+                <div className="p-3.5 rounded-xl bg-[#190d12] border border-[#3a1a25] space-y-2.5 mb-5">
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="text-[10px] uppercase tracking-wider text-[#dfbe76] font-semibold flex items-center gap-1.5">
+                      <Ticket className="w-3.5 h-3.5" />
+                      <span>VÍNEA Rewards Voucher or Promo Code</span>
+                    </span>
+                    {appliedVoucher && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          removeAppliedVoucher();
+                          setVoucherError('');
+                        }}
+                        className="text-[11px] text-neutral-400 hover:text-white underline cursor-pointer"
+                      >
+                        Remove
+                      </button>
+                    )}
+                  </div>
+
+                  {appliedVoucher ? (
+                    <div className="flex items-center justify-between gap-2 p-2.5 rounded-lg bg-emerald-950/35 border border-emerald-700/40 text-emerald-300">
+                      <div className="flex items-center gap-2 min-w-0">
+                        <Check className="w-4 h-4 shrink-0 text-emerald-400" />
+                        <div className="min-w-0">
+                          <span className="font-mono font-semibold block truncate">{appliedVoucher.code}</span>
+                          <span className="text-[11px] text-emerald-200/80 block truncate">{appliedVoucher.title}</span>
+                        </div>
+                      </div>
+                      <span className="font-semibold tabular-nums shrink-0 text-emerald-300">
+                        {discountAmount > 0
+                          ? `-${formatPeso(discountAmount)}`
+                          : shippingDiscount > 0
+                          ? `-${formatPeso(shippingDiscount)} Ship`
+                          : 'Attached'}
+                      </span>
+                    </div>
+                  ) : (
+                    <>
+                      <div className="flex gap-2">
+                        <div className="relative flex-1 min-w-0">
+                          <Tag className="w-3.5 h-3.5 absolute left-3 top-2.5 text-neutral-500" />
+                          <input
+                            type="text"
+                            value={voucherInput}
+                            onChange={(e) => {
+                              setVoucherInput(e.target.value);
+                              if (voucherError) setVoucherError('');
+                            }}
+                            placeholder="Enter VN-RW-... or VINEA10"
+                            className="w-full pl-8 pr-3 py-2 rounded-lg bg-black/40 border border-neutral-700 text-xs text-white focus:outline-none focus:border-[#dfbe76]"
+                          />
+                        </div>
+                        <button
+                          type="button"
+                          onClick={handleApplyVoucher}
+                          className="py-2 px-3.5 rounded-lg bg-[#48151F] hover:bg-[#801729] text-[#dfbe76] hover:text-white text-xs font-semibold uppercase tracking-wider border border-[#dfbe76]/30 transition-colors cursor-pointer shrink-0"
+                        >
+                          Apply
+                        </button>
+                      </div>
+
+                      {voucherError && (
+                        <p className="text-[11px] text-rose-400 flex items-center gap-1">
+                          <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                          <span>{voucherError}</span>
+                        </p>
+                      )}
+
+                      {activeWalletVouchers.length > 0 && (
+                        <div className="flex flex-wrap gap-1.5 pt-1">
+                          {activeWalletVouchers.map((v) => (
+                            <button
+                              key={v.voucher_id}
+                              type="button"
+                              onClick={() => {
+                                setVoucherError('');
+                                applyVoucherCode(v.code);
+                              }}
+                              className="px-2.5 py-1 rounded-md bg-black/40 hover:bg-[#48151F] border border-[#dfbe76]/40 text-[11px] text-white flex items-center gap-1.5 transition-colors cursor-pointer"
+                            >
+                              <span className="font-mono text-[#dfbe76] font-semibold">{v.code}</span>
+                              <span className="text-neutral-300">
+                                ·{' '}
+                                {v.discount_type === 'fixed'
+                                  ? `${formatPeso(v.discount_value)} Off`
+                                  : v.discount_type === 'percent'
+                                  ? `${v.discount_value}% Off`
+                                  : v.discount_type === 'free_shipping'
+                                  ? 'Free Shipping'
+                                  : 'VIP Perk'}
+                              </span>
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                    </>
+                  )}
+                </div>
+
                 {/* Financial calculation */}
-                <div className="space-y-1.5 text-xs text-neutral-300 border-t border-white/10 pt-4 mb-8">
+                <div className="space-y-1.5 text-xs text-neutral-300 border-t border-white/10 pt-4 mb-6 sm:mb-8">
                   <div className="flex justify-between">
                     <span>Subtotal</span>
                     <span className="font-semibold tabular-nums text-white">{formatPeso(cartSubtotal)}</span>
                   </div>
+                  {discountAmount > 0 && (
+                    <div className="flex justify-between text-emerald-400">
+                      <span>Voucher Savings ({appliedVoucher?.code})</span>
+                      <span className="font-semibold tabular-nums">-{formatPeso(discountAmount)}</span>
+                    </div>
+                  )}
                   <div className="flex justify-between">
                     <span>Climate-Controlled Shipping</span>
                     <span className="font-semibold tabular-nums text-white">
-                      {shippingCost === 0 ? 'Complimentary' : formatPeso(shippingCost)}
+                      {shippingCost === 0
+                        ? shippingDiscount > 0
+                          ? 'Waived by Voucher'
+                          : 'Complimentary'
+                        : formatPeso(shippingCost)}
                     </span>
                   </div>
                   <div className="flex justify-between text-base font-semibold text-white pt-2 border-t border-white/10">
@@ -1082,18 +1214,18 @@ export const CheckoutModal: React.FC = () => {
                   </div>
                 </div>
 
-                <div className="flex items-center justify-between">
+                <div className="flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-between gap-3">
                   <button
                     type="button"
                     onClick={() => setStep(3)}
-                    className="py-2.5 px-4 text-xs text-neutral-400 hover:text-white transition-colors cursor-pointer"
+                    className="py-2.5 px-4 text-xs text-neutral-400 hover:text-white transition-colors cursor-pointer text-center"
                   >
                     Back
                   </button>
                   <button
                     type="button"
                     onClick={handlePlaceOrder}
-                    className="gold-shimmer-cta py-4 px-8 rounded-lg bg-gradient-to-r from-[#801729] via-[#66101f] to-[#450913] hover:from-[#941b31] hover:to-[#540c18] text-white text-xs sm:text-sm uppercase tracking-[0.15em] font-semibold transition-all cursor-pointer shadow-xl border border-[#d4af37]/40"
+                    className="gold-shimmer-cta w-full sm:w-auto py-4 px-8 rounded-lg bg-gradient-to-r from-[#801729] via-[#66101f] to-[#450913] hover:from-[#941b31] hover:to-[#540c18] text-white text-xs sm:text-sm uppercase tracking-[0.15em] font-semibold transition-all cursor-pointer shadow-xl border border-[#d4af37]/40 text-center"
                   >
                     PLACE ORDER
                   </button>

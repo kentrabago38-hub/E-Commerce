@@ -461,9 +461,20 @@ export const generateVineaReceiptHtml = (order: Order): string => {
           <span>Subtotal</span>
           <span style="font-family: monospace;">${formatPeso(subtotal)}</span>
         </div>
+        ${order.discount > 0 ? `
+        <div class="total-row" style="color: #68D391;">
+          <span>Voucher${order.discount_code ? ` (${escapeHtml(order.discount_code)})` : ''}</span>
+          <span style="font-family: monospace; font-weight: 600;">-${formatPeso(order.discount)}</span>
+        </div>
+        ` : order.discount_code ? `
+        <div class="total-row" style="color: #D5B15C;">
+          <span>Member Privilege</span>
+          <span style="font-family: monospace;">${escapeHtml(order.discount_code)}</span>
+        </div>
+        ` : ''}
         <div class="total-row">
           <span>Cold-Chain Handling (Davao)</span>
-          <span style="color: #68D391; font-weight: 600;">Complimentary</span>
+          <span style="${order.shipping === 0 ? 'color: #68D391; font-weight: 600;' : 'font-family: monospace;'}">${order.shipping === 0 ? 'Complimentary' : formatPeso(order.shipping)}</span>
         </div>
         <div class="total-row">
           <span>Estimated 12% VAT Included</span>

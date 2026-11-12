@@ -178,44 +178,47 @@ export const Navbar: React.FC = () => {
   return (
     <>
       {/* Top announcement bar: in natural document flow so it scrolls away naturally without layout shift */}
-      <div className="bg-[#130B0D] py-2 px-4 text-center border-b border-[#351116]/60 text-xs font-semibold tracking-wider text-[#E5D7B7] flex items-center justify-between select-none">
-        <div className="hidden sm:block text-white/80 font-normal">
+      <div className="bg-[#130B0D] py-1.5 sm:py-2 px-3 sm:px-4 text-center border-b border-[#351116]/60 text-[11px] sm:text-xs font-semibold tracking-wider text-[#E5D7B7] flex items-center justify-between select-none">
+        <div className="hidden md:block text-white/80 font-normal">
           Complimentary climate-controlled delivery across Davao on allocations over ₱5,000
         </div>
-        <div className="mx-auto sm:mx-0 flex items-center gap-2.5 text-white">
-          <span className="flex items-center gap-1.5 text-[#E5D7B7] font-semibold">
-            <MapPin className="w-3.5 h-3.5 text-[#D5B15C]" />
+        <div className="mx-auto md:mx-0 flex items-center justify-center gap-2 sm:gap-2.5 text-white min-w-0">
+          <span className="flex items-center gap-1.5 text-[#E5D7B7] font-semibold whitespace-nowrap">
+            <MapPin className="w-3.5 h-3.5 text-[#D5B15C] shrink-0" />
             5 Private Cellars in Davao
           </span>
-          <span className="text-white/40">·</span>
-          <span className="text-white/80 font-normal">Lanang · Bajada · Matina · Azuela Cove · SM Premier</span>
+          <span className="hidden sm:inline text-white/40">·</span>
+          <span className="hidden sm:inline text-white/80 font-normal truncate">Lanang · Bajada · Matina · Azuela Cove · SM Premier</span>
         </div>
       </div>
 
       {/* Sticky Floating Modern Header Island */}
-      <div className="sticky top-0 z-40 w-full pointer-events-none py-2 px-3 sm:px-6">
+      <div className="sticky top-0 z-40 w-full pointer-events-none py-1.5 sm:py-2 px-2 sm:px-6">
         <header
           className={`pointer-events-auto mx-auto transition-[max-width,border-radius,background-color,border-color,box-shadow] duration-300 ease-out ${
             isScrolled
-              ? 'max-w-6xl rounded-full dark-luxury-glass px-6 sm:px-8 shadow-[0_20px_50px_rgba(0,0,0,0.85)] border border-white/15'
-              : 'max-w-7xl rounded-2xl bg-[#210D12]/95 backdrop-blur-md border border-white/10 px-4 sm:px-6 lg:px-8 shadow-xl'
+              ? 'max-w-6xl rounded-full dark-luxury-glass px-3.5 sm:px-8 shadow-[0_20px_50px_rgba(0,0,0,0.85)] border border-white/15'
+              : 'max-w-7xl rounded-2xl bg-[#210D12]/95 backdrop-blur-md border border-white/10 px-3 sm:px-6 lg:px-8 shadow-xl'
           }`}
         >
-          <div className="flex items-center justify-between gap-6 h-16 sm:h-18">
+          <div className="flex items-center justify-between gap-2 sm:gap-6 h-14 sm:h-18 min-w-0">
             {/* Zone 1: Minimal Brand Wordmark */}
-            <div className="flex items-center gap-3 shrink-0">
+            <div className="flex items-center gap-2 sm:gap-3 min-w-0 shrink">
               <button
                 type="button"
                 onClick={handleLogoClick}
-                className="group flex items-center gap-3 text-left cursor-pointer"
+                className="group flex items-center gap-2 sm:gap-3 text-left cursor-pointer min-w-0"
                 title="VÍNEA Fine Wine Merchant"
               >
-                <VineaLogoIcon sizePx={36} className="group-hover:scale-105 transition-transform duration-300" />
-                <div>
-                  <span className="font-serif text-2xl tracking-wider text-white font-medium leading-none block drop-shadow-sm group-hover:text-[#D5B15C] transition-colors">
+                <div className="shrink-0">
+                  <VineaLogoIcon sizePx={30} className="sm:hidden group-hover:scale-105 transition-transform duration-300" />
+                  <VineaLogoIcon sizePx={36} className="hidden sm:block group-hover:scale-105 transition-transform duration-300" />
+                </div>
+                <div className="min-w-0">
+                  <span className="font-serif text-lg sm:text-2xl tracking-wider text-white font-medium leading-none block drop-shadow-sm group-hover:text-[#D5B15C] transition-colors">
                     VÍNEA
                   </span>
-                  <span className="text-[9px] tracking-[0.28em] text-[#E5D7B7] uppercase block mt-1.5 font-bold font-sans">
+                  <span className="text-[8px] sm:text-[9px] tracking-[0.14em] sm:tracking-[0.28em] text-[#E5D7B7] uppercase block mt-1 sm:mt-1.5 font-bold font-sans whitespace-nowrap">
                     Haute Sommelerie
                   </span>
                 </div>
@@ -400,33 +403,33 @@ export const Navbar: React.FC = () => {
             </nav>
 
             {/* Zone 3: Modern Minimal Utility Icons (Search, Wishlist, Cart, Account) */}
-            <div className="flex items-center gap-2 sm:gap-3 text-white/90 shrink-0">
+            <div className="flex items-center gap-0.5 sm:gap-2.5 text-white/90 shrink-0">
               {/* Search Toggle */}
               <button
                 type="button"
                 onClick={() => setSearchOpen(true)}
-                className="p-2 rounded-full hover:bg-white/10 hover:text-[#D5B15C] transition-colors relative cursor-pointer"
+                className="p-1.5 sm:p-2 rounded-full hover:bg-white/10 hover:text-[#D5B15C] transition-colors relative cursor-pointer"
                 aria-label="Search wines"
                 title="Search VÍNEA"
               >
-                <Search className="w-5 h-5" />
+                <Search className="w-[18px] h-[18px] sm:w-5 sm:h-5" />
               </button>
 
               {/* Wishlist */}
               <button
                 type="button"
                 onClick={openWishlist}
-                className="p-2 rounded-full hover:bg-white/10 hover:text-[#D5B15C] transition-colors relative cursor-pointer group"
+                className="p-1.5 sm:p-2 rounded-full hover:bg-white/10 hover:text-[#D5B15C] transition-colors relative cursor-pointer group"
                 aria-label="Saved Wines Wishlist"
                 title={`Wishlist (${wishlist.length})`}
               >
                 <Heart
-                  className={`w-5 h-5 transition-transform group-hover:scale-110 ${
+                  className={`w-[18px] h-[18px] sm:w-5 sm:h-5 transition-transform group-hover:scale-110 ${
                     wishlist.length > 0 ? 'text-[#D5B15C] fill-[#D5B15C]/40' : ''
                   }`}
                 />
                 {wishlist.length > 0 && (
-                  <span className="absolute top-1 right-1 w-4 h-4 bg-[#861F32] text-white text-[10px] font-bold rounded-full flex items-center justify-center border border-[#130B0D]">
+                  <span className="absolute top-0.5 right-0.5 sm:top-1 sm:right-1 w-3.5 h-3.5 sm:w-4 sm:h-4 bg-[#861F32] text-white text-[9px] sm:text-[10px] font-bold rounded-full flex items-center justify-center border border-[#130B0D]">
                     {wishlist.length}
                   </span>
                 )}
@@ -436,13 +439,13 @@ export const Navbar: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setIsCartOpen(true)}
-                className="p-2 rounded-full hover:bg-white/10 hover:text-[#D5B15C] transition-colors relative cursor-pointer flex items-center gap-1.5 group"
+                className="p-1.5 sm:p-2 rounded-full hover:bg-white/10 hover:text-[#D5B15C] transition-colors relative cursor-pointer flex items-center gap-1.5 group"
                 aria-label="Shopping Cart"
                 data-cursor="add"
               >
-                <ShoppingBag className="w-5 h-5 transition-transform group-hover:scale-110" />
+                <ShoppingBag className="w-[18px] h-[18px] sm:w-5 sm:h-5 transition-transform group-hover:scale-110" />
                 {cartCount > 0 && (
-                  <span className="absolute top-1 right-1 w-4 h-4 bg-[#D5B15C] text-[#130B0D] text-[10px] font-black rounded-full flex items-center justify-center shadow-md animate-scale-in">
+                  <span className="absolute top-0.5 right-0.5 sm:top-1 sm:right-1 w-3.5 h-3.5 sm:w-4 sm:h-4 bg-[#D5B15C] text-[#130B0D] text-[9px] sm:text-[10px] font-black rounded-full flex items-center justify-center shadow-md animate-scale-in">
                     {cartCount}
                   </span>
                 )}
@@ -452,7 +455,7 @@ export const Navbar: React.FC = () => {
               <button
                 type="button"
                 onClick={() => handleNavClick('account')}
-                className={`p-1.5 sm:p-2 rounded-full transition-all cursor-pointer flex items-center justify-center ${
+                className={`p-1 sm:p-1.5 rounded-full transition-all cursor-pointer flex items-center justify-center ${
                   activeTab === 'account'
                     ? 'bg-[#861F32] text-white ring-2 ring-[#D5B15C] shadow-lg shadow-[#861F32]/50'
                     : 'hover:bg-white/10 hover:text-[#D5B15C]'
@@ -469,7 +472,7 @@ export const Navbar: React.FC = () => {
                     onError={handleAvatarLoadError}
                   />
                 ) : (
-                  <UserIcon className="w-5 h-5" />
+                  <UserIcon className="w-[18px] h-[18px] sm:w-5 sm:h-5" />
                 )}
               </button>
 
@@ -477,10 +480,10 @@ export const Navbar: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                className="lg:hidden p-2 rounded-full hover:bg-white/10 hover:text-[#D5B15C] transition-colors cursor-pointer text-white"
+                className="lg:hidden p-1.5 sm:p-2 rounded-full hover:bg-white/10 hover:text-[#D5B15C] transition-colors cursor-pointer text-white"
                 aria-label="Toggle navigation menu"
               >
-                {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+                {mobileMenuOpen ? <X className="w-5 h-5 sm:w-6 sm:h-6" /> : <Menu className="w-5 h-5 sm:w-6 sm:h-6" />}
               </button>
             </div>
           </div>
@@ -489,22 +492,22 @@ export const Navbar: React.FC = () => {
 
       {/* EXPANSIVE FULLSCREEN / LARGE MODERN SEARCH OVERLAY */}
       {searchOpen && (
-        <div className="fixed inset-0 z-50 bg-[#120A0C]/95 backdrop-blur-2xl flex flex-col justify-start p-6 md:p-12 overflow-y-auto animate-fade-in">
-          <div className="max-w-5xl w-full mx-auto space-y-8">
+        <div className="fixed inset-0 z-50 bg-[#120A0C]/95 backdrop-blur-2xl flex flex-col justify-start p-4 sm:p-6 md:p-12 overflow-y-auto animate-fade-in">
+          <div className="max-w-5xl w-full mx-auto space-y-6 sm:space-y-8">
             {/* Top Bar with Close button */}
-            <div className="flex items-center justify-between border-b border-white/10 pb-6">
+            <div className="flex items-center justify-between border-b border-white/10 pb-4 sm:pb-6">
               <div>
                 <span className="text-[10px] tracking-[0.3em] uppercase text-[#C6A15B] font-semibold block">
                   Sommelier Cellar Search
                 </span>
-                <h2 className="font-serif text-3xl md:text-4xl text-[#F5EFE7] mt-1 font-normal tracking-wide">
+                <h2 className="font-serif text-2xl sm:text-3xl md:text-4xl text-[#F5EFE7] mt-1 font-normal tracking-wide">
                   SEARCH VÍNEA
                 </h2>
               </div>
               <button
                 type="button"
                 onClick={() => setSearchOpen(false)}
-                className="p-3 rounded-full hover:bg-white/10 text-[#B7AAA1] hover:text-[#F5EFE7] transition-colors cursor-pointer flex items-center gap-2 text-xs uppercase tracking-wider"
+                className="p-2.5 sm:p-3 rounded-full hover:bg-white/10 text-[#B7AAA1] hover:text-[#F5EFE7] transition-colors cursor-pointer flex items-center gap-2 text-xs uppercase tracking-wider"
               >
                 <span className="hidden sm:inline">Close [Esc]</span>
                 <X className="w-6 h-6" />
@@ -513,13 +516,13 @@ export const Navbar: React.FC = () => {
 
             {/* Large Search Input */}
             <div className="relative">
-              <Search className="absolute left-0 top-1/2 -translate-y-1/2 w-7 h-7 text-[#C6A15B]" />
+              <Search className="absolute left-0 top-1/2 -translate-y-1/2 w-5 h-5 sm:w-7 sm:h-7 text-[#C6A15B]" />
               <input
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search vintages, châteaux, regions, grape varieties..."
-                className="w-full bg-transparent border-b-2 border-white/15 focus:border-[#C6A15B] py-4 pl-12 pr-4 text-xl md:text-2xl text-[#F5EFE7] placeholder-[#B7AAA1]/40 focus:outline-none transition-colors font-serif"
+                placeholder="Search vintages, châteaux, regions..."
+                className="w-full bg-transparent border-b-2 border-white/15 focus:border-[#C6A15B] py-3 sm:py-4 pl-8 sm:pl-12 pr-4 text-base sm:text-xl md:text-2xl text-[#F5EFE7] placeholder-[#B7AAA1]/40 focus:outline-none transition-colors font-serif"
                 autoFocus
               />
             </div>
@@ -615,11 +618,11 @@ export const Navbar: React.FC = () => {
 
       {/* Mobile Drawer Navigation Menu */}
       {mobileMenuOpen && (
-        <div className="lg:hidden fixed inset-0 z-50 bg-[#120A0C]/98 backdrop-blur-2xl p-6 pt-24 overflow-y-auto animate-fade-in flex flex-col justify-between">
+        <div className="lg:hidden fixed inset-0 z-50 bg-[#120A0C]/98 backdrop-blur-2xl p-4 pt-20 sm:p-6 sm:pt-24 overflow-y-auto animate-fade-in flex flex-col justify-between">
           <button
             type="button"
             onClick={() => setMobileMenuOpen(false)}
-            className="absolute top-6 right-6 p-3 rounded-full bg-white/5 text-[#F5EFE7] hover:text-[#C6A15B] cursor-pointer"
+            className="absolute top-4 right-4 sm:top-6 sm:right-6 p-2.5 sm:p-3 rounded-full bg-white/5 text-[#F5EFE7] hover:text-[#C6A15B] cursor-pointer"
             aria-label="Close menu"
           >
             <X className="w-6 h-6" />

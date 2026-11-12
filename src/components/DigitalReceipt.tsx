@@ -279,9 +279,23 @@ export const DigitalReceipt: React.FC<DigitalReceiptProps> = ({
                   <span>Subtotal</span>
                   <span className="font-mono text-white print:text-neutral-900">{formatPeso(subtotal)}</span>
                 </div>
+                {order.discount > 0 && (
+                  <div className="flex justify-between text-emerald-400 print:text-emerald-700">
+                    <span>Voucher {order.discount_code ? `(${order.discount_code})` : 'Discount'}</span>
+                    <span className="font-mono font-semibold">-{formatPeso(order.discount)}</span>
+                  </div>
+                )}
+                {order.discount === 0 && order.discount_code && (
+                  <div className="flex justify-between text-[#D5B15C] print:text-[#8B6B2B]">
+                    <span>VIP Privilege</span>
+                    <span className="font-mono">{order.discount_code}</span>
+                  </div>
+                )}
                 <div className="flex justify-between text-[#B7AAA1] print:text-neutral-600">
                   <span>Davao Cold-Chain</span>
-                  <span className="text-emerald-400 font-semibold print:text-emerald-700">Complimentary</span>
+                  <span className={`font-semibold ${order.shipping === 0 ? 'text-emerald-400 print:text-emerald-700' : 'text-white font-mono print:text-neutral-900'}`}>
+                    {order.shipping === 0 ? 'Complimentary' : formatPeso(order.shipping)}
+                  </span>
                 </div>
                 <div className="flex justify-between text-[#B7AAA1] print:text-neutral-600">
                   <span>12% BIR VAT (Incl.)</span>

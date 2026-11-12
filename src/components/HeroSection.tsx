@@ -124,7 +124,7 @@ export const HeroSection: React.FC = () => {
   return (
     <section
       ref={sectionRef}
-      className="relative min-h-[96vh] flex flex-col justify-between overflow-hidden bg-[#210D12]"
+      className="relative min-h-[auto] lg:min-h-[96vh] flex flex-col justify-between overflow-hidden bg-[#210D12]"
     >
       {/* Background Image with Subtle Slow Parallax, Dark Wine Scrim, and Atmospheric Lighting */}
       <div
@@ -158,20 +158,19 @@ export const HeroSection: React.FC = () => {
       </div>
 
       {/* Main Hero Container */}
-      <div className="relative z-10 flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-16 sm:py-24 flex items-center">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center w-full">
+      <div className="relative z-10 flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-10 sm:py-20 lg:py-24 flex items-center">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 sm:gap-12 lg:gap-16 items-center w-full">
           
           {/* Left Column: Dominant Editorial Headline & Call to Action */}
-          {/* Left Column: Dominant Editorial Headline & Call to Action */}
-          <div className="lg:col-span-7 flex flex-col items-start text-left z-10">
+          <div className="lg:col-span-7 flex flex-col items-start text-left z-10 min-w-0">
             {/* 1. Small Eyebrow (Entrance step 1) */}
-            <div className="inline-flex items-center gap-3 text-xs uppercase tracking-[0.3em] text-[#C6A15B] font-medium mb-6 animate-fade-in">
-              <span className="h-px w-8 bg-[#C6A15B]/60" />
+            <div className="inline-flex items-center gap-2 sm:gap-3 text-[10px] sm:text-xs uppercase tracking-[0.2em] sm:tracking-[0.3em] text-[#C6A15B] font-medium mb-4 sm:mb-6 animate-fade-in">
+              <span className="h-px w-6 sm:w-8 bg-[#C6A15B]/60 shrink-0" />
               <span>VÍNEA · Haute Sommelerie · Est. 2026</span>
             </div>
 
             {/* 2. Dominant Master Headline (Fluid clamp typography with editorial italics) */}
-            <h1 className="text-clamp-hero font-serif font-normal text-[#F5EFE7] tracking-tight mb-8 text-balance">
+            <h1 className="text-clamp-hero font-serif font-normal text-[#F5EFE7] tracking-tight mb-5 sm:mb-8 text-balance">
               <span className="block animate-fade-in" style={{ animationDelay: '150ms' }}>
                 Every Bottle
               </span>
@@ -185,7 +184,7 @@ export const HeroSection: React.FC = () => {
 
             {/* 3. Supporting Description */}
             <p
-              className="text-base sm:text-lg lg:text-xl text-[#B7AAA1] font-light max-w-xl mb-10 leading-relaxed text-balance animate-fade-in"
+              className="text-sm sm:text-lg lg:text-xl text-[#B7AAA1] font-light max-w-xl mb-6 sm:mb-10 leading-relaxed text-balance animate-fade-in"
               style={{ animationDelay: '450ms' }}
             >
               Discover exceptional vintages, remarkable origins, and unforgettable moments, carefully selected for those who appreciate the art of wine.
@@ -193,7 +192,7 @@ export const HeroSection: React.FC = () => {
 
             {/* 4. Action Buttons with Magnetic Transitions */}
             <div
-              className="flex flex-col sm:flex-row items-center gap-4 w-full sm:w-auto mb-10 animate-fade-in"
+              className="flex flex-col sm:flex-row items-center gap-3 sm:gap-4 w-full sm:w-auto mb-6 sm:mb-10 animate-fade-in"
               style={{ animationDelay: '600ms' }}
             >
               {/* Primary CTA: Discover the Collection */}
@@ -288,21 +287,21 @@ export const HeroSection: React.FC = () => {
 
                 {/* Floating Glass Label 1: “2018 VOSNE-ROMANÉE” */}
                 <div
-                  className="absolute top-6 left-6 transition-transform duration-300 pointer-events-none z-10"
+                  className="absolute top-3 left-3 sm:top-6 sm:left-6 transition-transform duration-300 pointer-events-none z-10"
                   style={{ transform: `translate3d(${tilt.y * 1.2}px, ${-tilt.x * 1.2}px, 30px)` }}
                 >
-                  <span className="text-xs font-bold tracking-[0.25em] text-white uppercase bg-[#120A0C]/95 backdrop-blur-md px-4 py-2 rounded-full shadow-2xl border border-[#D5B15C]/60 flex items-center gap-2">
-                    <span className="w-2 h-2 rounded-full bg-[#D5B15C] shadow-[0_0_8px_#D5B15C]" />
+                  <span className="text-[10px] sm:text-xs font-bold tracking-[0.12em] sm:tracking-[0.25em] text-white uppercase bg-[#120A0C]/95 backdrop-blur-md px-2.5 py-1 sm:px-4 sm:py-2 rounded-full shadow-2xl border border-[#D5B15C]/60 flex items-center gap-1.5 sm:gap-2">
+                    <span className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-[#D5B15C] shadow-[0_0_8px_#D5B15C]" />
                     <span>2018 Vosne-Romanée</span>
                   </span>
                 </div>
 
                 {/* Floating Glass Label 2: “GRAND CRU” */}
                 <div
-                  className="absolute top-6 right-6 transition-transform duration-300 pointer-events-none z-10"
-                  style={{ transform: `translate3d(${-tilt.y * 1.2}px, ${-tilt.x * 1.2}px, 30px)` }}
+                  className="absolute top-3 right-3 sm:top-6 sm:right-6 transition-transform duration-300 pointer-events-none z-10"
+                  style={{ transform: `translate3d(${-tilt.y * 1.2}px, ${tilt.x * 1.2}px, 30px)` }}
                 >
-                  <span className="text-xs uppercase font-extrabold tracking-widest text-white bg-[#861F32]/95 px-4 py-2 rounded-full border border-[#D5B15C]/60 shadow-2xl">
+                  <span className="text-[10px] sm:text-xs uppercase font-extrabold tracking-wider sm:tracking-widest text-white bg-[#861F32]/95 px-2.5 py-1 sm:px-4 sm:py-2 rounded-full border border-[#D5B15C]/60 shadow-2xl">
                     Grand Cru
                   </span>
                 </div>
@@ -320,23 +319,23 @@ export const HeroSection: React.FC = () => {
 
               {/* Floating Minimal Glass Metadata Bar Below Bottle */}
               <div
-                className="mt-4 w-full p-4 rounded-2xl dark-luxury-glass-elevated flex items-center justify-between gap-4 transition-transform duration-300 border border-white/15"
+                className="mt-4 w-full p-3.5 sm:p-4 rounded-2xl dark-luxury-glass-elevated flex items-center justify-between gap-3 sm:gap-4 transition-transform duration-300 border border-white/15"
                 style={{ transform: `translate3d(${-tilt.y * 0.4}px, ${tilt.x * 0.4}px, 15px)` }}
               >
-                <div>
-                  <span className="text-xs text-[#E5D7B7] uppercase tracking-[0.2em] font-bold block mb-0.5">
+                <div className="min-w-0">
+                  <span className="text-[10px] sm:text-xs text-[#E5D7B7] uppercase tracking-[0.16em] sm:tracking-[0.2em] font-bold block mb-0.5 truncate">
                     Domaine de la Roche
                   </span>
-                  <h3 className="font-serif text-lg sm:text-xl text-white font-medium leading-snug">
+                  <h3 className="font-serif text-base sm:text-xl text-white font-medium leading-snug truncate">
                     Prestige Grand Cuvée
                   </h3>
-                  <p className="text-xs text-white/80 font-normal">
+                  <p className="text-[11px] sm:text-xs text-white/80 font-normal truncate">
                     Côte de Nuits, France · Pinot Noir
                   </p>
                 </div>
 
                 <div className="text-right shrink-0">
-                  <span className="font-serif text-2xl text-[#E5D7B7] tabular-nums font-bold block">
+                  <span className="font-serif text-xl sm:text-2xl text-[#E5D7B7] tabular-nums font-bold block">
                     ₱42,500
                   </span>
                   <span className="text-[10px] uppercase tracking-wider text-emerald-400 font-bold">
@@ -387,45 +386,45 @@ export const HeroSection: React.FC = () => {
 
       {/* Brand Trust Indicators Strip */}
       <div className="relative z-10 w-full border-t border-[#351116]/80 bg-[#130B0D]/95 backdrop-blur-md">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
-            <div className="flex items-center gap-3.5">
-              <div className="w-10 h-10 rounded-xl bg-[#210D12] flex items-center justify-center border border-[#351116] shrink-0 text-[#C6A15B] shadow-sm">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5 sm:py-6">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3.5 sm:gap-6 lg:gap-8">
+            <div className="flex items-start sm:items-center gap-2.5 sm:gap-3.5 min-w-0">
+              <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-[#210D12] flex items-center justify-center border border-[#351116] shrink-0 text-[#C6A15B] shadow-sm">
                 <Award className="w-4 h-4" />
               </div>
-              <div>
-                <h4 className="text-xs font-semibold text-[#F5EFE7] uppercase tracking-wider">Authentic Provenance</h4>
-                <p className="text-[11px] text-[#B7AAA1] font-light mt-0.5">Direct châteaux allocations</p>
+              <div className="min-w-0">
+                <h4 className="text-[11px] sm:text-xs font-semibold text-[#F5EFE7] uppercase tracking-wider leading-tight">Authentic Provenance</h4>
+                <p className="text-[10px] sm:text-[11px] text-[#B7AAA1] font-light mt-0.5">Direct châteaux allocations</p>
               </div>
             </div>
 
-            <div className="flex items-center gap-3.5">
-              <div className="w-10 h-10 rounded-xl bg-[#210D12] flex items-center justify-center border border-[#351116] shrink-0 text-[#C6A15B] shadow-sm">
+            <div className="flex items-start sm:items-center gap-2.5 sm:gap-3.5 min-w-0">
+              <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-[#210D12] flex items-center justify-center border border-[#351116] shrink-0 text-[#C6A15B] shadow-sm">
                 <Thermometer className="w-4 h-4" />
               </div>
-              <div>
-                <h4 className="text-xs font-semibold text-[#F5EFE7] uppercase tracking-wider">Climate-Controlled Delivery</h4>
-                <p className="text-[11px] text-[#B7AAA1] font-light mt-0.5">Cold-chain climate fleet across Davao</p>
+              <div className="min-w-0">
+                <h4 className="text-[11px] sm:text-xs font-semibold text-[#F5EFE7] uppercase tracking-wider leading-tight">Climate-Controlled Delivery</h4>
+                <p className="text-[10px] sm:text-[11px] text-[#B7AAA1] font-light mt-0.5">Cold-chain fleet across Davao</p>
               </div>
             </div>
 
-            <div className="flex items-center gap-3.5">
-              <div className="w-10 h-10 rounded-xl bg-[#210D12] flex items-center justify-center border border-[#351116] shrink-0 text-[#C6A15B] shadow-sm">
+            <div className="flex items-start sm:items-center gap-2.5 sm:gap-3.5 min-w-0">
+              <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-[#210D12] flex items-center justify-center border border-[#351116] shrink-0 text-[#C6A15B] shadow-sm">
                 <Wine className="w-4 h-4" />
               </div>
-              <div>
-                <h4 className="text-xs font-semibold text-[#F5EFE7] uppercase tracking-wider">Curated Selections</h4>
-                <p className="text-[11px] text-[#B7AAA1] font-light mt-0.5">Hand-evaluated by sommeliers</p>
+              <div className="min-w-0">
+                <h4 className="text-[11px] sm:text-xs font-semibold text-[#F5EFE7] uppercase tracking-wider leading-tight">Curated Selections</h4>
+                <p className="text-[10px] sm:text-[11px] text-[#B7AAA1] font-light mt-0.5">Hand-evaluated by sommeliers</p>
               </div>
             </div>
 
-            <div className="flex items-center gap-3.5">
-              <div className="w-10 h-10 rounded-xl bg-[#210D12] flex items-center justify-center border border-[#351116] shrink-0 text-[#C6A15B] shadow-sm">
+            <div className="flex items-start sm:items-center gap-2.5 sm:gap-3.5 min-w-0">
+              <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-[#210D12] flex items-center justify-center border border-[#351116] shrink-0 text-[#C6A15B] shadow-sm">
                 <ShieldCheck className="w-4 h-4" />
               </div>
-              <div>
-                <h4 className="text-xs font-semibold text-[#F5EFE7] uppercase tracking-wider">Davao Wine Experience</h4>
-                <p className="text-[11px] text-[#B7AAA1] font-light mt-0.5">5 private tasting rooms & vaults</p>
+              <div className="min-w-0">
+                <h4 className="text-[11px] sm:text-xs font-semibold text-[#F5EFE7] uppercase tracking-wider leading-tight">Davao Wine Experience</h4>
+                <p className="text-[10px] sm:text-[11px] text-[#B7AAA1] font-light mt-0.5">5 private tasting rooms & vaults</p>
               </div>
             </div>
           </div>

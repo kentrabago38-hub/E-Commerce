@@ -196,8 +196,8 @@ export const UserDashboard: React.FC = () => {
   // If customer is not logged in: present high-end sign in / registration screen
   if (!user) {
     return (
-      <div className="py-20 px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto animate-fade-in text-[#F5EFE7]">
-        <div className="rounded-3xl bg-[#190D10] border border-[#392126] shadow-2xl p-8 sm:p-14 text-center relative overflow-hidden">
+      <div className="py-12 sm:py-20 px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto animate-fade-in text-[#F5EFE7]">
+        <div className="rounded-3xl bg-[#190D10] border border-[#392126] shadow-2xl p-5 sm:p-14 text-center relative overflow-hidden">
           <div className="absolute top-0 right-0 w-96 h-96 bg-[#7F1427]/10 rounded-full blur-3xl pointer-events-none"></div>
 
           <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-gradient-to-br from-[#7F1427] to-[#3A1018] border border-[#D5B15C]/50 flex items-center justify-center text-[#D5B15C] shadow-2xl">
@@ -385,22 +385,22 @@ export const UserDashboard: React.FC = () => {
   };
 
   return (
-    <div className="py-10 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto text-[#F5EFE7] animate-fade-in">
+    <div className="py-6 sm:py-10 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto text-[#F5EFE7] animate-fade-in">
       {/* 1. Header Banner & Identity */}
-      <div className="rounded-2xl bg-gradient-to-r from-[#210D12] via-[#130B0D] to-[#210D12] border border-[#48151F] p-6 sm:p-10 mb-8 relative overflow-hidden shadow-2xl">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-          <div className="flex items-center gap-5">
+      <div className="rounded-2xl bg-gradient-to-r from-[#210D12] via-[#130B0D] to-[#210D12] border border-[#48151F] p-4 sm:p-6 lg:p-10 mb-6 sm:mb-8 relative overflow-hidden shadow-2xl">
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-5">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-5 min-w-0">
             <div className="relative group shrink-0">
               {(avatarFallback || user.avatar) && !avatarError ? (
                 <img
                   src={avatarFallback || user.avatar}
                   alt={user.name}
                   onError={handleAvatarImgError}
-                  className="w-20 h-20 sm:w-24 sm:h-24 rounded-full object-cover border-2 border-[#C6A15B] shadow-2xl"
+                  className="w-16 h-16 sm:w-24 sm:h-24 rounded-full object-cover border-2 border-[#C6A15B] shadow-2xl"
                   referrerPolicy="no-referrer"
                 />
               ) : (
-                <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-[#48151F] border-2 border-[#C6A15B]/60 flex items-center justify-center text-[#C6A15B] text-3xl font-serif font-bold shadow-2xl">
+                <div className="w-16 h-16 sm:w-24 sm:h-24 rounded-full bg-[#48151F] border-2 border-[#C6A15B]/60 flex items-center justify-center text-[#C6A15B] text-2xl sm:text-3xl font-serif font-bold shadow-2xl">
                   {user.name.charAt(0)}
                 </div>
               )}
@@ -409,20 +409,20 @@ export const UserDashboard: React.FC = () => {
                 className="absolute bottom-0 right-0 p-1.5 rounded-full bg-[#861F32] text-white border border-[#C6A15B] shadow-lg hover:scale-110 transition-transform cursor-pointer"
                 title="Change Profile Picture"
               >
-                <Camera className="w-3.5 h-3.5 text-[#C6A15B]" />
+                <Camera className="w-3.5 h-3.5 text-[#C6A15C]" />
               </button>
             </div>
 
-            <div>
-              <div className="text-[#C6A15B] text-[11px] uppercase tracking-[0.2em] font-semibold mb-2 flex items-center gap-1.5">
-                <Award className="w-3.5 h-3.5 text-[#C6A15B]" />
-                <span>{user.membership_tier || 'Connoisseur Member'} · Verified Cellar Customer</span>
+            <div className="min-w-0 w-full">
+              <div className="text-[#C6A15B] text-[10px] sm:text-[11px] uppercase tracking-[0.16em] sm:tracking-[0.2em] font-semibold mb-1.5 sm:mb-2 flex items-center gap-1.5">
+                <Award className="w-3.5 h-3.5 text-[#C6A15B] shrink-0" />
+                <span className="truncate">{user.membership_tier || 'Connoisseur Member'} · Verified Cellar Customer</span>
               </div>
-              <h1 className="font-serif text-3xl sm:text-4xl text-[#F5EFE7] font-normal leading-tight">
+              <h1 className="font-serif text-2xl sm:text-4xl text-[#F5EFE7] font-normal leading-tight break-words">
                 {user.name}
               </h1>
-              <div className="flex flex-wrap items-center gap-3 mt-1 text-xs text-[#B7AAA1]">
-                <span className="font-mono">{user.email}</span>
+              <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1 mt-1 text-xs text-[#B7AAA1]">
+                <span className="font-mono break-all">{user.email}</span>
                 <span>·</span>
                 <span>{user.phone || '+63 Davao'}</span>
                 <span>·</span>
@@ -432,10 +432,10 @@ export const UserDashboard: React.FC = () => {
           </div>
 
           {/* Quick Actions */}
-          <div className="flex flex-wrap items-center gap-3">
+          <div className="flex flex-wrap items-center gap-2.5 sm:gap-3">
             <button
               onClick={() => setActiveTab('shop')}
-              className="py-2.5 px-5 rounded-lg bg-[#861F32] hover:bg-[#a1253c] text-white text-xs uppercase tracking-wider font-semibold border border-[#C6A15B]/40 transition-all cursor-pointer shadow-md flex items-center gap-1.5"
+              className="py-2.5 px-4 sm:px-5 rounded-lg bg-[#861F32] hover:bg-[#a1253c] text-white text-xs uppercase tracking-wider font-semibold border border-[#C6A15B]/40 transition-all cursor-pointer shadow-md flex items-center gap-1.5"
             >
               <Wine className="w-3.5 h-3.5 text-[#C6A15B]" />
               <span>Browse Cellar</span>
@@ -452,23 +452,23 @@ export const UserDashboard: React.FC = () => {
         </div>
 
         {/* Customer Metrics */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3.5 mt-8 pt-8 border-t border-[#48151F]">
-          <div className="p-4 rounded-xl bg-[#130B0D]/80 border border-[#48151F]">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-3.5 mt-6 sm:mt-8 pt-6 sm:pt-8 border-t border-[#48151F]">
+          <div className="p-3 sm:p-4 rounded-xl bg-[#130B0D]/80 border border-[#48151F]">
             <span className="text-[10px] text-[#B7AAA1]/70 uppercase tracking-wider block mb-1">Total Orders</span>
-            <span className="font-serif text-2xl text-[#F5EFE7] font-normal">{userOrders.length}</span>
+            <span className="font-serif text-xl sm:text-2xl text-[#F5EFE7] font-normal">{userOrders.length}</span>
             <span className="text-[10px] text-[#B7AAA1] block mt-0.5">Cellar allocations</span>
           </div>
 
-          <div className="p-4 rounded-xl bg-[#130B0D]/80 border border-[#48151F]">
+          <div className="p-3 sm:p-4 rounded-xl bg-[#130B0D]/80 border border-[#48151F]">
             <span className="text-[10px] text-[#B7AAA1]/70 uppercase tracking-wider block mb-1">Total Spent</span>
-            <span className="font-serif text-2xl text-[#C6A15B] font-normal tabular-nums">{formatPeso(totalSpent)}</span>
+            <span className="font-serif text-xl sm:text-2xl text-[#C6A15B] font-normal tabular-nums">{formatPeso(totalSpent)}</span>
             <span className="text-[10px] text-[#B7AAA1] block mt-0.5">Direct winery pricing</span>
           </div>
 
           {/* VÍNEA Rewards Metric Button */}
           <button
             onClick={() => setActiveTabState('rewards')}
-            className="p-4 rounded-xl bg-gradient-to-br from-[#260B12] to-[#130B0D] border border-[#C6A15B]/50 hover:border-[#C6A15B] text-left transition-all cursor-pointer group shadow-lg"
+            className="p-3 sm:p-4 rounded-xl bg-gradient-to-br from-[#260B12] to-[#130B0D] border border-[#C6A15B]/50 hover:border-[#C6A15B] text-left transition-all cursor-pointer group shadow-lg"
           >
             <div className="flex items-center justify-between mb-1">
               <span className="text-[10px] text-[#C6A15B] uppercase tracking-wider font-semibold flex items-center gap-1">
@@ -477,7 +477,7 @@ export const UserDashboard: React.FC = () => {
               </span>
               <span className="text-[9px] text-[#D5B15C] font-mono group-hover:translate-x-0.5 transition-transform">→</span>
             </div>
-            <span className="font-serif text-2xl text-[#D5B15C] font-normal tabular-nums block">
+            <span className="font-serif text-xl sm:text-2xl text-[#D5B15C] font-normal tabular-nums block">
               {(user.loyalty_points ?? 0).toLocaleString()} <span className="text-xs font-sans text-[#C1B7B4]">pts</span>
             </span>
             <span className="text-[10px] text-[#C1B7B4] block mt-0.5 group-hover:text-white transition-colors">
@@ -485,171 +485,173 @@ export const UserDashboard: React.FC = () => {
             </span>
           </button>
 
-          <div className="p-4 rounded-xl bg-[#130B0D]/80 border border-[#48151F]">
+          <div className="p-3 sm:p-4 rounded-xl bg-[#130B0D]/80 border border-[#48151F]">
             <span className="text-[10px] text-[#B7AAA1]/70 uppercase tracking-wider block mb-1">Saved In Wishlist</span>
-            <span className="font-serif text-2xl text-[#F5EFE7] font-normal">{wishlist.length}</span>
+            <span className="font-serif text-xl sm:text-2xl text-[#F5EFE7] font-normal">{wishlist.length}</span>
             <span className="text-[10px] text-[#B7AAA1] block mt-0.5">Bottles reserved</span>
           </div>
 
-          <div className="col-span-2 sm:col-span-1 p-4 rounded-xl bg-[#130B0D]/80 border border-[#48151F]">
+          <div className="col-span-2 sm:col-span-1 p-3 sm:p-4 rounded-xl bg-[#130B0D]/80 border border-[#48151F]">
             <span className="text-[10px] text-[#B7AAA1]/70 uppercase tracking-wider block mb-1">Member Status</span>
-            <span className="font-serif text-2xl text-emerald-400 font-normal">Active (21+)</span>
+            <span className="font-serif text-xl sm:text-2xl text-emerald-400 font-normal">Active (21+)</span>
             <span className="text-[10px] text-[#B7AAA1] block mt-0.5">Davao cold-chain verified</span>
           </div>
         </div>
       </div>
 
       {/* 2. Main Dashboard Layout: Sidebar Navigation & Content Pane */}
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-        {/* Navigation Tabs (Sidebar on Desktop) */}
-        <div className="lg:col-span-1 space-y-1.5">
-          <div className="rounded-xl bg-[#130B0D] border border-[#48151F] p-3 shadow-lg">
-            <span className="text-[10px] text-[#B7AAA1]/70 uppercase tracking-wider font-semibold px-3 py-2 block">
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-5 lg:gap-8">
+        {/* Navigation Tabs (Horizontal Scroll Strip on Mobile, Sidebar on Desktop) */}
+        <div className="lg:col-span-1 space-y-2">
+          <div className="rounded-xl bg-[#130B0D] border border-[#48151F] p-2.5 sm:p-3 shadow-lg">
+            <span className="hidden lg:block text-[10px] text-[#B7AAA1]/70 uppercase tracking-wider font-semibold px-3 py-2">
               Customer Navigation
             </span>
 
-            <button
-              onClick={() => setActiveTabState('orders')}
-              className={`w-full flex items-center justify-between px-3.5 py-3 rounded-lg text-xs font-medium transition-all cursor-pointer ${
-                activeTabState === 'orders'
-                  ? 'bg-[#48151F] text-[#C6A15B] border border-[#C6A15B]/40 font-semibold shadow-md'
-                  : 'text-[#B7AAA1] hover:text-[#F5EFE7] hover:bg-[#210D12]'
-              }`}
-            >
-              <div className="flex items-center gap-2.5">
-                <Package className="w-4 h-4" />
-                <span>My Orders & Allocations</span>
-              </div>
-              <span className="px-2 py-0.5 rounded-full bg-[#210D12] text-[10px] border border-[#48151F]">
-                {userOrders.length}
-              </span>
-            </button>
-
-            <button
-              onClick={() => {
-                setActiveTabState('tracking');
-                if (!selectedTrackingOrderId && userOrders.length > 0) {
-                  setSelectedTrackingOrderId(userOrders[0].order_id);
-                }
-              }}
-              className={`w-full flex items-center justify-between px-3.5 py-3 rounded-lg text-xs font-medium transition-all cursor-pointer ${
-                activeTabState === 'tracking'
-                  ? 'bg-[#48151F] text-[#C6A15B] border border-[#C6A15B]/40 font-semibold shadow-md'
-                  : 'text-[#B7AAA1] hover:text-[#F5EFE7] hover:bg-[#210D12]'
-              }`}
-            >
-              <div className="flex items-center gap-2.5">
-                <Truck className="w-4 h-4" />
-                <span>Order Tracking</span>
-              </div>
-              {userOrders.some((o) => o.status === 'Shipped') ? (
-                <span className="px-2 py-0.5 rounded-full bg-[#861F32] text-[#F5EFE7] text-[10px] font-semibold border border-[#C6A15B]/40 animate-pulse">
-                  In Transit
+            <div className="flex lg:flex-col gap-1.5 overflow-x-auto lg:overflow-visible pb-1 lg:pb-0">
+              <button
+                onClick={() => setActiveTabState('orders')}
+                className={`shrink-0 whitespace-nowrap lg:w-full flex items-center justify-between gap-2 px-3 sm:px-3.5 py-2.5 lg:py-3 rounded-lg text-xs font-medium transition-all cursor-pointer ${
+                  activeTabState === 'orders'
+                    ? 'bg-[#48151F] text-[#C6A15B] border border-[#C6A15B]/40 font-semibold shadow-md'
+                    : 'text-[#B7AAA1] hover:text-[#F5EFE7] hover:bg-[#210D12]'
+                }`}
+              >
+                <div className="flex items-center gap-2">
+                  <Package className="w-4 h-4 shrink-0" />
+                  <span>My Orders</span>
+                </div>
+                <span className="px-2 py-0.5 rounded-full bg-[#210D12] text-[10px] border border-[#48151F]">
+                  {userOrders.length}
                 </span>
-              ) : (
-                <span className="px-2 py-0.5 rounded-full bg-[#210D12] text-[10px] text-[#C6A15B] border border-[#48151F]">
-                  Cold-Chain
+              </button>
+
+              <button
+                onClick={() => {
+                  setActiveTabState('tracking');
+                  if (!selectedTrackingOrderId && userOrders.length > 0) {
+                    setSelectedTrackingOrderId(userOrders[0].order_id);
+                  }
+                }}
+                className={`shrink-0 whitespace-nowrap lg:w-full flex items-center justify-between gap-2 px-3 sm:px-3.5 py-2.5 lg:py-3 rounded-lg text-xs font-medium transition-all cursor-pointer ${
+                  activeTabState === 'tracking'
+                    ? 'bg-[#48151F] text-[#C6A15B] border border-[#C6A15B]/40 font-semibold shadow-md'
+                    : 'text-[#B7AAA1] hover:text-[#F5EFE7] hover:bg-[#210D12]'
+                }`}
+              >
+                <div className="flex items-center gap-2">
+                  <Truck className="w-4 h-4 shrink-0" />
+                  <span>Order Tracking</span>
+                </div>
+                {userOrders.some((o) => o.status === 'Shipped') ? (
+                  <span className="px-2 py-0.5 rounded-full bg-[#861F32] text-[#F5EFE7] text-[10px] font-semibold border border-[#C6A15B]/40 animate-pulse">
+                    In Transit
+                  </span>
+                ) : (
+                  <span className="hidden lg:inline-block px-2 py-0.5 rounded-full bg-[#210D12] text-[10px] text-[#C6A15B] border border-[#48151F]">
+                    Cold-Chain
+                  </span>
+                )}
+              </button>
+
+              <button
+                onClick={() => setActiveTabState('rewards')}
+                className={`shrink-0 whitespace-nowrap lg:w-full flex items-center justify-between gap-2 px-3 sm:px-3.5 py-2.5 lg:py-3 rounded-lg text-xs font-medium transition-all cursor-pointer ${
+                  activeTabState === 'rewards'
+                    ? 'bg-[#48151F] text-[#C6A15B] border border-[#C6A15B]/40 font-semibold shadow-md'
+                    : 'text-[#B7AAA1] hover:text-[#F5EFE7] hover:bg-[#210D12]'
+                }`}
+              >
+                <div className="flex items-center gap-2">
+                  <Award className="w-4 h-4 text-[#D5B15C] shrink-0" />
+                  <span>VÍNEA Rewards</span>
+                </div>
+                <span className="px-2 py-0.5 rounded-full bg-[#7F1427] text-[#D5B15C] text-[10px] font-mono border border-[#D5B15C]/40">
+                  {(user.loyalty_points ?? 0).toLocaleString()} pts
                 </span>
-              )}
-            </button>
+              </button>
 
-            <button
-              onClick={() => setActiveTabState('rewards')}
-              className={`w-full flex items-center justify-between px-3.5 py-3 rounded-lg text-xs font-medium transition-all cursor-pointer ${
-                activeTabState === 'rewards'
-                  ? 'bg-[#48151F] text-[#C6A15B] border border-[#C6A15B]/40 font-semibold shadow-md'
-                  : 'text-[#B7AAA1] hover:text-[#F5EFE7] hover:bg-[#210D12]'
-              }`}
-            >
-              <div className="flex items-center gap-2.5">
-                <Award className="w-4 h-4 text-[#D5B15C]" />
-                <span>VÍNEA Rewards & Perks</span>
-              </div>
-              <span className="px-2 py-0.5 rounded-full bg-[#7F1427] text-[#D5B15C] text-[10px] font-mono border border-[#D5B15C]/40">
-                {(user.loyalty_points ?? 0).toLocaleString()} pts
-              </span>
-            </button>
+              <button
+                onClick={() => setActiveTabState('profile')}
+                className={`shrink-0 whitespace-nowrap lg:w-full flex items-center gap-2 px-3 sm:px-3.5 py-2.5 lg:py-3 rounded-lg text-xs font-medium transition-all cursor-pointer ${
+                  activeTabState === 'profile'
+                    ? 'bg-[#48151F] text-[#C6A15B] border border-[#C6A15B]/40 font-semibold shadow-md'
+                    : 'text-[#B7AAA1] hover:text-[#F5EFE7] hover:bg-[#210D12]'
+                }`}
+              >
+                <UserIcon className="w-4 h-4 shrink-0" />
+                <span>Customer Info</span>
+              </button>
 
-            <button
-              onClick={() => setActiveTabState('profile')}
-              className={`w-full flex items-center gap-2.5 px-3.5 py-3 rounded-lg text-xs font-medium transition-all cursor-pointer ${
-                activeTabState === 'profile'
-                  ? 'bg-[#48151F] text-[#C6A15B] border border-[#C6A15B]/40 font-semibold shadow-md'
-                  : 'text-[#B7AAA1] hover:text-[#F5EFE7] hover:bg-[#210D12]'
-              }`}
-            >
-              <UserIcon className="w-4 h-4" />
-              <span>Customer Information</span>
-            </button>
+              <button
+                onClick={() => setActiveTabState('avatar')}
+                className={`shrink-0 whitespace-nowrap lg:w-full flex items-center gap-2 px-3 sm:px-3.5 py-2.5 lg:py-3 rounded-lg text-xs font-medium transition-all cursor-pointer ${
+                  activeTabState === 'avatar'
+                    ? 'bg-[#48151F] text-[#C6A15B] border border-[#C6A15B]/40 font-semibold shadow-md'
+                    : 'text-[#B7AAA1] hover:text-[#F5EFE7] hover:bg-[#210D12]'
+                }`}
+              >
+                <Camera className="w-4 h-4 shrink-0" />
+                <span>Profile Picture</span>
+              </button>
 
-            <button
-              onClick={() => setActiveTabState('avatar')}
-              className={`w-full flex items-center gap-2.5 px-3.5 py-3 rounded-lg text-xs font-medium transition-all cursor-pointer ${
-                activeTabState === 'avatar'
-                  ? 'bg-[#48151F] text-[#C6A15B] border border-[#C6A15B]/40 font-semibold shadow-md'
-                  : 'text-[#B7AAA1] hover:text-[#F5EFE7] hover:bg-[#210D12]'
-              }`}
-            >
-              <Camera className="w-4 h-4" />
-              <span>Profile Picture</span>
-            </button>
+              <button
+                onClick={() => setActiveTabState('password')}
+                className={`shrink-0 whitespace-nowrap lg:w-full flex items-center gap-2 px-3 sm:px-3.5 py-2.5 lg:py-3 rounded-lg text-xs font-medium transition-all cursor-pointer ${
+                  activeTabState === 'password'
+                    ? 'bg-[#48151F] text-[#C6A15B] border border-[#C6A15B]/40 font-semibold shadow-md'
+                    : 'text-[#B7AAA1] hover:text-[#F5EFE7] hover:bg-[#210D12]'
+                }`}
+              >
+                <KeyRound className="w-4 h-4 shrink-0" />
+                <span>Change Password</span>
+              </button>
 
-            <button
-              onClick={() => setActiveTabState('password')}
-              className={`w-full flex items-center gap-2.5 px-3.5 py-3 rounded-lg text-xs font-medium transition-all cursor-pointer ${
-                activeTabState === 'password'
-                  ? 'bg-[#48151F] text-[#C6A15B] border border-[#C6A15B]/40 font-semibold shadow-md'
-                  : 'text-[#B7AAA1] hover:text-[#F5EFE7] hover:bg-[#210D12]'
-              }`}
-            >
-              <KeyRound className="w-4 h-4" />
-              <span>Change Password</span>
-            </button>
+              <button
+                onClick={() => setActiveTabState('preferences')}
+                className={`shrink-0 whitespace-nowrap lg:w-full flex items-center gap-2 px-3 sm:px-3.5 py-2.5 lg:py-3 rounded-lg text-xs font-medium transition-all cursor-pointer ${
+                  activeTabState === 'preferences'
+                    ? 'bg-[#48151F] text-[#C6A15B] border border-[#C6A15B]/40 font-semibold shadow-md'
+                    : 'text-[#B7AAA1] hover:text-[#F5EFE7] hover:bg-[#210D12]'
+                }`}
+              >
+                <Sparkles className="w-4 h-4 shrink-0" />
+                <span>Tasting Preferences</span>
+              </button>
 
-            <button
-              onClick={() => setActiveTabState('preferences')}
-              className={`w-full flex items-center gap-2.5 px-3.5 py-3 rounded-lg text-xs font-medium transition-all cursor-pointer ${
-                activeTabState === 'preferences'
-                  ? 'bg-[#48151F] text-[#C6A15B] border border-[#C6A15B]/40 font-semibold shadow-md'
-                  : 'text-[#B7AAA1] hover:text-[#F5EFE7] hover:bg-[#210D12]'
-              }`}
-            >
-              <Sparkles className="w-4 h-4" />
-              <span>Tasting Preferences</span>
-            </button>
+              <button
+                onClick={() => setActiveTabState('addresses')}
+                className={`shrink-0 whitespace-nowrap lg:w-full flex items-center gap-2 px-3 sm:px-3.5 py-2.5 lg:py-3 rounded-lg text-xs font-medium transition-all cursor-pointer ${
+                  activeTabState === 'addresses'
+                    ? 'bg-[#48151F] text-[#C6A15B] border border-[#C6A15B]/40 font-semibold shadow-md'
+                    : 'text-[#B7AAA1] hover:text-[#F5EFE7] hover:bg-[#210D12]'
+                }`}
+              >
+                <MapPin className="w-4 h-4 shrink-0" />
+                <span>Davao Addresses</span>
+              </button>
 
-            <button
-              onClick={() => setActiveTabState('addresses')}
-              className={`w-full flex items-center gap-2.5 px-3.5 py-3 rounded-lg text-xs font-medium transition-all cursor-pointer ${
-                activeTabState === 'addresses'
-                  ? 'bg-[#48151F] text-[#C6A15B] border border-[#C6A15B]/40 font-semibold shadow-md'
-                  : 'text-[#B7AAA1] hover:text-[#F5EFE7] hover:bg-[#210D12]'
-              }`}
-            >
-              <MapPin className="w-4 h-4" />
-              <span>Davao Delivery Addresses</span>
-            </button>
-
-            <button
-              onClick={() => setActiveTabState('wishlist')}
-              className={`w-full flex items-center justify-between px-3.5 py-3 rounded-lg text-xs font-medium transition-all cursor-pointer ${
-                activeTabState === 'wishlist'
-                  ? 'bg-[#48151F] text-[#C6A15B] border border-[#C6A15B]/40 font-semibold shadow-md'
-                  : 'text-[#B7AAA1] hover:text-[#F5EFE7] hover:bg-[#210D12]'
-              }`}
-            >
-              <div className="flex items-center gap-2.5">
-                <Heart className="w-4 h-4" />
-                <span>Cellar Wishlist</span>
-              </div>
-              <span className="px-2 py-0.5 rounded-full bg-[#210D12] text-[10px] border border-[#48151F]">
-                {wishlist.length}
-              </span>
-            </button>
+              <button
+                onClick={() => setActiveTabState('wishlist')}
+                className={`shrink-0 whitespace-nowrap lg:w-full flex items-center justify-between gap-2 px-3 sm:px-3.5 py-2.5 lg:py-3 rounded-lg text-xs font-medium transition-all cursor-pointer ${
+                  activeTabState === 'wishlist'
+                    ? 'bg-[#48151F] text-[#C6A15B] border border-[#C6A15B]/40 font-semibold shadow-md'
+                    : 'text-[#B7AAA1] hover:text-[#F5EFE7] hover:bg-[#210D12]'
+                }`}
+              >
+                <div className="flex items-center gap-2">
+                  <Heart className="w-4 h-4 shrink-0" />
+                  <span>Cellar Wishlist</span>
+                </div>
+                <span className="px-2 py-0.5 rounded-full bg-[#210D12] text-[10px] border border-[#48151F]">
+                  {wishlist.length}
+                </span>
+              </button>
+            </div>
           </div>
 
           {/* Sommelier Concierge Info */}
-          <div className="rounded-xl bg-[#130B0D] border border-[#48151F] p-4 text-xs">
+          <div className="hidden lg:block rounded-xl bg-[#130B0D] border border-[#48151F] p-4 text-xs">
             <span className="text-[10px] uppercase tracking-wider text-[#C6A15B] block mb-1 font-semibold flex items-center gap-1.5">
               <Wine className="w-3.5 h-3.5 text-[#C6A15B]" />
               <span>Sommelier Concierge</span>
@@ -665,7 +667,7 @@ export const UserDashboard: React.FC = () => {
 
         {/* Content Pane */}
         <div className="lg:col-span-3">
-          <div className="rounded-2xl bg-[#190D10] border border-[#392126] p-6 sm:p-8 shadow-xl">
+          <div className="rounded-2xl bg-[#190D10] border border-[#392126] p-4 sm:p-6 lg:p-8 shadow-xl">
             {/* TAB: ORDERS */}
             {activeTabState === 'orders' && (
               <div>
@@ -700,7 +702,7 @@ export const UserDashboard: React.FC = () => {
                       return (
                         <div
                           key={ord.order_id}
-                          className="rounded-xl bg-[#100809] border border-[#392126] p-5 hover:border-[#D5B15C]/40 transition-colors"
+                          className="rounded-xl bg-[#100809] border border-[#392126] p-4 sm:p-5 hover:border-[#D5B15C]/40 transition-colors"
                         >
                           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4 pb-3 border-b border-[#392126]">
                             <div>
@@ -729,7 +731,7 @@ export const UserDashboard: React.FC = () => {
                               <span className="font-serif text-xl text-[#F5EFE7] font-normal block tabular-nums">
                                 {formatPeso(ord.total_amount)}
                               </span>
-                              <div className="flex items-center gap-2">
+                              <div className="flex flex-wrap items-center gap-2">
                                 <button
                                   onClick={() => {
                                     setSelectedTrackingOrderId(ord.order_id);
@@ -940,14 +942,14 @@ export const UserDashboard: React.FC = () => {
                     />
                   </div>
 
-                  <div className="pt-3 flex items-center justify-between">
+                  <div className="pt-3 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
                     <div className="flex items-center gap-1.5 text-[#918481] text-[11px]">
-                      <ShieldCheck className="w-4 h-4 text-[#D5B15C]" />
+                      <ShieldCheck className="w-4 h-4 text-[#D5B15C] shrink-0" />
                       <span>Member since {user.member_since || 'October 2024'}</span>
                     </div>
                     <button
                       type="submit"
-                      className="py-2.5 px-6 rounded-lg bg-[#7F1427] hover:bg-[#8e192f] text-white font-medium text-xs uppercase tracking-wider border border-[#D5B15C]/40 flex items-center gap-2 cursor-pointer shadow-lg transition-colors"
+                      className="w-full sm:w-auto py-2.5 px-6 rounded-lg bg-[#7F1427] hover:bg-[#8e192f] text-white font-medium text-xs uppercase tracking-wider border border-[#D5B15C]/40 flex items-center justify-center gap-2 cursor-pointer shadow-lg transition-colors"
                     >
                       <Save className="w-4 h-4 text-[#D5B15C]" />
                       <span>Save Changes</span>
@@ -966,7 +968,7 @@ export const UserDashboard: React.FC = () => {
                 </div>
 
                 {/* Current Preview */}
-                <div className="p-5 rounded-xl bg-[#100809] border border-[#392126] mb-6 flex items-center gap-5">
+                <div className="p-4 sm:p-5 rounded-xl bg-[#100809] border border-[#392126] mb-6 flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-5">
                   <img
                     src={avatarFallback || selectedAvatarUrl || user.avatar}
                     alt="Avatar Preview"
@@ -1235,7 +1237,7 @@ export const UserDashboard: React.FC = () => {
             {/* TAB: ADDRESSES */}
             {activeTabState === 'addresses' && (
               <div>
-                <div className="flex items-center justify-between mb-6 pb-4 border-b border-[#392126]">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6 pb-4 border-b border-[#392126]">
                   <div>
                     <h2 className="font-serif text-2xl text-[#F5EFE7] font-normal">Davao Delivery Addresses</h2>
                     <p className="text-xs text-[#C1B7B4]">Manage your verified residential and commercial delivery locations in Davao City.</p>
@@ -1243,7 +1245,7 @@ export const UserDashboard: React.FC = () => {
 
                   <button
                     onClick={() => setShowAddAddress(!showAddAddress)}
-                    className="py-2 px-3.5 rounded-lg bg-[#7F1427] hover:bg-[#8e192f] text-white text-xs font-medium border border-[#D5B15C]/40 flex items-center gap-1.5 transition-colors cursor-pointer"
+                    className="self-start sm:self-auto py-2 px-3.5 rounded-lg bg-[#7F1427] hover:bg-[#8e192f] text-white text-xs font-medium border border-[#D5B15C]/40 flex items-center gap-1.5 transition-colors cursor-pointer shrink-0"
                   >
                     <Plus className="w-3.5 h-3.5" />
                     <span>{showAddAddress ? 'Cancel' : 'Add New Address'}</span>
@@ -1280,7 +1282,7 @@ export const UserDashboard: React.FC = () => {
                       )}
                     </div>
 
-                    <div className="grid grid-cols-2 gap-3">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                       <div>
                         <label className="block text-[#C1B7B4] uppercase tracking-wider text-[10px] font-semibold mb-1">
                           District / Area

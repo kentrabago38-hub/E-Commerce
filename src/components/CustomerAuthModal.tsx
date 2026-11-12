@@ -180,8 +180,8 @@ export const CustomerAuthModal: React.FC = () => {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-md p-4 animate-fade-in text-[#F5EFE7]">
-      <div className="relative max-w-lg w-full max-h-[92vh] overflow-y-auto rounded-2xl bg-[#130B0D] border border-[#48151F] shadow-2xl p-6 sm:p-8">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-md p-2 sm:p-4 animate-fade-in text-[#F5EFE7]">
+      <div className="relative max-w-lg w-full max-h-[94vh] sm:max-h-[92vh] overflow-y-auto rounded-2xl bg-[#130B0D] border border-[#48151F] shadow-2xl p-4 sm:p-8">
         {/* Close Button */}
         <button
           onClick={handleClose}
@@ -372,7 +372,7 @@ export const CustomerAuthModal: React.FC = () => {
               )}
             </div>
 
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
                 <label className="block text-[#B7AAA1] uppercase tracking-wider text-[10px] font-semibold mb-1">
                   Password * (6+ chars)
@@ -428,7 +428,7 @@ export const CustomerAuthModal: React.FC = () => {
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
                 <div className="flex items-center justify-between mb-1">
                   <label className="block text-[#B7AAA1] uppercase tracking-wider text-[10px] font-semibold">

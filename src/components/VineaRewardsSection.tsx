@@ -23,7 +23,8 @@ import {
   CheckCircle2,
   Clock,
   Compass,
-  AlertCircle
+  AlertCircle,
+  Ticket
 } from 'lucide-react';
 
 interface VineaRewardsSectionProps {
@@ -35,7 +36,17 @@ export const VineaRewardsSection: React.FC<VineaRewardsSectionProps> = ({
   onNavigateToCatalog,
   onNavigateToTracking
 }) => {
-  const { user, redeemPerk, showToast, setActiveTab } = useWineStore();
+  const {
+    user,
+    redeemPerk,
+    showToast,
+    userVouchers,
+    appliedVoucher,
+    applyVoucherCode,
+    cart,
+    setIsCartOpen,
+    setIsAccountOpen
+  } = useWineStore();
 
   const [filterCategory, setFilterCategory] = useState<'all' | 'unlocked' | 'vouchers' | 'experiences'>('all');
   const [selectedPerkForModal, setSelectedPerkForModal] = useState<MemberPerk | null>(null);
@@ -99,7 +110,17 @@ export const VineaRewardsSection: React.FC<VineaRewardsSectionProps> = ({
         setLastRedeemedCode({ id: perk.id, code: result.code });
         setSelectedPerkForModal(null);
       }
-    }, 600);
+    }, 350);
+  };
+
+  const handleUseVoucher = (code: string) => {
+    const res = applyVoucherCode(code);
+    if (res.success && cart.length > 0) {
+      setIsAccountOpen(false);
+      setIsCartOpen(true);
+    } else if (res.success && cart.length === 0) {
+      showToast(`Voucher ${code} is armed for your next bottle — explore the cellar to use it!`, 'info');
+    }
   };
 
   // Filter perks
@@ -277,7 +298,7 @@ export const VineaRewardsSection: React.FC<VineaRewardsSectionProps> = ({
             </div>
 
             {/* Milestone markers */}
-            <div className="flex items-center justify-between text-[10px] text-[#918481] mt-2 font-mono">
+            <div className="flex flex-wrap items-center justify-between gap-2 text-[10px] text-[#918481] mt-2 font-mono">
               <span className={userTierIndex >= 0 ? 'text-[#D5B15C] font-semibold' : ''}>
                 Connoisseur (0 pts)
               </span>
@@ -290,6 +311,112 @@ export const VineaRewardsSection: React.FC<VineaRewardsSectionProps> = ({
             </div>
           </div>
         </div>
+      </div>
+
+      {/* 2.5 My Voucher Wallet */}
+      <div className="rounded-2xl bg-[#14080B] border border-[#48151F] p-4 sm:p-6 shadow-xl">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-4 mb-4 border-b border-[#392126]">
+          <div>
+            <span className="text-[10px] uppercase tracking-widest text-[#C6A15B] font-semibold flex items-center gap-1.5 mb-0.5">
+              <Ticket className="w-3.5 h-3.5" />
+              <span>Cellar Voucher Wallet</span>
+            </span>
+            <h3 className="font-serif text-xl text-[#F5EFE7] font-normal">
+              Your Active & Redeemed Vouchers
+            </h3>
+          </div>
+          <span className="text-xs text-[#C6A15B] font-mono bg-[#1A080D] px-3 py-1 rounded border border-[#48151F] self-start sm:self-auto">
+            {userVouchers.filter(v => v.status === 'active').length} Active · {userVouchers.length} Total
+          </span>
+        </div>
+
+        {userVouchers.length === 0 ? (
+          <div className="py-6 text-center text-xs text-[#C1B7B4]">
+            Redeem any perk below to generate a checkout-ready voucher code. You can also apply public seasonal codes like <strong className="font-mono text-[#D5B15C]">VINEA10</strong> in your cart.
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+            {userVouchers.map((voucher) => {
+              const isApplied = appliedVoucher?.code?.toUpperCase() === voucher.code.toUpperCase();
+              const isUsed = voucher.status === 'used';
+              return (
+                <div
+                  key={voucher.voucher_id}
+                  className={`p-4 rounded-xl border flex flex-col justify-between gap-3 ${
+                    isUsed
+                      ? 'bg-[#0E0608] border-[#2A1014] opacity-70'
+                      : isApplied
+                      ? 'bg-[#210D12] border-emerald-500/60 shadow-lg'
+                      : 'bg-[#1A0A0E] border-[#48151F] hover:border-[#C6A15B]/50'
+                  }`}
+                >
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="min-w-0">
+                      <div className="flex flex-wrap items-center gap-2 mb-1">
+                        <span className="font-mono text-xs font-bold text-[#D5B15C] bg-[#100809] px-2 py-0.5 rounded border border-[#48151F]">
+                          {voucher.code}
+                        </span>
+                        <span
+                          className={`text-[10px] uppercase tracking-wider font-semibold px-2 py-0.5 rounded ${
+                            isUsed
+                              ? 'bg-neutral-900 text-neutral-400 border border-neutral-700'
+                              : isApplied
+                              ? 'bg-emerald-950/70 text-emerald-300 border border-emerald-700/50'
+                              : 'bg-[#2A0D14] text-[#F5EFE7] border border-[#C6A15B]/40'
+                          }`}
+                        >
+                          {isUsed ? `Used${voucher.order_id ? ` · #${voucher.order_id}` : ''}` : isApplied ? 'Applied to Cart' : 'Ready to Use'}
+                        </span>
+                      </div>
+                      <h4 className="font-serif text-base text-[#F5EFE7] font-normal leading-snug">
+                        {voucher.title}
+                      </h4>
+                      <p className="text-[11px] text-[#C1B7B4] mt-0.5">
+                        {voucher.discount_type === 'fixed'
+                          ? `${formatPeso(voucher.discount_value)} instant deduction at checkout`
+                          : voucher.discount_type === 'percent'
+                          ? `${voucher.discount_value}% off subtotal at checkout`
+                          : voucher.discount_type === 'free_shipping'
+                          ? 'Waives ₱350 Davao Cold-Chain Delivery fee'
+                          : voucher.description}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="pt-2.5 border-t border-[#392126]/70 flex flex-wrap items-center justify-between gap-2">
+                    <span className="text-[10px] text-[#918481] font-mono">
+                      Issued {voucher.created_at}
+                    </span>
+                    {!isUsed && (
+                      <div className="flex items-center gap-2">
+                        <button
+                          type="button"
+                          onClick={() => handleCopyCode(voucher.code)}
+                          className="py-1.5 px-2.5 rounded-lg bg-[#100809] hover:bg-[#210D12] border border-[#392126] text-[11px] font-mono text-[#D5B15C] flex items-center gap-1 cursor-pointer transition-colors"
+                        >
+                          <Copy className="w-3 h-3" />
+                          <span>{copiedCode === voucher.code ? 'Copied' : 'Copy'}</span>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleUseVoucher(voucher.code)}
+                          className={`py-1.5 px-3 rounded-lg text-[11px] font-semibold uppercase tracking-wider flex items-center gap-1 cursor-pointer transition-colors ${
+                            isApplied
+                              ? 'bg-emerald-950/60 text-emerald-300 border border-emerald-700/50'
+                              : 'bg-[#861F32] hover:bg-[#a1253c] text-white border border-[#C6A15B]/40'
+                          }`}
+                        >
+                          <Check className="w-3 h-3" />
+                          <span>{isApplied ? (cart.length > 0 ? 'Open Cart' : 'Applied') : 'Apply to Cart'}</span>
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
       </div>
 
       {/* 3. Tier Comparison Table (Toggled) */}
@@ -420,10 +547,12 @@ export const VineaRewardsSection: React.FC<VineaRewardsSectionProps> = ({
         </div>
 
         {/* Perks Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5">
           {filteredPerks.map((perk) => {
             const isUnlocked = isPerkUnlockedForTier(perk);
-            const isClaimed = redeemedPerkIds.includes(perk.id);
+            const activeForPerk = userVouchers.filter(v => v.perk_id === perk.id && v.status === 'active');
+            const isRepeatableVoucher = perk.category === 'voucher';
+            const isClaimed = !isRepeatableVoucher && redeemedPerkIds.includes(perk.id);
             const pointCost = perk.pointCost || 0;
             const canAfford = currentPoints >= pointCost;
             const isComplimentary = perk.isComplimentaryForTier && isUnlocked;
@@ -431,7 +560,7 @@ export const VineaRewardsSection: React.FC<VineaRewardsSectionProps> = ({
             return (
               <div
                 key={perk.id}
-                className={`relative rounded-xl border p-5 flex flex-col justify-between transition-all ${
+                className={`relative rounded-xl border p-4 sm:p-5 flex flex-col justify-between transition-all ${
                   isUnlocked
                     ? 'bg-[#14080B] border-[#48151F] hover:border-[#C6A15B]/60 shadow-lg'
                     : 'bg-[#0E0507] border-[#2A1014] opacity-75'
@@ -440,11 +569,11 @@ export const VineaRewardsSection: React.FC<VineaRewardsSectionProps> = ({
                 <div>
                   {/* Top Bar: Icon, Tier requirement, Value Label */}
                   <div className="flex items-start justify-between gap-3 mb-3">
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-3 min-w-0">
                       <div className="w-10 h-10 rounded-xl bg-[#210D12] border border-[#48151F] flex items-center justify-center shrink-0">
                         {getPerkIcon(perk.iconName)}
                       </div>
-                      <div>
+                      <div className="min-w-0">
                         <span className="text-[10px] text-[#C6A15B] uppercase tracking-wider block font-medium">
                           {perk.valueLabel}
                         </span>
@@ -474,7 +603,7 @@ export const VineaRewardsSection: React.FC<VineaRewardsSectionProps> = ({
                 </div>
 
                 {/* Bottom Action Footer */}
-                <div className="pt-3 border-t border-[#392126] flex items-center justify-between gap-3">
+                <div className="pt-3 border-t border-[#392126] flex flex-wrap items-center justify-between gap-3">
                   <div className="text-xs">
                     {isComplimentary ? (
                       <span className="text-emerald-400 font-semibold text-xs flex items-center gap-1">
@@ -489,6 +618,11 @@ export const VineaRewardsSection: React.FC<VineaRewardsSectionProps> = ({
                         <span className="text-[10px] text-[#918481] uppercase font-sans">
                           Points
                         </span>
+                        {activeForPerk.length > 0 && (
+                          <span className="text-[10px] text-emerald-400 font-medium ml-1">
+                            ({activeForPerk.length} active)
+                          </span>
+                        )}
                       </div>
                     ) : (
                       <span className="text-[#C6A15B] text-xs font-medium">
@@ -504,19 +638,19 @@ export const VineaRewardsSection: React.FC<VineaRewardsSectionProps> = ({
                         <span>Requires {perk.tierRequired}</span>
                       </div>
                     ) : isClaimed ? (
-                      <div className="flex items-center gap-2">
+                      <div className="flex flex-wrap items-center gap-2">
                         <span className="px-2.5 py-1 rounded-md bg-emerald-950/60 text-emerald-300 border border-emerald-800/50 text-[11px] font-medium flex items-center gap-1">
                           <Check className="w-3 h-3 text-emerald-400" />
                           <span>Active / Claimed</span>
                         </span>
-                        {lastRedeemedCode?.id === perk.id && (
+                        {(lastRedeemedCode?.id === perk.id || activeForPerk[0]) && (
                           <button
-                            onClick={() => handleCopyCode(lastRedeemedCode.code)}
-                            className="py-1 px-2 rounded bg-[#210D12] text-[#D5B15C] text-[11px] font-mono border border-[#48151F] hover:bg-[#48151F] transition-colors flex items-center gap-1"
-                            title="Copy voucher code"
+                            onClick={() => handleUseVoucher((lastRedeemedCode?.id === perk.id ? lastRedeemedCode.code : activeForPerk[0].code))}
+                            className="py-1 px-2.5 rounded bg-[#210D12] text-[#D5B15C] text-[11px] font-mono border border-[#48151F] hover:bg-[#48151F] transition-colors flex items-center gap-1 cursor-pointer"
+                            title="Apply voucher to cart"
                           >
-                            <Copy className="w-3 h-3" />
-                            <span>{copiedCode === lastRedeemedCode.code ? 'Copied' : lastRedeemedCode.code}</span>
+                            <Ticket className="w-3 h-3" />
+                            <span>Use {lastRedeemedCode?.id === perk.id ? lastRedeemedCode.code : activeForPerk[0].code}</span>
                           </button>
                         )}
                       </div>
@@ -530,7 +664,7 @@ export const VineaRewardsSection: React.FC<VineaRewardsSectionProps> = ({
                             : 'bg-[#210D12] text-[#918481] border border-[#392126] cursor-not-allowed'
                         }`}
                       >
-                        <span>{pointCost > 0 ? 'Redeem Perk' : 'Activate Privilege'}</span>
+                        <span>{pointCost > 0 ? (isRepeatableVoucher && activeForPerk.length > 0 ? 'Redeem Another' : 'Redeem Perk') : 'Activate Privilege'}</span>
                         <ArrowRight className="w-3.5 h-3.5 text-[#C6A15B]" />
                       </button>
                     )}

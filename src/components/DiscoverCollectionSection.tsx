@@ -30,9 +30,9 @@ export const DiscoverCollectionSection: React.FC = () => {
   };
 
   return (
-    <section className="py-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+    <section className="py-14 sm:py-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
       {/* Editorial Section Header */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-6 border-b border-[#351116] pb-8">
+      <div className="flex flex-col md:flex-row md:items-end justify-between mb-10 sm:mb-16 gap-4 sm:gap-6 border-b border-[#351116] pb-6 sm:pb-8">
         <div>
           <div className="flex items-center gap-2 text-xs uppercase tracking-[0.25em] text-[#C6A15B] font-semibold mb-3">
             <Award className="w-3.5 h-3.5" />
@@ -63,15 +63,15 @@ export const DiscoverCollectionSection: React.FC = () => {
       </div>
 
       {/* Asymmetric Magazine-Style Grid (Non-identical card layout) */}
-      <div className="space-y-8">
+      <div className="space-y-6 sm:space-y-8">
         
         {/* ROW 1: Large Featured Master Bottle (Left) + 2 Stacked Boutique Cards (Right) */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8 items-stretch">
           
           {/* Card 1: Large Asymmetric Flagship Showcase (7 Columns) */}
           {heroRed && (
             <div
-              className="lg:col-span-7 group relative rounded-3xl bg-gradient-to-b from-[#18090C] via-[#130B0D] to-[#130B0D] border border-[#351116] hover:border-[#C6A15B]/70 transition-all duration-500 overflow-hidden shadow-2xl flex flex-col justify-between p-6 sm:p-8"
+              className="lg:col-span-7 group relative rounded-3xl bg-gradient-to-b from-[#18090C] via-[#130B0D] to-[#130B0D] border border-[#351116] hover:border-[#C6A15B]/70 transition-all duration-500 overflow-hidden shadow-2xl flex flex-col justify-between p-4 sm:p-8"
               data-cursor="view"
             >
               <div className="grid grid-cols-1 sm:grid-cols-12 gap-6 items-center">
@@ -147,7 +147,7 @@ export const DiscoverCollectionSection: React.FC = () => {
                   </div>
 
                   {/* Price & Add to Cart */}
-                  <div className="pt-2 flex items-center justify-between border-t border-[#351116]">
+                  <div className="pt-3 flex flex-wrap items-center justify-between gap-3 border-t border-[#351116]">
                     <div>
                       <span className="text-[10px] text-[#B7AAA1] uppercase tracking-wider block">Allocation</span>
                       <span className="font-serif text-2xl text-[#C6A15B] tabular-nums font-normal">
@@ -158,7 +158,7 @@ export const DiscoverCollectionSection: React.FC = () => {
                     <button
                       type="button"
                       onClick={() => addToCart(heroRed, 1)}
-                      className="btn-magnetic py-3 px-6 rounded-xl bg-[#861F32] hover:bg-[#a1253c] text-white text-xs uppercase tracking-wider font-semibold flex items-center gap-2 transition-all cursor-pointer shadow-lg group"
+                      className="btn-magnetic py-3 px-5 sm:px-6 rounded-xl bg-[#861F32] hover:bg-[#a1253c] text-white text-xs uppercase tracking-wider font-semibold flex items-center gap-2 transition-all cursor-pointer shadow-lg group"
                       data-cursor="add"
                     >
                       <ShoppingBag className="w-3.5 h-3.5 text-[#C6A15B] btn-magnetic-arrow" />
@@ -171,15 +171,15 @@ export const DiscoverCollectionSection: React.FC = () => {
           )}
 
           {/* Cards 2 & 3: Two Stacked Editorial Cards (5 Columns) */}
-          <div className="lg:col-span-5 flex flex-col gap-8 justify-between">
+          <div className="lg:col-span-5 flex flex-col gap-6 sm:gap-8 justify-between">
             {/* Upper Stacked Card: Champagne */}
             {sideChampagne && (
               <div
-                className="group relative rounded-3xl bg-gradient-to-r from-[#18090C] to-[#130B0D] border border-[#351116] hover:border-[#C6A15B]/70 transition-all duration-500 overflow-hidden shadow-xl p-5 flex items-center gap-5"
+                className="group relative rounded-3xl bg-gradient-to-r from-[#18090C] to-[#130B0D] border border-[#351116] hover:border-[#C6A15B]/70 transition-all duration-500 overflow-hidden shadow-xl p-3.5 sm:p-5 flex items-center gap-3.5 sm:gap-5"
                 data-cursor="view"
               >
                 <div
-                  className="w-28 sm:w-32 aspect-3/4 rounded-xl overflow-hidden bg-[#210D12] shrink-0 cursor-pointer relative"
+                  className="w-24 sm:w-32 aspect-3/4 rounded-xl overflow-hidden bg-[#210D12] shrink-0 cursor-pointer relative"
                   onClick={() => handleSelectProduct(sideChampagne)}
                 >
                   <LazyWineImage
@@ -192,14 +192,14 @@ export const DiscoverCollectionSection: React.FC = () => {
                   </div>
                 </div>
 
-                <div className="flex-1 flex flex-col justify-between h-full space-y-2">
+                <div className="flex-1 min-w-0 flex flex-col justify-between h-full space-y-2">
                   <div>
-                    <span className="text-[10px] text-[#C6A15B] uppercase tracking-wider font-semibold block">
+                    <span className="text-[10px] text-[#C6A15B] uppercase tracking-wider font-semibold block truncate">
                       {sideChampagne.winery} · {sideChampagne.region}
                     </span>
                     <h4
                       onClick={() => handleSelectProduct(sideChampagne)}
-                      className="font-serif text-lg text-[#F5EFE7] font-normal leading-snug hover:text-[#C6A15B] cursor-pointer line-clamp-1"
+                      className="font-serif text-base sm:text-lg text-[#F5EFE7] font-normal leading-snug hover:text-[#C6A15B] cursor-pointer line-clamp-1"
                     >
                       {sideChampagne.name}
                     </h4>
@@ -209,13 +209,13 @@ export const DiscoverCollectionSection: React.FC = () => {
                   </div>
 
                   <div className="flex items-center justify-between pt-2 border-t border-[#351116]">
-                    <span className="font-serif text-xl text-[#C6A15B] tabular-nums font-normal">
+                    <span className="font-serif text-lg sm:text-xl text-[#C6A15B] tabular-nums font-normal">
                       {formatPeso(sideChampagne.price)}
                     </span>
                     <button
                       type="button"
                       onClick={() => addToCart(sideChampagne, 1)}
-                      className="p-2 rounded-lg bg-[#861F32] hover:bg-[#a1253c] text-white transition-colors cursor-pointer border border-[#C6A15B]/30"
+                      className="p-2 rounded-lg bg-[#861F32] hover:bg-[#a1253c] text-white transition-colors cursor-pointer border border-[#C6A15B]/30 shrink-0"
                       title="Add to Cart"
                       data-cursor="add"
                     >
@@ -229,11 +229,11 @@ export const DiscoverCollectionSection: React.FC = () => {
             {/* Lower Stacked Card: Heritage White Chardonnay */}
             {sideWhite && (
               <div
-                className="group relative rounded-3xl bg-gradient-to-r from-[#18090C] to-[#130B0D] border border-[#351116] hover:border-[#C6A15B]/70 transition-all duration-500 overflow-hidden shadow-xl p-5 flex items-center gap-5"
+                className="group relative rounded-3xl bg-gradient-to-r from-[#18090C] to-[#130B0D] border border-[#351116] hover:border-[#C6A15B]/70 transition-all duration-500 overflow-hidden shadow-xl p-3.5 sm:p-5 flex items-center gap-3.5 sm:gap-5"
                 data-cursor="view"
               >
                 <div
-                  className="w-28 sm:w-32 aspect-3/4 rounded-xl overflow-hidden bg-[#210D12] shrink-0 cursor-pointer relative"
+                  className="w-24 sm:w-32 aspect-3/4 rounded-xl overflow-hidden bg-[#210D12] shrink-0 cursor-pointer relative"
                   onClick={() => handleSelectProduct(sideWhite)}
                 >
                   <LazyWineImage
@@ -246,14 +246,14 @@ export const DiscoverCollectionSection: React.FC = () => {
                   </div>
                 </div>
 
-                <div className="flex-1 flex flex-col justify-between h-full space-y-2">
+                <div className="flex-1 min-w-0 flex flex-col justify-between h-full space-y-2">
                   <div>
-                    <span className="text-[10px] text-[#C6A15B] uppercase tracking-wider font-semibold block">
+                    <span className="text-[10px] text-[#C6A15B] uppercase tracking-wider font-semibold block truncate">
                       {sideWhite.winery} · {sideWhite.region}
                     </span>
                     <h4
                       onClick={() => handleSelectProduct(sideWhite)}
-                      className="font-serif text-lg text-[#F5EFE7] font-normal leading-snug hover:text-[#C6A15B] cursor-pointer line-clamp-1"
+                      className="font-serif text-base sm:text-lg text-[#F5EFE7] font-normal leading-snug hover:text-[#C6A15B] cursor-pointer line-clamp-1"
                     >
                       {sideWhite.name}
                     </h4>
@@ -263,13 +263,13 @@ export const DiscoverCollectionSection: React.FC = () => {
                   </div>
 
                   <div className="flex items-center justify-between pt-2 border-t border-[#351116]">
-                    <span className="font-serif text-xl text-[#C6A15B] tabular-nums font-normal">
+                    <span className="font-serif text-lg sm:text-xl text-[#C6A15B] tabular-nums font-normal">
                       {formatPeso(sideWhite.price)}
                     </span>
                     <button
                       type="button"
                       onClick={() => addToCart(sideWhite, 1)}
-                      className="p-2 rounded-lg bg-[#861F32] hover:bg-[#a1253c] text-white transition-colors cursor-pointer border border-[#C6A15B]/30"
+                      className="p-2 rounded-lg bg-[#861F32] hover:bg-[#a1253c] text-white transition-colors cursor-pointer border border-[#C6A15B]/30 shrink-0"
                       title="Add to Cart"
                       data-cursor="add"
                     >
@@ -283,12 +283,12 @@ export const DiscoverCollectionSection: React.FC = () => {
         </div>
 
         {/* ROW 2: Complementary Asymmetric Pair (Rosé Vertical Card 5 Col + Wide Brunello Showcase 7 Col) */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8 items-stretch">
           
           {/* Card 4: Rosé Bottle Showcase (5 Columns) */}
           {lowerRose && (
             <div
-              className="lg:col-span-5 group relative rounded-3xl bg-gradient-to-b from-[#18090C] via-[#130B0D] to-[#130B0D] border border-[#351116] hover:border-[#C6A15B]/70 transition-all duration-500 overflow-hidden shadow-xl p-6 flex flex-col justify-between"
+              className="lg:col-span-5 group relative rounded-3xl bg-gradient-to-b from-[#18090C] via-[#130B0D] to-[#130B0D] border border-[#351116] hover:border-[#C6A15B]/70 transition-all duration-500 overflow-hidden shadow-xl p-4 sm:p-6 flex flex-col justify-between"
               data-cursor="view"
             >
               <div
@@ -340,7 +340,7 @@ export const DiscoverCollectionSection: React.FC = () => {
           {/* Card 5: Wide Brunello di Montalcino Showcase (7 Columns) */}
           {lowerBrunello && (
             <div
-              className="lg:col-span-7 group relative rounded-3xl bg-gradient-to-b from-[#18090C] via-[#130B0D] to-[#130B0D] border border-[#351116] hover:border-[#C6A15B]/70 transition-all duration-500 overflow-hidden shadow-2xl p-6 sm:p-8 flex flex-col justify-between"
+              className="lg:col-span-7 group relative rounded-3xl bg-gradient-to-b from-[#18090C] via-[#130B0D] to-[#130B0D] border border-[#351116] hover:border-[#C6A15B]/70 transition-all duration-500 overflow-hidden shadow-2xl p-4 sm:p-8 flex flex-col justify-between"
               data-cursor="view"
             >
               <div className="grid grid-cols-1 sm:grid-cols-12 gap-6 items-center">
@@ -378,7 +378,7 @@ export const DiscoverCollectionSection: React.FC = () => {
                     "{lowerBrunello.tasting_notes?.palate || lowerBrunello.description}"
                   </p>
 
-                  <div className="pt-2 flex items-center justify-between border-t border-[#351116]">
+                  <div className="pt-3 flex flex-wrap items-center justify-between gap-3 border-t border-[#351116]">
                     <div>
                       <span className="text-[10px] text-[#B7AAA1] uppercase tracking-wider block">Allocation</span>
                       <span className="font-serif text-2xl text-[#C6A15B] tabular-nums font-normal">
@@ -389,7 +389,7 @@ export const DiscoverCollectionSection: React.FC = () => {
                     <button
                       type="button"
                       onClick={() => addToCart(lowerBrunello, 1)}
-                      className="btn-magnetic py-3 px-6 rounded-xl bg-[#861F32] hover:bg-[#a1253c] text-white text-xs uppercase tracking-wider font-semibold flex items-center gap-2 transition-all cursor-pointer shadow-lg group"
+                      className="btn-magnetic py-3 px-5 sm:px-6 rounded-xl bg-[#861F32] hover:bg-[#a1253c] text-white text-xs uppercase tracking-wider font-semibold flex items-center gap-2 transition-all cursor-pointer shadow-lg group"
                       data-cursor="add"
                     >
                       <ShoppingBag className="w-3.5 h-3.5 text-[#C6A15B] btn-magnetic-arrow" />

@@ -51,8 +51,8 @@ export const OrderConfirmationModal: React.FC = () => {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-md p-4 animate-fade-in text-[#F5EFE7]">
-      <div className="relative max-w-2xl w-full max-h-[92vh] overflow-y-auto rounded-3xl bg-[#130B0D] border border-[#48151F] shadow-2xl p-6 sm:p-10">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-md p-2 sm:p-4 animate-fade-in text-[#F5EFE7]">
+      <div className="relative max-w-2xl w-full max-h-[92vh] overflow-y-auto rounded-3xl bg-[#130B0D] border border-[#48151F] shadow-2xl p-4 sm:p-10">
         {/* Close Button */}
         <button
           onClick={handleDone}
@@ -126,19 +126,43 @@ export const OrderConfirmationModal: React.FC = () => {
                 </div>
               </div>
 
-              {/* Delivery Address */}
-              <div className="pt-3 border-t border-[#48151F]/40 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                <div>
-                  <span className="text-[#B7AAA1] uppercase tracking-wider text-[10px] block">Delivery Address</span>
-                  <p className="text-[#F5EFE7]">
-                    {order.customer_name} · {order.delivery_address.street}, {order.delivery_address.city}, {order.delivery_address.state} {order.delivery_address.postalCode}
-                  </p>
+              {/* Delivery Address & Financial Breakdown */}
+              <div className="pt-3 border-t border-[#48151F]/40 space-y-2.5">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs">
+                  <span>Subtotal</span>
+                  <span className="font-medium tabular-nums text-[#F5EFE7]">{formatPeso(order.subtotal)}</span>
                 </div>
-                <div className="sm:text-right">
-                  <span className="text-[#B7AAA1] uppercase tracking-wider text-[10px] block">Total Amount</span>
-                  <span className="font-serif text-xl text-[#C6A15B] font-semibold tabular-nums">
-                    {formatPeso(order.total_amount)}
+                {order.discount > 0 && (
+                  <div className="flex items-center justify-between text-xs text-emerald-400">
+                    <span>Voucher Savings {order.discount_code ? `(${order.discount_code})` : ''}</span>
+                    <span className="font-semibold tabular-nums">-{formatPeso(order.discount)}</span>
+                  </div>
+                )}
+                {order.discount === 0 && order.discount_code && (
+                  <div className="flex items-center justify-between text-xs text-[#C6A15B]">
+                    <span>Attached Member Privilege</span>
+                    <span className="font-mono">{order.discount_code}</span>
+                  </div>
+                )}
+                <div className="flex items-center justify-between text-xs">
+                  <span className="text-[#B7AAA1]">Cold-Chain Delivery</span>
+                  <span className="font-medium tabular-nums text-[#F5EFE7]">
+                    {order.shipping === 0 ? 'Complimentary' : formatPeso(order.shipping)}
                   </span>
+                </div>
+                <div className="pt-2 border-t border-[#48151F]/40 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                  <div>
+                    <span className="text-[#B7AAA1] uppercase tracking-wider text-[10px] block">Delivery Address</span>
+                    <p className="text-[#F5EFE7]">
+                      {order.customer_name} · {order.delivery_address.street}, {order.delivery_address.city}, {order.delivery_address.state} {order.delivery_address.postalCode}
+                    </p>
+                  </div>
+                  <div className="sm:text-right shrink-0">
+                    <span className="text-[#B7AAA1] uppercase tracking-wider text-[10px] block">Total Amount</span>
+                    <span className="font-serif text-xl text-[#C6A15B] font-semibold tabular-nums">
+                      {formatPeso(order.total_amount)}
+                    </span>
+                  </div>
                 </div>
               </div>
             </div>
@@ -185,7 +209,7 @@ export const OrderConfirmationModal: React.FC = () => {
             </div>
 
             {/* 4-Stage Stepper: Processing → Confirmed → Shipped → Delivered */}
-            <div className="py-8 px-4 bg-[#210D12] rounded-2xl border border-[#48151F] mb-8">
+            <div className="py-5 px-2 sm:py-8 sm:px-4 bg-[#210D12] rounded-2xl border border-[#48151F] mb-6 sm:mb-8">
               <div className="relative flex items-center justify-between">
                 {/* Connecting bar */}
                 <div className="absolute top-1/2 left-0 right-0 -translate-y-1/2 h-1 bg-[#130B0D] z-0" />
@@ -203,7 +227,7 @@ export const OrderConfirmationModal: React.FC = () => {
                   return (
                     <div key={s} className="relative z-10 flex flex-col items-center">
                       <div
-                        className={`w-9 h-9 rounded-full flex items-center justify-center text-xs font-bold transition-all shadow-md ${
+                        className={`w-8 h-8 sm:w-9 sm:h-9 rounded-full flex items-center justify-center text-xs font-bold transition-all shadow-md ${
                           isDone
                             ? 'bg-[#861F32] text-white border-2 border-[#C6A15B]'
                             : 'bg-[#130B0D] text-[#B7AAA1] border border-[#48151F]'
@@ -212,7 +236,7 @@ export const OrderConfirmationModal: React.FC = () => {
                         {idx + 1}
                       </div>
                       <span
-                        className={`text-xs mt-2 text-center whitespace-nowrap font-medium ${
+                        className={`text-[10px] sm:text-xs mt-2 text-center whitespace-nowrap font-medium ${
                           isCurrent ? 'text-[#C6A15B] font-bold' : isDone ? 'text-[#F5EFE7]' : 'text-[#B7AAA1]'
                         }`}
                       >

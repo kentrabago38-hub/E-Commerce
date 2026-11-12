@@ -14,17 +14,31 @@ export const CustomCursor: React.FC = () => {
   const animFrameId = useRef<number | null>(null);
 
   useEffect(() => {
-    // Check if device is touch-based or has reduced motion
-    const touchCheck =
+    const isMobileOrTouch = () =>
+      window.innerWidth < 1024 ||
       'ontouchstart' in window ||
       navigator.maxTouchPoints > 0 ||
+      window.matchMedia('(hover: none)').matches ||
       window.matchMedia('(pointer: coarse)').matches ||
       window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-    if (touchCheck) {
+    if (isMobileOrTouch()) {
       setIsTouchDevice(true);
+      setIsVisible(false);
       return;
     }
+
+    const handleResize = () => {
+      if (isMobileOrTouch()) {
+        setIsTouchDevice(true);
+        setIsVisible(false);
+      }
+    };
+
+    const handleTouchStart = () => {
+      setIsTouchDevice(true);
+      setIsVisible(false);
+    };
 
     const handleMouseMove = (e: MouseEvent) => {
       mousePos.current = { x: e.clientX, y: e.clientY };
@@ -77,6 +91,8 @@ export const CustomCursor: React.FC = () => {
     };
 
     window.addEventListener('mousemove', handleMouseMove, { passive: true });
+    window.addEventListener('resize', handleResize, { passive: true });
+    window.addEventListener('touchstart', handleTouchStart, { passive: true });
     document.addEventListener('mouseleave', handleMouseLeave);
     document.addEventListener('mouseenter', handleMouseEnter);
 
@@ -100,6 +116,8 @@ export const CustomCursor: React.FC = () => {
 
     return () => {
       window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('resize', handleResize);
+      window.removeEventListener('touchstart', handleTouchStart);
       document.removeEventListener('mouseleave', handleMouseLeave);
       document.removeEventListener('mouseenter', handleMouseEnter);
       if (animFrameId.current) cancelAnimationFrame(animFrameId.current);
@@ -111,7 +129,7 @@ export const CustomCursor: React.FC = () => {
   const hasText = Boolean(cursorText);
 
   return (
-    <div className="pointer-events-none fixed inset-0 z-[9999] overflow-hidden select-none">
+    <div className="hidden lg:block pointer-events-none fixed inset-0 z-[9999] overflow-hidden select-none">
       {/* Precision center dot */}
       <div
         ref={dotRef}

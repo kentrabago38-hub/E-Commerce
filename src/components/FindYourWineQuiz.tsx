@@ -226,21 +226,21 @@ export const FindYourWineQuiz: React.FC = () => {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#120A0C]/90 backdrop-blur-2xl p-4 sm:p-6 animate-fade-in text-[#F5EFE7]">
-      <div className="relative max-w-4xl w-full max-h-[94vh] overflow-y-auto rounded-3xl dark-luxury-glass-elevated shadow-2xl p-6 sm:p-10 border border-white/10">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#120A0C]/90 backdrop-blur-2xl p-2 sm:p-6 animate-fade-in text-[#F5EFE7]">
+      <div className="relative max-w-4xl w-full max-h-[94vh] overflow-y-auto rounded-2xl sm:rounded-3xl dark-luxury-glass-elevated shadow-2xl p-4 sm:p-10 border border-white/10">
         {/* Close Button */}
         <button
           onClick={() => setIsQuizOpen(false)}
-          className="p-3 rounded-full bg-white/5 hover:bg-white/10 text-[#B7AAA1] hover:text-[#F5EFE7] transition-colors cursor-pointer absolute top-6 right-6 z-20"
+          className="p-2.5 sm:p-3 rounded-full bg-white/5 hover:bg-white/10 text-[#B7AAA1] hover:text-[#F5EFE7] transition-colors cursor-pointer absolute top-3.5 right-3.5 sm:top-6 sm:right-6 z-20"
           aria-label="Close wine finder"
         >
           <X className="w-5 h-5" />
         </button>
 
         {/* Header Title & Eyebrow */}
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center gap-2 text-[#C6A15B] text-xs font-semibold uppercase tracking-[0.25em] mb-2">
-            <Sparkles className="w-3.5 h-3.5" />
+        <div className="text-center mb-5 sm:mb-8 pr-8 sm:pr-0">
+          <div className="inline-flex items-center gap-2 text-[#C6A15B] text-[10px] sm:text-xs font-semibold uppercase tracking-[0.2em] sm:tracking-[0.25em] mb-2">
+            <Sparkles className="w-3.5 h-3.5 shrink-0" />
             <span>Interactive Sommelier Recommendation</span>
           </div>
           <h2 className="font-serif text-3xl sm:text-5xl text-[#F5EFE7] font-normal tracking-tight">
@@ -252,7 +252,7 @@ export const FindYourWineQuiz: React.FC = () => {
         </div>
 
         {/* Step Progress Indicators */}
-        <div className="flex items-center justify-center gap-3 mb-10">
+        <div className="flex items-center justify-center gap-2 sm:gap-3 mb-6 sm:mb-10">
           {[1, 2, 3, 4].map((s, idx) => (
             <React.Fragment key={s}>
               <div
@@ -268,7 +268,7 @@ export const FindYourWineQuiz: React.FC = () => {
               </div>
               {idx < 3 && (
                 <div
-                  className={`w-10 sm:w-16 h-0.5 transition-colors ${
+                  className={`w-7 sm:w-16 h-0.5 transition-colors ${
                     step > s ? 'bg-[#861F32]' : 'bg-white/10'
                   }`}
                 />
@@ -297,7 +297,7 @@ export const FindYourWineQuiz: React.FC = () => {
                     key={mood.id}
                     type="button"
                     onClick={() => setSelectedMood(mood.id)}
-                    className={`p-5 rounded-2xl text-left transition-all cursor-pointer flex flex-col justify-between ${
+                    className={`p-4 sm:p-5 rounded-2xl text-left transition-all cursor-pointer flex flex-col justify-between ${
                       isSelected
                         ? 'bg-[#210D12] border-2 border-[#C6A15B] shadow-xl'
                         : 'dark-luxury-glass hover:bg-white/[0.08]'
@@ -321,7 +321,7 @@ export const FindYourWineQuiz: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setStep(2)}
-                className="btn-magnetic py-3.5 px-8 rounded-xl bg-[#861F32] hover:bg-[#a1253c] text-white text-xs uppercase tracking-[0.18em] font-semibold flex items-center gap-2 transition-all cursor-pointer shadow-lg group"
+                className="w-full sm:w-auto justify-center btn-magnetic py-3.5 px-6 sm:px-8 rounded-xl bg-[#861F32] hover:bg-[#a1253c] text-white text-xs uppercase tracking-[0.16em] sm:tracking-[0.18em] font-semibold flex items-center gap-2 transition-all cursor-pointer shadow-lg group"
               >
                 <span>Next: Choose Pairing</span>
                 <ArrowRight className="w-4 h-4 text-[#C6A15B] btn-magnetic-arrow" />
@@ -350,7 +350,7 @@ export const FindYourWineQuiz: React.FC = () => {
                     key={pairing.id}
                     type="button"
                     onClick={() => setSelectedPairing(pairing.id)}
-                    className={`p-5 rounded-2xl text-left transition-all cursor-pointer flex flex-col justify-between ${
+                    className={`p-4 sm:p-5 rounded-2xl text-left transition-all cursor-pointer flex flex-col justify-between ${
                       isSelected
                         ? 'bg-[#210D12] border-2 border-[#C6A15B] shadow-xl'
                         : 'dark-luxury-glass hover:bg-white/[0.08]'
@@ -371,7 +371,7 @@ export const FindYourWineQuiz: React.FC = () => {
               })}
             </div>
 
-            <div className="flex items-center justify-between pt-4">
+            <div className="flex flex-wrap items-center justify-between gap-3 pt-4">
               <button
                 type="button"
                 onClick={() => setStep(1)}
@@ -382,7 +382,7 @@ export const FindYourWineQuiz: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setStep(3)}
-                className="btn-magnetic py-3.5 px-8 rounded-xl bg-[#861F32] hover:bg-[#a1253c] text-white text-xs uppercase tracking-[0.18em] font-semibold flex items-center gap-2 transition-all cursor-pointer shadow-lg group"
+                className="btn-magnetic py-3.5 px-6 sm:px-8 rounded-xl bg-[#861F32] hover:bg-[#a1253c] text-white text-xs uppercase tracking-[0.14em] sm:tracking-[0.18em] font-semibold flex items-center gap-2 transition-all cursor-pointer shadow-lg group"
               >
                 <span>Next: Allocation Range</span>
                 <ArrowRight className="w-4 h-4 text-[#C6A15B] btn-magnetic-arrow" />
@@ -411,7 +411,7 @@ export const FindYourWineQuiz: React.FC = () => {
                     key={tier.id}
                     type="button"
                     onClick={() => setSelectedPriceTier(tier.id)}
-                    className={`p-5 rounded-2xl text-left transition-all cursor-pointer flex flex-col justify-between ${
+                    className={`p-4 sm:p-5 rounded-2xl text-left transition-all cursor-pointer flex flex-col justify-between ${
                       isSelected
                         ? 'bg-[#210D12] border-2 border-[#C6A15B] shadow-xl'
                         : 'dark-luxury-glass hover:bg-white/[0.08]'
@@ -431,7 +431,7 @@ export const FindYourWineQuiz: React.FC = () => {
               })}
             </div>
 
-            <div className="flex items-center justify-between pt-4">
+            <div className="flex flex-wrap items-center justify-between gap-3 pt-4">
               <button
                 type="button"
                 onClick={() => setStep(2)}
@@ -442,10 +442,10 @@ export const FindYourWineQuiz: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setStep(4)}
-                className="btn-magnetic py-3.5 px-8 rounded-xl bg-[#861F32] hover:bg-[#a1253c] text-white text-xs uppercase tracking-[0.18em] font-semibold flex items-center gap-2 transition-all cursor-pointer shadow-lg group"
+                className="btn-magnetic py-3.5 px-5 sm:px-8 rounded-xl bg-[#861F32] hover:bg-[#a1253c] text-white text-xs uppercase tracking-[0.12em] sm:tracking-[0.18em] font-semibold flex items-center gap-2 transition-all cursor-pointer shadow-lg group"
               >
                 <span>Reveal Sommelier Recommendation</span>
-                <Sparkles className="w-4 h-4 text-[#C6A15B] btn-magnetic-arrow" />
+                <Sparkles className="w-4 h-4 text-[#C6A15B] btn-magnetic-arrow shrink-0" />
               </button>
             </div>
           </div>
@@ -454,7 +454,7 @@ export const FindYourWineQuiz: React.FC = () => {
         {/* STEP 4: Your VÍNEA Recommendation Showcase */}
         {step === 4 && (
           <div className="animate-fade-in space-y-6">
-            <div className="flex items-center justify-between pb-4 border-b border-white/10">
+            <div className="flex flex-wrap items-center justify-between gap-2 pb-4 border-b border-white/10">
               <div>
                 <span className="text-xs uppercase tracking-[0.25em] text-[#C6A15B] font-semibold block">
                   Sommelier Curated Match
@@ -474,7 +474,7 @@ export const FindYourWineQuiz: React.FC = () => {
             </div>
 
             {/* Primary Hero Recommended Bottle Card */}
-            <div className="p-6 sm:p-8 rounded-3xl dark-luxury-glass-elevated border border-[#C6A15B]/40 shadow-2xl grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
+            <div className="p-4 sm:p-8 rounded-2xl sm:rounded-3xl dark-luxury-glass-elevated border border-[#C6A15B]/40 shadow-2xl grid grid-cols-1 md:grid-cols-12 gap-5 sm:gap-6 items-center">
               {/* Bottle Visual */}
               <div className="md:col-span-5 relative flex justify-center">
                 <div className="relative w-48 aspect-3/4 rounded-2xl overflow-hidden bg-black/40 border border-white/10 shadow-2xl group flex items-center justify-center p-2">
@@ -544,11 +544,11 @@ export const FindYourWineQuiz: React.FC = () => {
                     </span>
                   </div>
 
-                  <div className="flex items-center gap-3">
+                  <div className="flex flex-wrap items-center gap-2.5 sm:gap-3">
                     <button
                       type="button"
                       onClick={() => addToCart(topPick, 1)}
-                      className="btn-magnetic py-3 px-6 rounded-xl bg-[#861F32] hover:bg-[#a1253c] text-white text-xs uppercase tracking-[0.18em] font-semibold flex items-center gap-2 transition-all cursor-pointer shadow-lg group"
+                      className="btn-magnetic py-3 px-5 sm:px-6 rounded-xl bg-[#861F32] hover:bg-[#a1253c] text-white text-xs uppercase tracking-[0.14em] sm:tracking-[0.18em] font-semibold flex items-center gap-2 transition-all cursor-pointer shadow-lg group"
                       data-cursor="add"
                     >
                       <Plus className="w-4 h-4 text-[#C6A15B] btn-magnetic-arrow" />

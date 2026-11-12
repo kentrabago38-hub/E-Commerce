@@ -1,5 +1,11 @@
-import React, { createContext, useContext, useState, useEffect, useRef, ReactNode } from 'react';
-import { Product, Category, CartItem, Order, User, Review, GuideArticle, OrderStatus, DeliveryAddress, LoyaltyHistoryItem } from '../types/wine';
+import React, { createContext, useContext, useState, useEffect, useRef, useMemo, ReactNode } from 'react';
+import { Product, Category, CartItem, Order, User, Review, GuideArticle, OrderStatus, DeliveryAddress, LoyaltyHistoryItem, UserVoucher } from '../types/wine';
+import {
+  PUBLIC_PROMO_VOUCHERS,
+  getPerkBenefit,
+  extractUserVouchers,
+  MEMBER_PERKS
+} from '../data/rewardsData';
 import {
   INITIAL_CATEGORIES,
   INITIAL_PRODUCTS,
@@ -199,6 +205,17 @@ interface WineStoreContextType {
 
   cartSubtotal: number;
   cartCount: number;
+  userVouchers: UserVoucher[];
+  appliedVoucher: UserVoucher | null;
+  applyVoucherCode: (codeInput: string) => { success: boolean; message: string; voucher?: UserVoucher };
+  removeAppliedVoucher: () => void;
+  calculateOrderTotals: (subtotal: number, voucher?: UserVoucher | null) => {
+    baseShipping: number;
+    shippingCost: number;
+    discountAmount: number;
+    shippingDiscount: number;
+    totalAmount: number;
+  };
   isCloudConnected: boolean;
   isPostgresConnected: boolean;
   isSupabaseConnected: boolean;
@@ -593,10 +610,119 @@ export const WineStoreProvider: React.FC<{ children: ReactNode }> = ({ children 
   const [activeOrderConfirmation, setActiveOrderConfirmation] = useState<Order | null>(null);
   const [viewingDigitalReceiptOrder, setViewingDigitalReceiptOrder] = useState<Order | null>(null);
   const [toasts, setToasts] = useState<ToastMessage[]>([]);
+  const [appliedVoucher, setAppliedVoucher] = useState<UserVoucher | null>(() => {
+    try {
+      const saved = sessionStorage.getItem('vinea_applied_voucher');
+      return saved ? JSON.parse(saved) : null;
+    } catch {
+      return null;
+    }
+  });
   const [isCloudConnected, setIsCloudConnected] = useState<boolean>(true);
   const [isPostgresConnected, setIsPostgresConnected] = useState<boolean>(true);
   const [isSupabaseConnected, setIsSupabaseConnected] = useState<boolean>(isSupabaseConfigured);
   const [isSupabaseConfigOpen, setIsSupabaseConfigOpen] = useState<boolean>(false);
+
+  const userVouchers = useMemo(() => extractUserVouchers(user, orders), [user, orders]);
+
+  useEffect(() => {
+    try {
+      if (appliedVoucher) {
+        sessionStorage.setItem('vinea_applied_voucher', JSON.stringify(appliedVoucher));
+      } else {
+        sessionStorage.removeItem('vinea_applied_voucher');
+      }
+    } catch {}
+  }, [appliedVoucher]);
+
+  useEffect(() => {
+    if (!appliedVoucher) return;
+    if (!appliedVoucher.is_public_promo) {
+      if (!user) {
+        setAppliedVoucher(null);
+        return;
+      }
+      const match = userVouchers.find(v => v.code.toUpperCase() === appliedVoucher.code.toUpperCase());
+      if (match && match.status === 'used') {
+        setAppliedVoucher(null);
+      }
+    }
+  }, [user, userVouchers, appliedVoucher]);
+
+  const calculateOrderTotals = (subtotal: number, voucher: UserVoucher | null = appliedVoucher) => {
+    const baseShipping = subtotal === 0 || subtotal >= 5000 ? 0 : 350;
+    let shippingCost = baseShipping;
+    let discountAmount = 0;
+    let shippingDiscount = 0;
+
+    if (voucher && subtotal > 0) {
+      if (voucher.discount_type === 'fixed') {
+        discountAmount = Math.min(subtotal, Math.max(0, voucher.discount_value));
+      } else if (voucher.discount_type === 'percent') {
+        discountAmount = Math.min(subtotal, Math.round((subtotal * Math.max(0, voucher.discount_value)) / 100));
+      } else if (voucher.discount_type === 'free_shipping') {
+        shippingDiscount = baseShipping;
+        shippingCost = 0;
+      }
+    }
+
+    const totalAmount = Math.max(0, subtotal - discountAmount) + shippingCost;
+    return {
+      baseShipping,
+      shippingCost,
+      discountAmount,
+      shippingDiscount,
+      totalAmount
+    };
+  };
+
+  const applyVoucherCode = (codeInput: string): { success: boolean; message: string; voucher?: UserVoucher } => {
+    const code = codeInput.trim().toUpperCase();
+    if (!code) {
+      return { success: false, message: 'Please enter a voucher or promotion code.' };
+    }
+
+    // 1. Check logged-in member's redeemed reward vouchers
+    const userMatch = userVouchers.find(v => v.code.toUpperCase() === code);
+    if (userMatch) {
+      if (userMatch.status === 'used') {
+        showToast(`Voucher ${code} has already been redeemed.`, 'error');
+        return { success: false, message: 'This voucher code has already been used on a previous order.' };
+      }
+      setAppliedVoucher(userMatch);
+      showToast(`Applied voucher ${userMatch.code}: ${userMatch.title}`, 'success');
+      return {
+        success: true,
+        voucher: userMatch,
+        message: `${userMatch.title} (${userMatch.code}) applied to your order.`
+      };
+    }
+
+    // 2. Check public promotional codes (VINEA10, SOMMELIER)
+    const publicPromo = PUBLIC_PROMO_VOUCHERS[code];
+    if (publicPromo) {
+      setAppliedVoucher(publicPromo);
+      showToast(`Applied promotion ${publicPromo.code}: ${publicPromo.title}`, 'success');
+      return {
+        success: true,
+        voucher: publicPromo,
+        message: `${publicPromo.title} (${publicPromo.code}) applied to your order.`
+      };
+    }
+
+    if (!user && code.startsWith('VN-RW-')) {
+      showToast('Please sign in to apply your personal VÍNEA Rewards voucher.', 'info');
+      return { success: false, message: 'Sign in to your member account to apply personal reward vouchers.' };
+    }
+
+    showToast('Invalid or unrecognized voucher code.', 'error');
+    return { success: false, message: 'Invalid voucher code. Check your Rewards Wallet or try VINEA10 / SOMMELIER.' };
+  };
+
+  const removeAppliedVoucher = () => {
+    setAppliedVoucher(null);
+    showToast('Voucher removed from order.', 'info');
+  };
 
   // Supabase & PostgreSQL real-time synchronization & initial boot
   useEffect(() => {
@@ -1178,15 +1304,42 @@ export const WineStoreProvider: React.FC<{ children: ReactNode }> = ({ children 
       type: 'order'
     };
 
+    const appliedCodeUpper = orderData.discount_code?.trim().toUpperCase();
+    let nextUserVouchers: UserVoucher[] = [...(user.vouchers || [])];
+    if (appliedCodeUpper) {
+      const matchedActive = userVouchers.find(v => v.code.toUpperCase() === appliedCodeUpper && !v.is_public_promo);
+      if (matchedActive) {
+        const existsInSaved = nextUserVouchers.some(v => v.code.toUpperCase() === appliedCodeUpper);
+        if (existsInSaved) {
+          nextUserVouchers = nextUserVouchers.map(v =>
+            v.code.toUpperCase() === appliedCodeUpper
+              ? { ...v, status: 'used', used_at: today, order_id: newOrderId }
+              : v
+          );
+        } else {
+          nextUserVouchers = [
+            { ...matchedActive, status: 'used', used_at: today, order_id: newOrderId },
+            ...nextUserVouchers
+          ];
+        }
+      }
+    }
+
     const updatedUserWithPoints: User = {
       ...user,
       loyalty_points: nextPoints,
       lifetime_points: nextLifetime,
       membership_tier: updatedTier,
-      rewards_history: [orderLoyaltyRecord, ...(user.rewards_history || [])]
+      rewards_history: [orderLoyaltyRecord, ...(user.rewards_history || [])],
+      vouchers: nextUserVouchers
     };
 
+    userRef.current = updatedUserWithPoints;
     setUser(updatedUserWithPoints);
+    setAppliedVoucher(null);
+    try {
+      sessionStorage.removeItem('vinea_applied_voucher');
+    } catch {}
     persistActiveUserSession(updatedUserWithPoints);
     setRegisteredUsers(prev => prev.map(u => (u.user_id === user.user_id ? updatedUserWithPoints : u)));
     saveUserToSupabase(updatedUserWithPoints).catch(() => {});
@@ -1640,6 +1793,7 @@ export const WineStoreProvider: React.FC<{ children: ReactNode }> = ({ children 
     saveCurrentUserToDb(null).catch(() => {});
     clearSessionApi().catch(() => {});
     setUser(null);
+    setAppliedVoucher(null);
     setIsAccountOpen(false);
     if (isSupabaseConfigured) {
       supabaseSignOut().catch(() => {});
@@ -1748,10 +1902,25 @@ export const WineStoreProvider: React.FC<{ children: ReactNode }> = ({ children 
     const nextPoints = Math.max(0, currentPoints - pointCost);
     const currentRedeemed = user.redeemed_perks || [];
     const nextRedeemed = currentRedeemed.includes(perkId) ? currentRedeemed : [...currentRedeemed, perkId];
+    const formattedDate = new Date().toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' });
+    const perkMeta = MEMBER_PERKS.find(p => p.id === perkId);
+    const benefit = getPerkBenefit(perkId);
+
+    const newVoucher: UserVoucher = {
+      voucher_id: `vch-${Date.now()}-${Math.random().toString(36).substring(2, 5)}`,
+      code: voucherCode,
+      perk_id: perkId,
+      title: perkMeta?.title || perkTitle,
+      description: perkMeta?.tagline || benefit.label,
+      discount_type: benefit.discountType,
+      discount_value: benefit.discountValue,
+      status: 'active',
+      created_at: formattedDate
+    };
 
     const redemptionRecord: LoyaltyHistoryItem = {
       id: `hist-red-${Date.now()}`,
-      date: new Date().toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' }),
+      date: formattedDate,
       title: pointCost > 0 ? `Redeemed: ${perkTitle}` : `Activated: ${perkTitle}`,
       description: pointCost > 0
         ? `Used ${pointCost} loyalty points. Voucher Code: ${voucherCode}`
@@ -1765,7 +1934,8 @@ export const WineStoreProvider: React.FC<{ children: ReactNode }> = ({ children 
       ...user,
       loyalty_points: nextPoints,
       redeemed_perks: nextRedeemed,
-      rewards_history: [redemptionRecord, ...(user.rewards_history || [])]
+      rewards_history: [redemptionRecord, ...(user.rewards_history || [])],
+      vouchers: [newVoucher, ...extractUserVouchers(user, orders)]
     };
 
     userRef.current = updatedUser;
@@ -1775,7 +1945,7 @@ export const WineStoreProvider: React.FC<{ children: ReactNode }> = ({ children 
     saveUserToSupabase(updatedUser).catch(() => {});
     saveUserApi(updatedUser).catch(() => {});
 
-    showToast(`Perk claimed! Code: ${voucherCode}`, 'success');
+    showToast(`Voucher ready! Code: ${voucherCode}`, 'success');
     return {
       success: true,
       code: voucherCode,
@@ -2043,6 +2213,11 @@ export const WineStoreProvider: React.FC<{ children: ReactNode }> = ({ children 
 
         cartSubtotal,
         cartCount,
+        userVouchers,
+        appliedVoucher,
+        applyVoucherCode,
+        removeAppliedVoucher,
+        calculateOrderTotals,
         isCloudConnected,
         isPostgresConnected,
         isSupabaseConnected,

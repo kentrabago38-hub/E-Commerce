@@ -218,7 +218,7 @@ const MainStoreContent: React.FC = () => {
 
       {/* 10. Featured Cellar Allocations & Bestselling Wines (Boutique Style Grid) */}
       <FadeInUp>
-        <section className="py-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+        <section className="py-14 sm:py-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
           <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 border-b border-[#48151F] pb-8">
             <div>
               <div className="inline-flex items-center gap-2 text-xs uppercase tracking-[0.25em] text-[#C6A15B] font-semibold mb-2">
@@ -270,8 +270,8 @@ const MainStoreContent: React.FC = () => {
 
       {/* 13. Interactive Sommelier Wine Finder Callout */}
       <FadeInUp>
-        <section className="py-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
-          <div className="relative rounded-2xl overflow-hidden bg-gradient-to-r from-[#210D12] via-[#48151F]/40 to-[#130B0D] border border-[#48151F] p-8 sm:p-12 lg:p-16 flex flex-col md:flex-row items-center justify-between gap-8 shadow-2xl">
+        <section className="py-12 sm:py-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+          <div className="relative rounded-2xl overflow-hidden bg-gradient-to-r from-[#210D12] via-[#48151F]/40 to-[#130B0D] border border-[#48151F] p-5 sm:p-12 lg:p-16 flex flex-col md:flex-row items-center justify-between gap-6 sm:gap-8 shadow-2xl">
             <div className="max-w-xl">
               <div className="flex items-center gap-2 text-[#C6A15B] text-xs uppercase tracking-[0.2em] font-semibold mb-3">
                 <Sparkles className="w-3.5 h-3.5" />
@@ -360,7 +360,7 @@ const AppLayout: React.FC = () => {
 
   // User Storefront Interface
   return (
-    <div className="min-h-screen bg-[#210D12] text-[#FDFBF7] flex flex-col justify-between selection:bg-[#861F32] selection:text-white">
+    <div className="min-h-screen overflow-x-clip bg-[#210D12] text-[#FDFBF7] flex flex-col justify-between selection:bg-[#861F32] selection:text-white">
       {/* Refined Desktop Custom Fluid Cursor */}
       <CustomCursor />
 
