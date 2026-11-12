@@ -6,8 +6,6 @@ import {
   Check,
   Instagram,
   Facebook,
-  Twitter,
-  Linkedin,
   ShieldCheck,
   Heart,
   AlertCircle
@@ -72,17 +70,67 @@ export const Footer: React.FC = () => {
 
             {/* Social Icons */}
             <div className="flex items-center gap-3 pt-2 text-white/80">
-              <a href="#instagram" className="p-2 rounded-lg bg-[#210D12] border border-white/10 hover:bg-[#861F32] hover:text-white transition-colors" aria-label="Instagram">
+              <a
+                href="https://www.instagram.com/slwlyjrch/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="p-2 rounded-lg bg-[#210D12] border border-white/10 hover:bg-[#861F32] hover:text-white transition-colors"
+                aria-label="Instagram"
+                title="Instagram (@slwlyjrch)"
+              >
                 <Instagram className="w-4 h-4" />
               </a>
-              <a href="#facebook" className="p-2 rounded-lg bg-[#210D12] border border-white/10 hover:bg-[#861F32] hover:text-white transition-colors" aria-label="Facebook">
+              <a
+                href="https://www.facebook.com/profile.php?id=61577974889410"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="p-2 rounded-lg bg-[#210D12] border border-white/10 hover:bg-[#861F32] hover:text-white transition-colors"
+                aria-label="Facebook"
+                title="Facebook"
+              >
                 <Facebook className="w-4 h-4" />
               </a>
-              <a href="#twitter" className="p-2 rounded-lg bg-[#210D12] border border-white/10 hover:bg-[#861F32] hover:text-white transition-colors" aria-label="Twitter">
-                <Twitter className="w-4 h-4" />
+              <a
+                href="https://www.threads.com/@slwlyjrch"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="p-2 rounded-lg bg-[#210D12] border border-white/10 hover:bg-[#861F32] hover:text-white transition-colors"
+                aria-label="Threads"
+                title="Threads (@slwlyjrch)"
+              >
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="w-4 h-4"
+                  aria-hidden="true"
+                >
+                  <path d="M19 7.5c-1.333 -3 -3.667 -4.5 -7 -4.5c-5 0 -8 3.5 -8 9c0 5.5 3 9 8 9c4.5 0 7 -2.5 7 -6c0 -2.5 -1.5 -4 -4 -4c-2.5 0 -4 1.5 -4 3.5c0 1.5 1 2.5 2.5 2.5c2 0 3.5 -1.5 3.5 -4.5c0 -2.5 -1.5 -4 -3.5 -4c-1.5 0 -2.5 .5 -3 1.5" />
+                </svg>
               </a>
-              <a href="#linkedin" className="p-2 rounded-lg bg-[#210D12] border border-white/10 hover:bg-[#861F32] hover:text-white transition-colors" aria-label="LinkedIn">
-                <Linkedin className="w-4 h-4" />
+              <a
+                href="https://www.tiktok.com/@itss.jorikk?is_from_webapp=1&sender_device=pc"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="p-2 rounded-lg bg-[#210D12] border border-white/10 hover:bg-[#861F32] hover:text-white transition-colors"
+                aria-label="TikTok"
+                title="TikTok (@itss.jorikk)"
+              >
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="w-4 h-4"
+                  aria-hidden="true"
+                >
+                  <path d="M9 12a4 4 0 1 0 4 4V4a5 5 0 0 0 5 5" />
+                </svg>
               </a>
             </div>
           </div>
